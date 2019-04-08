@@ -1,0 +1,2 @@
+Create a new entry in /etc/udev/rules.d/015usbprog.rules
+SUBSYSTEM=="usb", ATTRS{idVendor}=="03eb", ATTRS{idProduct}=="2104", GROUP="ENTER THE USERNAME HERE", MODE="0660"

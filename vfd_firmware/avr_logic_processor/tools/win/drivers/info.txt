@@ -1,0 +1,1 @@
+Zum installieren des Treibers aus dem Gerätemanager muss Windows im Startmodus "Erzwingen der Treibersignatur deaktivieren" gestartet werden!
