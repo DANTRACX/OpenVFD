@@ -14,16 +14,26 @@
 ; ==============================================================================
 ;          R  E  G  I  S  T  E  R     D  E  F  I  N  I  T  I  O  N  S
 ; ==============================================================================
-.def INTVL0L    = r6
-.def INTVL0H    = r7
-.def INTVL1L    = r8
-.def INTVL1H    = r9
-.def INTVL2L    = r10
-.def INTVL2H    = r11
-.def MAGNITUDE  = r22                   ; hold the desired magnitude
-.def FREQUENCY  = r23                   ; holds the desired frequency
-.def ANGLEL     = r24                   ; low byte of the current angle
-.def ANGLEH     = r25                   ; high byte of the current angle
+.def SVPWM_CALC0L   = r0                ; calc 0 register low byte
+.def SVPWM_CALC0H   = r1                ; calc 0 register high byte
+.def SVPWM_CALC1L   = r2                ; calc 1 register low byte
+.def SVPWM_CALC1H   = r3                ; calc 1 register high byte
+.def SVPWM_CALC2L   = r4                ; calc 2 register low byte
+.def SVPWM_CALC2H   = r5                ; calc 2 register high byte
+.def SVPWM_INTVL0L  = r6                ; channel A interval low byte
+.def SVPWM_INTVL0H  = r7                ; channel A interval high byte
+.def SVPWM_INTVL1L  = r8                ; channel B interval low byte
+.def SVPWM_INTVL1H  = r9                ; channel B interval high byte
+.def SVPWM_INTVL2L  = r10               ; channel C interval low byte
+.def SVPWM_INTVL2H  = r11               ; channel C interval high byte
+.def SVPWM_TEMPL    = r16               ; temp register low byte
+.def SVPWM_TEMPH    = r17               ; temp register high byte
+.def SVPWM_COUNTERL = r18               ; counter register low byte
+.def SVPWM_COUNTERH = r19               ; counter register high byte
+.def SVPWM_MAGN     = r22               ; hold the desired magnitude
+.def SVPWM_FREQ     = r23               ; holds the desired frequency
+.def SVPWM_ANGLEL   = r24               ; low byte of the current angle
+.def SVPWM_ANGLEH   = r25               ; high byte of the current angle
 
 
 ; ==============================================================================
@@ -36,95 +46,98 @@
 ; ==============================================================================
 ;      S V P W M  -  H A R D W A R E   G E N E R A T O R   ( T I M E R 1 )
 ; ==============================================================================
+; PLL low speed mode
+
 .cseg
-SVPWM_HW_INIT:                          ;
-    ldi     TEMPL,0b00111111            ;
-    out     DDRB,TEMPL                  ;
-    ldi     TEMPL,0xFF                  ; dead time cycles (0xHigh:Low)
-    out     DT1,TEMPL                   ; set dead time
-    ldi     TEMPL,0b01010011            ;
-    out     TCCR1A,TEMPL                ; set bit for control register A
-    ldi     TEMPL,0b00110000            ;
-    out     TCCR1B,TEMPL                ; set bit for control register B
-    ldi     TEMPL,0b01010101            ;
-    out     TCCR1C,TEMPL                ; set bit for control register C
-    ldi     TEMPL,0b11100001            ;
-    out     TCCR1D,TEMPL                ; set bit for control register D
-    ldi     TEMPL,0b00000000            ;
-    out     TCCR1E,TEMPL                ; set bit for control register E
-    ldi     TEMPL,0xFF                  ; define high byte for OCR1C (top)
-    ldi     TEMPH,0x03                  ; define low byte for OCR1C (top)
-    out     TC1H,TEMPH                  ; set high byte for OCR1C (top)
-    out     OCR1C,TEMPL                 ; set low byte for OCR1C (top)
-    ldi     TEMPL,0b10000010            ;
-    out     PLLCSR,TEMPL                ;
-svpwm_hw_pll_wait:                      ;
-    nop                                 ;
-    nop                                 ;
-    nop                                 ;
-    dec     TEMPL                       ;
-    brne    svpwm_hw_pll_wait           ;
-svpwm_hw_plock_check:                   ;
-    in      TEMPL,PLLCSR                ;
-    sbrs    TEMPL,0                     ;
-    rjmp    svpwm_hw_plock_check        ;
-    ldi     TEMPL,0b10000111            ;
-    out     PLLCSR,TEMPL                ;
+SVPWM_HW_INIT:                          ; INIT SVPWM HARDWARE
+    ldi     SVPWM_TEMPL,0b00111111      ; load bit mask in temp
+    out     DDRB,SVPWM_TEMPL            ; set i/o to output
+    ldi     SVPWM_TEMPL,0xFF            ; dead time cycles (0xHigh:Low)
+    out     DT1,SVPWM_TEMPL             ; set dead time
+    ldi     SVPWM_TEMPL,0b01010011      ; load settings for register
+    out     TCCR1A,SVPWM_TEMPL          ; set bit for control register A
+    ldi     SVPWM_TEMPL,0b00110000      ; load settings for register
+    out     TCCR1B,SVPWM_TEMPL          ; set bit for control register B
+    ldi     SVPWM_TEMPL,0b01010101      ; load settings for register
+    out     TCCR1C,SVPWM_TEMPL          ; set bit for control register C
+    ldi     SVPWM_TEMPL,0b11100001      ; load settings for register
+    out     TCCR1D,SVPWM_TEMPL          ; set bit for control register D
+    ldi     SVPWM_TEMPL,0b00000000      ; load settings for register
+    out     TCCR1E,SVPWM_TEMPL          ; set bit for control register E
+    ldi     SVPWM_TEMPL,0xFF            ; define high byte for OCR1C (top)
+    ldi     SVPWM_TEMPH,0x03            ; define low byte for OCR1C (top)
+    out     TC1H,SVPWM_TEMPH            ; set high byte for OCR1C (top)
+    out     OCR1C,SVPWM_TEMPL           ; set low byte for OCR1C (top)
+    ldi     SVPWM_TEMPL,0b10000010      ; load settings for register
+    out     PLLCSR,SVPWM_TEMPL          ; trigger pll start mechanism
+    ldi     SVPWM_COUNTERL,0xFF         ; set counter to max value
+svpwm_hw_pll_wait:                      ; wait for pll to lock
+    nop                                 ; wait
+    nop                                 ; wait
+    nop                                 ; wait
+    dec     SVPWM_COUNTERL              ; decrement counter
+    brne    svpwm_hw_pll_wait           ; loop while counter not 0
+svpwm_hw_plock_check:                   ; check if plock is set
+    in      SVPWM_TEMPL,PLLCSR          ; load pll register data
+    sbrs    SVPWM_TEMPL,0               ; check if plock bit is set
+    rjmp    svpwm_hw_plock_check        ; if not set goto pll wait
+    ldi     SVPWM_TEMPL,0b10000111      ; else load new register data
+    out     PLLCSR,SVPWM_TEMPL          ; set pll register - enable pll timer
+    ret                                 ; end function
+
+
+SVPWM_HW_FREQ0:                         ; DISABLE SVPWM CLOCK
+    in      SVPWM_TEMPL,TCCR1B          ;
+    cbr     SVPWM_TEMPL,0b00001111      ;
+    out     TCCR1B,SVPWM_TEMPL          ;
+    in      SVPWM_TEMPL,TCCR1C          ;
+    cbr     SVPWM_TEMPL,0b11000000      ;
+    out     TCCR1B,SVPWM_TEMPL          ;
     ret                                 ;
 
 
-SVPWM_HW_FREQ0:                         ;
-    in      TEMPL,TCCR1B                ;
-    cbr     TEMPL,0b00001111            ;
-    out     TCCR1B,TEMPL                ;
-    in      TEMPL,TCCR1C                ;
-    cbr     TEMPL,0b11000000            ;
-    out     TCCR1B,TEMPL                ;
+SVPWM_HW_FREQ1:                         ; SET SVPWM CLOCK TO PLKCK/8
+    ldi     SVPWM_TEMPL,0b01010011      ;
+    out     TCCR1A,SVPWM_TEMPL          ; set bit for control register A
+    ldi     SVPWM_TEMPL,0b01010101      ;
+    out     TCCR1C,SVPWM_TEMPL          ; set bit for control register C
+    in      SVPWM_TEMPL,TCCR1D          ;
+    sbr     SVPWM_TEMPL,0b11000000      ;
+    out     TCCR1D,SVPWM_TEMPL          ; set bits for control register D
+    in      SVPWM_TEMPL,TCCR1B          ;
+    cbr     SVPWM_TEMPL,0b00001111      ;
+    sbr     SVPWM_TEMPL,0b00000100      ;
+    out     TCCR1B,SVPWM_TEMPL          ; set bits for control register B
     ret                                 ;
 
 
-SVPWM_HW_FREQ1:                         ;
-    ldi     TEMPL,0b01010011            ;
-    out     TCCR1A,TEMPL                ; set bit for control register A
-    ldi     TEMPL,0b01010101            ;
-    out     TCCR1C,TEMPL                ; set bit for control register C
-    in      TEMPL,TCCR1D                ;
-    sbr     TEMPL,0b11000000            ;
-    out     TCCR1D,TEMPL                ; set bits for control register D
-    in      TEMPL,TCCR1B                ;
-    cbr     TEMPL,0b00001111            ;
-    sbr     TEMPL,0b00000100            ;
-    out     TCCR1B,TEMPL                ; set bits for control register B
+SVPWM_HW_FREQ2:                         ; SET SVPWM CLOCK TO PLKCK/8
+    ldi     SVPWM_TEMPL,0b01010011      ;
+    out     TCCR1A,SVPWM_TEMPL          ; set bit for control register A
+    ldi     SVPWM_TEMPL,0b01010101      ;
+    out     TCCR1C,SVPWM_TEMPL          ; set bit for control register C
+    in      SVPWM_TEMPL,TCCR1D          ;
+    sbr     SVPWM_TEMPL,0b11000000      ;
+    out     TCCR1D,SVPWM_TEMPL          ; set bits for control register D
+    in      SVPWM_TEMPL,TCCR1B          ;
+    cbr     SVPWM_TEMPL,0b00001111      ;
+    sbr     SVPWM_TEMPL,0b00000100      ;
+    out     TCCR1B,SVPWM_TEMPL          ; set bits for control register B
     ret                                 ;
 
 
-SVPWM_HW_FREQ2:                         ;
-    ldi     TEMPL,0b01010011            ;
-    out     TCCR1A,TEMPL                ; set bit for control register A
-    ldi     TEMPL,0b01010101            ;
-    out     TCCR1C,TEMPL                ; set bit for control register C
-    in      TEMPL,TCCR1D                ;
-    sbr     TEMPL,0b11000000            ;
-    out     TCCR1D,TEMPL                ; set bits for control register D
-    in      TEMPL,TCCR1B                ;
-    cbr     TEMPL,0b00001111            ;
-    sbr     TEMPL,0b00000100            ;
-    out     TCCR1B,TEMPL                ; set bits for control register B
-    ret                                 ;
-
-
-SVPWM_HW_FREQ3:                         ;
-    ldi     TEMPL,0b01010011            ;
-    out     TCCR1A,TEMPL                ; set bit for control register A
-    ldi     TEMPL,0b01010101            ;
-    out     TCCR1C,TEMPL                ; set bit for control register C
-    in      TEMPL,TCCR1D                ;
-    sbr     TEMPL,0b11000000            ;
-    out     TCCR1D,TEMPL                ; set bits for control register D
-    in      TEMPL,TCCR1B                ;
-    cbr     TEMPL,0b00001111            ;
-    sbr     TEMPL,0b00000100            ;
-    out     TCCR1B,TEMPL                ; set bits for control register B
+SVPWM_HW_FREQ3:                         ; SET SVPWM CLOCK TO PLKCK/8
+    ldi     SVPWM_TEMPL,0b01010011      ;
+    out     TCCR1A,SVPWM_TEMPL          ; set bit for control register A
+    ldi     SVPWM_TEMPL,0b01010101      ;
+    out     TCCR1C,SVPWM_TEMPL          ; set bit for control register C
+    in      SVPWM_TEMPL,TCCR1D          ;
+    sbr     SVPWM_TEMPL,0b11000000      ;
+    out     TCCR1D,SVPWM_TEMPL          ; set bits for control register D
+    in      SVPWM_TEMPL,TCCR1B          ;
+    cbr     SVPWM_TEMPL,0b00001111      ;
+    sbr     SVPWM_TEMPL,0b00000100      ;
+    out     TCCR1B,SVPWM_TEMPL          ; set bits for control register B
     ret                                 ;
 
 
@@ -138,148 +151,148 @@ SVPWM_HW_FP_ISR:                        ;
 ; ==============================================================================
 .cseg
 SVPWM_SW_INIT:                          ;
-    ldi     MAGNITUDE,0xE1              ; init MAGNITUDE register
-    ldi     FREQUENCY,0x19              ; init FREQUENCY register
-    ldi     ANGLEL,0x00                 ; init ANGLEL register
-    ldi     ANGLEH,0x00                 ; init ANGLEH register
+    ldi     SVPWM_MAGN,0xE1             ; init SVPWM_MAGN register
+    ldi     SVPWM_FREQ,0x19             ; init SVPWM_FREQ register
+    ldi     SVPWM_ANGLEL,0x00           ; init SVPWM_ANGLEL register
+    ldi     SVPWM_ANGLEH,0x00           ; init SVPWM_ANGLEH register
     ret                                 ;
 
 
 SVPWM_SW_UPDATE_ANGLE:                  ;
-    in      TEMPL,TCCR1B                ;
-    ldi     COUNTERH,0x00               ;
-    mov     COUNTERL,FREQUENCY          ;
-    cbr     COUNTERL,0b10000000         ;
+    in      SVPWM_TEMPL,TCCR1B          ;
+    ldi     SVPWM_COUNTERH,0x00         ;
+    mov     SVPWM_COUNTERL,SVPWM_FREQ   ;
+    cbr     SVPWM_COUNTERL,0b10000000   ;
 svpwm_sw_upd_angle_f2_corr:             ;
-    sbrs    TEMPL,0                     ;
+    sbrs    SVPWM_TEMPL,0               ;
     rjmp    svpwm_sw_upd_angle_f3_corr  ;
-    lsl     COUNTERL                    ;
-    rol     COUNTERH                    ;
+    lsl     SVPWM_COUNTERL              ;
+    rol     SVPWM_COUNTERH              ;
 svpwm_sw_upd_angle_f3_corr:             ;
-    sbrs    TEMPL,2                     ;
+    sbrs    SVPWM_TEMPL,2               ;
     rjmp    svpwm_upd_angle_dir_sel     ;
-    lsl     COUNTERL                    ;
-    rol     COUNTERH                    ;
+    lsl     SVPWM_COUNTERL              ;
+    rol     SVPWM_COUNTERH              ;
 svpwm_upd_angle_dir_sel:                ;
-    sbrc    FREQUENCY,7                 ;
+    sbrc    SVPWM_FREQ,7                ;
     rjmp    svpwm_sw_upd_angle_dec      ;
 svpwm_sw_upd_angle_inc:                 ;
-    add     ANGLEL,COUNTERL             ;
-    adc     ANGLEH,COUNTERH             ;
-    ldi     TEMPL,0x20                  ; set TEMP registers to 7200
-    ldi     TEMPH,0x1C                  ; set TEMP registers to 7200
-    cp      ANGLEL,TEMPL                ; check if ANGLE >= 7200
-    cpc     ANGLEH,TEMPH                ; check if ANGLE >= 7200
+    add     SVPWM_ANGLEL,SVPWM_COUNTERL ;
+    adc     SVPWM_ANGLEH,SVPWM_COUNTERH ;
+    ldi     SVPWM_TEMPL,0x20            ; set TEMP registers to 7200
+    ldi     SVPWM_TEMPH,0x1C            ; set TEMP registers to 7200
+    cp      SVPWM_ANGLEL,SVPWM_TEMPL    ; check if ANGLE >= 7200
+    cpc     SVPWM_ANGLEH,SVPWM_TEMPH    ; check if ANGLE >= 7200
     brsh    svpwm_sw_upd_angle_inc_ovf  ; if ANGLE >= 7200 : jump
     ret                                 ; else return
 svpwm_sw_upd_angle_inc_ovf:             ;
-    sub     ANGLEL,TEMPL                ; subtract 7200 from ANGLE
-    sbc     ANGLEH,TEMPH                ; subtract 7200 from ANGLE
+    sub     SVPWM_ANGLEL,SVPWM_TEMPL    ; subtract 7200 from ANGLE
+    sbc     SVPWM_ANGLEH,SVPWM_TEMPH    ; subtract 7200 from ANGLE
     ret                                 ; return
 svpwm_sw_upd_angle_dec:                 ;
-    sub     ANGLEL,COUNTERL             ;
-    sbc     ANGLEH,COUNTERH             ;
-    ldi     TEMPL,0x20                  ;
-    ldi     TEMPH,0x1C                  ;
-    cp      ANGLEL,TEMPL                ;
-    cpc     ANGLEH,TEMPH                ;
+    sub     SVPWM_ANGLEL,SVPWM_COUNTERL ;
+    sbc     SVPWM_ANGLEH,SVPWM_COUNTERH ;
+    ldi     SVPWM_TEMPL,0x20            ;
+    ldi     SVPWM_TEMPH,0x1C            ;
+    cp      SVPWM_ANGLEL,SVPWM_TEMPL    ;
+    cpc     SVPWM_ANGLEH,SVPWM_TEMPH    ;
     brsh    svpwm_sw_upd_angle_dec_ovf  ;
     ret                                 ;
 svpwm_sw_upd_angle_dec_ovf:             ;
-    add     ANGLEL,TEMPL                ;
-    adc     ANGLEH,TEMPH                ;
+    add     SVPWM_ANGLEL,SVPWM_TEMPL    ;
+    adc     SVPWM_ANGLEH,SVPWM_TEMPH    ;
     ret                                 ;
 
 
 SVPWM_SW_UPDATE_INTVL:                  ;
-    ldi     COUNTERH,0x00               ;
-    mov     CALC0L,ANGLEL               ;
-    mov     CALC0H,ANGLEH               ;
-    ldi     TEMPL,0xB0                  ;
-    ldi     TEMPH,0x04                  ;
+    ldi     SVPWM_COUNTERH,0x00         ;
+    mov     SVPWM_CALC0L,SVPWM_ANGLEL   ;
+    mov     SVPWM_CALC0H,SVPWM_ANGLEH   ;
+    ldi     SVPWM_TEMPL,0xB0            ;
+    ldi     SVPWM_TEMPH,0x04            ;
 svpwm_sw_upd_intvl_sector:              ;
-    cp      CALC0L,TEMPL                ;
-    cpc     CALC0H,TEMPH                ;
+    cp      SVPWM_CALC0L,SVPWM_TEMPL    ;
+    cpc     SVPWM_CALC0H,SVPWM_TEMPH    ;
     brlo    svpwm_sw_upd_intvl_t1       ;
-    inc     COUNTERH                    ;
-    sub     CALC0L,TEMPL                ;
-    sbc     CALC0H,TEMPH                ;
+    inc     SVPWM_COUNTERH              ;
+    sub     SVPWM_CALC0L,SVPWM_TEMPL    ;
+    sbc     SVPWM_CALC0H,SVPWM_TEMPH    ;
     rjmp    svpwm_sw_upd_intvl_sector   ;
 svpwm_sw_upd_intvl_t1:                  ;
-    sub     TEMPL,CALC0L                ;
-    sbc     TEMPH,CALC0H                ;
-    lsl     TEMPL                       ;
-    rol     TEMPH                       ;
+    sub     SVPWM_TEMPL,SVPWM_CALC0L    ;
+    sbc     SVPWM_TEMPH,SVPWM_CALC0H    ;
+    lsl     SVPWM_TEMPL                 ;
+    rol     SVPWM_TEMPH                 ;
     ldi     ZL,LOW(SINE*2)              ;
     ldi     ZH,HIGH(SINE*2)             ;
-    add     ZL,TEMPL                    ;
-    adc     ZH,TEMPH                    ;
-    lpm     INTVL1L,Z+                  ;
-    lpm     INTVL1H,Z                   ;
+    add     ZL,SVPWM_TEMPL              ;
+    adc     ZH,SVPWM_TEMPH              ;
+    lpm     SVPWM_INTVL1L,Z+            ;
+    lpm     SVPWM_INTVL1H,Z             ;
 svpwm_sw_upd_intvl_t2:                  ;
-    lsl     CALC0L                      ;
-    rol     CALC0H                      ;
+    lsl     SVPWM_CALC0L                ;
+    rol     SVPWM_CALC0H                ;
     ldi     ZL,LOW(SINE*2)              ;
     ldi     ZH,HIGH(SINE*2)             ;
-    add     ZL,CALC0L                   ;
-    adc     ZH,CALC0H                   ;
-    lpm     INTVL2L,Z+                  ;
-    lpm     INTVL2H,Z                   ;
+    add     ZL,SVPWM_CALC0L             ;
+    adc     ZH,SVPWM_CALC0H             ;
+    lpm     SVPWM_INTVL2L,Z+            ;
+    lpm     SVPWM_INTVL2H,Z             ;
 svpwm_sw_mult_t1t2:                     ;
-    mov     COUNTERL,MAGNITUDE          ;
-    ldi     TEMPL,0x00                  ;
-    ldi     TEMPH,0x00                  ;
-    clr     CALC0L                      ; clear t1 result byte 0
-    clr     CALC1L                      ; clear t1 result byte 1
-    clr     CALC2L                      ; clear t1 result byte 2
-    clr     CALC0H                      ; clear t2 result byte 0
-    clr     CALC1H                      ; clear t2 result byte 1
-    clr     CALC2H                      ; clear t2 result byte 2
+    mov     SVPWM_COUNTERL,SVPWM_MAGN   ;
+    ldi     SVPWM_TEMPL,0x00            ;
+    ldi     SVPWM_TEMPH,0x00            ;
+    clr     SVPWM_CALC0L                ; clear t1 result byte 0
+    clr     SVPWM_CALC1L                ; clear t1 result byte 1
+    clr     SVPWM_CALC2L                ; clear t1 result byte 2
+    clr     SVPWM_CALC0H                ; clear t2 result byte 0
+    clr     SVPWM_CALC1H                ; clear t2 result byte 1
+    clr     SVPWM_CALC2H                ; clear t2 result byte 2
 svpwm_sw_mult_t1t2_a:                   ;
     clc                                 ;
-    ror     COUNTERL                    ;
+    ror     SVPWM_COUNTERL              ;
     brcc    svpwm_sw_mult_t1t2_b        ;
-    add     CALC0L,INTVL1L              ;
-    adc     CALC1L,INTVL1H              ;
-    adc     CALC2L,TEMPL                ;
-    add     CALC0H,INTVL2L              ;
-    adc     CALC1H,INTVL2H              ;
-    adc     CALC2H,TEMPH                ;
+    add     SVPWM_CALC0L,SVPWM_INTVL1L  ;
+    adc     SVPWM_CALC1L,SVPWM_INTVL1H  ;
+    adc     SVPWM_CALC2L,SVPWM_TEMPL    ;
+    add     SVPWM_CALC0H,SVPWM_INTVL2L  ;
+    adc     SVPWM_CALC1H,SVPWM_INTVL2H  ;
+    adc     SVPWM_CALC2H,SVPWM_TEMPH    ;
 svpwm_sw_mult_t1t2_b:                   ;
     clc                                 ;
-    rol     INTVL1L                     ;
-    rol     INTVL1H                     ;
-    rol     TEMPL                       ;
+    rol     SVPWM_INTVL1L               ;
+    rol     SVPWM_INTVL1H               ;
+    rol     SVPWM_TEMPL                 ;
     clc                                 ;
-    rol     INTVL2L                     ;
-    rol     INTVL2H                     ;
-    rol     TEMPH                       ;
-    tst     COUNTERL                    ;
+    rol     SVPWM_INTVL2L               ;
+    rol     SVPWM_INTVL2H               ;
+    rol     SVPWM_TEMPH                 ;
+    tst     SVPWM_COUNTERL              ;
     brne    svpwm_sw_mult_t1t2_a        ;
 svpwm_sw_div_t1t2:                      ;
-    mov     INTVL1L,CALC1L              ;
-    mov     INTVL1H,CALC2L              ;
-    mov     INTVL2L,CALC1H              ;
-    mov     INTVL2H,CALC2H              ;
+    mov     SVPWM_INTVL1L,SVPWM_CALC1L  ;
+    mov     SVPWM_INTVL1H,SVPWM_CALC2L  ;
+    mov     SVPWM_INTVL2L,SVPWM_CALC1H  ;
+    mov     SVPWM_INTVL2H,SVPWM_CALC2H  ;
 svpwm_sw_upd_intvl_t0:                  ;
-    mov     CALC0L,INTVL1L              ;
-    mov     CALC0H,INTVL1H              ;
-    add     CALC0L,INTVL2L              ;
-    adc     CALC0H,INTVL2H              ;
-    ldi     TEMPL,0x00                  ;
-    ldi     TEMPH,0x04                  ;
-    sub     TEMPL,CALC0L                ;
-    sbc     TEMPH,CALC0H                ;
-    lsr     TEMPH                       ;
-    ror     TEMPL                       ;
-    mov     INTVL0L,TEMPL               ;
-    mov     INTVL0H,TEMPH               ;
+    mov     SVPWM_CALC0L,SVPWM_INTVL1L  ;
+    mov     SVPWM_CALC0H,SVPWM_INTVL1H  ;
+    add     SVPWM_CALC0L,SVPWM_INTVL2L  ;
+    adc     SVPWM_CALC0H,SVPWM_INTVL2H  ;
+    ldi     SVPWM_TEMPL,0x00            ;
+    ldi     SVPWM_TEMPH,0x04            ;
+    sub     SVPWM_TEMPL,SVPWM_CALC0L    ;
+    sbc     SVPWM_TEMPH,SVPWM_CALC0H    ;
+    lsr     SVPWM_TEMPH                 ;
+    ror     SVPWM_TEMPL                 ;
+    mov     SVPWM_INTVL0L,SVPWM_TEMPL   ;
+    mov     SVPWM_INTVL0H,SVPWM_TEMPH   ;
 svpwm_sw_upd_intvl_set_comp:            ;
-    ldi     TEMPL,0x00                  ;
+    ldi     SVPWM_TEMPL,0x00            ;
     ldi     ZL,low(SVPWM_SW_INTVL_JTB)  ;
     ldi     ZH,high(SVPWM_SW_INTVL_JTB) ;
-    add     ZL,COUNTERH                 ;
-    adc     ZH,TEMPL                    ;
+    add     ZL,SVPWM_COUNTERH           ;
+    adc     ZH,SVPWM_TEMPL              ;
     ijmp                                ;
 
 
@@ -294,86 +307,86 @@ SVPWM_SW_INTVL_JTB:                     ;
 
 
 SVPMW_SW_COMP_SECTOR0:                  ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1A,INTVL0L               ;
-    add     INTVL0L,INTVL1L             ;
-    adc     INTVL0H,INTVL1H             ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1B,INTVL0L               ;
-    add     INTVL0L,INTVL2L             ;
-    adc     INTVL0H,INTVL2H             ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1D,INTVL0L               ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1A,SVPWM_INTVL0L         ;
+    add     SVPWM_INTVL0L,SVPWM_INTVL1L ;
+    adc     SVPWM_INTVL0H,SVPWM_INTVL1H ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1B,SVPWM_INTVL0L         ;
+    add     SVPWM_INTVL0L,SVPWM_INTVL2L ;
+    adc     SVPWM_INTVL0H,SVPWM_INTVL2H ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1D,SVPWM_INTVL0L         ;
     ret                                 ;
 
 
 SVPMW_SW_COMP_SECTOR1:                  ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1B,INTVL0L               ;
-    add     INTVL0L,INTVL2L             ;
-    adc     INTVL0H,INTVL2H             ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1A,INTVL0L               ;
-    add     INTVL0L,INTVL1L             ;
-    adc     INTVL0H,INTVL1H             ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1D,INTVL0L               ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1B,SVPWM_INTVL0L         ;
+    add     SVPWM_INTVL0L,SVPWM_INTVL2L ;
+    adc     SVPWM_INTVL0H,SVPWM_INTVL2H ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1A,SVPWM_INTVL0L         ;
+    add     SVPWM_INTVL0L,SVPWM_INTVL1L ;
+    adc     SVPWM_INTVL0H,SVPWM_INTVL1H ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1D,SVPWM_INTVL0L         ;
     ret                                 ;
 
 
 SVPMW_SW_COMP_SECTOR2:                  ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1B,INTVL0L               ;
-    add     INTVL0L,INTVL1L             ;
-    adc     INTVL0H,INTVL1H             ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1D,INTVL0L               ;
-    add     INTVL0L,INTVL2L             ;
-    adc     INTVL0H,INTVL2H             ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1A,INTVL0L               ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1B,SVPWM_INTVL0L         ;
+    add     SVPWM_INTVL0L,SVPWM_INTVL1L ;
+    adc     SVPWM_INTVL0H,SVPWM_INTVL1H ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1D,SVPWM_INTVL0L         ;
+    add     SVPWM_INTVL0L,SVPWM_INTVL2L ;
+    adc     SVPWM_INTVL0H,SVPWM_INTVL2H ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1A,SVPWM_INTVL0L         ;
     ret                                 ;
 
 
 SVPMW_SW_COMP_SECTOR3:                  ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1D,INTVL0L               ;
-    add     INTVL0L,INTVL2L             ;
-    adc     INTVL0H,INTVL2H             ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1B,INTVL0L               ;
-    add     INTVL0L,INTVL1L             ;
-    adc     INTVL0H,INTVL1H             ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1A,INTVL0L               ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1D,SVPWM_INTVL0L         ;
+    add     SVPWM_INTVL0L,SVPWM_INTVL2L ;
+    adc     SVPWM_INTVL0H,SVPWM_INTVL2H ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1B,SVPWM_INTVL0L         ;
+    add     SVPWM_INTVL0L,SVPWM_INTVL1L ;
+    adc     SVPWM_INTVL0H,SVPWM_INTVL1H ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1A,SVPWM_INTVL0L         ;
     ret                                 ;
 
 
 SVPMW_SW_COMP_SECTOR4:                  ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1D,INTVL0L               ;
-    add     INTVL0L,INTVL1L             ;
-    adc     INTVL0H,INTVL1H             ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1A,INTVL0L               ;
-    add     INTVL0L,INTVL2L             ;
-    adc     INTVL0H,INTVL2H             ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1B,INTVL0L               ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1D,SVPWM_INTVL0L         ;
+    add     SVPWM_INTVL0L,SVPWM_INTVL1L ;
+    adc     SVPWM_INTVL0H,SVPWM_INTVL1H ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1A,SVPWM_INTVL0L         ;
+    add     SVPWM_INTVL0L,SVPWM_INTVL2L ;
+    adc     SVPWM_INTVL0H,SVPWM_INTVL2H ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1B,SVPWM_INTVL0L         ;
     ret                                 ;
 
 
 SVPMW_SW_COMP_SECTOR5:                  ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1A,INTVL0L               ;
-    add     INTVL0L,INTVL2L             ;
-    adc     INTVL0H,INTVL2H             ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1D,INTVL0L               ;
-    add     INTVL0L,INTVL1L             ;
-    adc     INTVL0H,INTVL1H             ;
-    out     TC1H,INTVL0H                ;
-    out     OCR1B,INTVL0L               ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1A,SVPWM_INTVL0L         ;
+    add     SVPWM_INTVL0L,SVPWM_INTVL2L ;
+    adc     SVPWM_INTVL0H,SVPWM_INTVL2H ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1D,SVPWM_INTVL0L         ;
+    add     SVPWM_INTVL0L,SVPWM_INTVL1L ;
+    adc     SVPWM_INTVL0H,SVPWM_INTVL1H ;
+    out     TC1H,SVPWM_INTVL0H          ;
+    out     OCR1B,SVPWM_INTVL0L         ;
     ret                                 ;
 
 

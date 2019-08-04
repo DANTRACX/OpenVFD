@@ -15,16 +15,16 @@
 ; ==============================================================================
 ;          R  E  G  I  S  T  E  R     D  E  F  I  N  I  T  I  O  N  S
 ; ==============================================================================
-.def CALC0L     = r0
-.def CALC0H     = r1
-.def CALC1L     = r2
-.def CALC1H     = r3
-.def CALC2L     = r4
-.def CALC2H     = r5
+;.def CALC0L     = r0
+;.def CALC0H     = r1
+;.def CALC1L     = r2
+;.def CALC1H     = r3
+;.def CALC2L     = r4
+;.def CALC2H     = r5
 .def TEMPL      = r16                   ; temp register low byte
 .def TEMPH      = r17                   ; temp register high byte
-.def COUNTERL   = r18                   ; counter register low byte
-.def COUNTERH   = r19                   ; counter register high byte
+;.def COUNTERL   = r18                   ; counter register low byte
+;.def COUNTERH   = r19                   ; counter register high byte
 
 
 ; ==============================================================================
