@@ -74,7 +74,7 @@
 .org 0x011                              ; TIMER1_COMPD program address
     reti
 .org 0x012                              ; FAULT_PROTECTION program address
-    rjmp    SVPWM_HW_FP_ISR
+    rjmp    _SVPWM_TIMER_FAULT_ISR
 
 
 ; ==============================================================================
@@ -94,25 +94,12 @@ INIT:
     sei                                 ; global interrupts enable
 
 SOFT_INIT:
-    rcall   SVPWM_HW_INIT               ;
-    rcall   SVPWM_SW_INIT               ;
+    rcall   SVPWM_INIT                  ;
 
 
 MAIN_LOOP:
     wdr
-    sbic    PINB,6
-    rcall   SVPWM_HW_FREQ3
-update_svpwm:
-    sbis    PINB,6
-    rjmp    MAIN_LOOP
-    in      TEMPL,TIFR
-    sbrs    TEMPL,0b00000010
-    rjmp    update_svpwm
-    rcall   SVPWM_SW_UPDATE_ANGLE
-    rcall   SVPWM_SW_UPDATE_INTVL
-    in      TEMPL,TIFR
-    sbr     TEMPL,0b00000010
-    out     TIFR,TEMPL
+    rcall   SVPWM_LOOP
     rjmp    MAIN_LOOP
 
 
