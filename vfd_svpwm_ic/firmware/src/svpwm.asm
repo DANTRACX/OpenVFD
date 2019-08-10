@@ -10,6 +10,11 @@
 ; This file implements the svpwm algorithm in soft- and hardware. Timer1 with
 ; its integrated deadtime generator is used.
 
+; !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+; TODO: - Alle zeilen kommentieren
+;       - Multiplikation/Division auf 64bit anpassen
+;       - somit tabellengröße von 2406 werten möglich machen
+
 
 ; ==============================================================================
 ;          R  E  G  I  S  T  E  R     D  E  F  I  N  I  T  I  O  N  S
@@ -49,19 +54,25 @@
 ; ==============================================================================
 .cseg
 SVPWM_INIT:                             ;
-    rcall   _SVPWM_CALC_INIT            ;
+    ldi     SVPWM_MAGN,0xE1             ; init SVPWM_MAGN register
+    ldi     SVPWM_FREQ,0x01             ; init SVPWM_FREQ register
+    ldi     SVPWM_ANGLEL,0x00           ; init SVPWM_ANGLEL register
+    ldi     SVPWM_ANGLEH,0x00           ; init SVPWM_ANGLEH register
+    ldi     SVPWM_PWMFREQ,0x10          ;
     rcall   _SVPWM_TIMER_OUTPUTS_SETUP  ;
     rcall   _SVPWM_TIMER_DEADTIME_SETUP ;
     rcall   _SVPWM_TIMER_CTRLREG_SETUP  ;
     rcall   _SVPWM_TIMER_RANGE_SETUP    ;
     rcall   _SVPWM_TIMER_PLL_SETUP      ;
     rcall   _SVPWM_TIMER_PWMOUT_DISABLE ;
+    rcall   _SVPWM_CALC_UPDATE_ANGLE
+    rcall   _SVPWM_CALC_UPDATE_INTVL
     ret                                 ;
 
 
 SVPWM_LOOP:                             ;
-    sbis    PINB,6
-    ret
+    ;sbis    PINB,6
+    ;ret
 update_pwmfreq_1khz:
     cpi     SVPWM_PWMFREQ,0x01
     brne    update_pwmfreq_2khz
@@ -92,7 +103,7 @@ update_pwmfreq_stop:
     ret
 update_angle:
     in      SVPWM_TEMPL,TIFR
-    sbrs    TEMPL,0b00000100
+    sbrs    TEMPL,2
     ret
     rcall   _SVPWM_CALC_UPDATE_ANGLE
     rcall   _SVPWM_CALC_UPDATE_INTVL
@@ -108,7 +119,7 @@ update_angle:
 
 .cseg
 _SVPWM_TIMER_OUTPUTS_SETUP:
-    ldi     SVPWM_TEMPL,0b00111111      ; load bit mask in temp
+    ldi     SVPWM_TEMPL,0b01111111      ; load bit mask in temp
     out     DDRB,SVPWM_TEMPL            ; set i/o to output
     ldi     SVPWM_TEMPL,0b00000000      ; load bit mask in temp
     out     PORTB,SVPWM_TEMPL           ; set all outputs to off
@@ -128,7 +139,7 @@ _SVPWM_TIMER_CTRLREG_SETUP:
     out     TCCR1B,SVPWM_TEMPL          ; set bit for control register B
     ldi     SVPWM_TEMPL,0b00000000      ; load settings for register
     out     TCCR1C,SVPWM_TEMPL          ; set bit for control register C
-    ldi     SVPWM_TEMPL,0b11100001      ; load settings for register
+    ldi     SVPWM_TEMPL,0b00000001      ; load settings for register
     out     TCCR1D,SVPWM_TEMPL          ; set bit for control register D
     ldi     SVPWM_TEMPL,0b00000000      ; load settings for register
     out     TCCR1E,SVPWM_TEMPL          ; set bit for control register E
@@ -236,66 +247,52 @@ _SVPWM_TIMER_FAULT_ISR:                 ;
 ;            S V P W M   -   S O F T W A R E   C A L C U L A T I O N
 ; ==============================================================================
 .cseg
-_SVPWM_CALC_INIT:                       ;
-    ldi     SVPWM_MAGN,0xE1             ; init SVPWM_MAGN register
-    ldi     SVPWM_FREQ,0x19             ; init SVPWM_FREQ register
-    ldi     SVPWM_ANGLEL,0x00           ; init SVPWM_ANGLEL register
-    ldi     SVPWM_ANGLEH,0x00           ; init SVPWM_ANGLEH register
-    ret                                 ;
-
-
 _SVPWM_CALC_UPDATE_ANGLE:               ;
-    in      SVPWM_TEMPL,TCCR1B          ;
+    in      SVPWM_TEMPL,TCCR1B          ; setup counter for anglestep correction
+    cbr     SVPWM_TEMPL,0b11111000
     sbrc    SVPWM_FREQ,7
-    rjmp    svpwm_load_neg_freq
-svpwm_load_pos_freq:
+    rjmp    svpwm_calc_load_neg_freq
+svpwm_calc_load_pos_freq:
     ldi     SVPWM_COUNTERH,0x00         ;
     mov     SVPWM_COUNTERL,SVPWM_FREQ   ;
-    rjmp    svpwm_sw_upd_angle_f2_corr
-svpwm_load_neg_freq:
+    rjmp    svpwm_calc_angelstep_corr
+svpwm_calc_load_neg_freq:
     ldi     SVPWM_COUNTERH,0x00         ;
     ldi     SVPWM_COUNTERL,0xFF
     SUB     SVPWM_COUNTERL,SVPWM_FREQ
     inc     SVPWM_COUNTERL
-
-                                        ; HIER MUSS WEITERGEMACHT WERDEN MIT DEM SKALIEREN DER FREQUENZEN !!!
-                                        ; BERECHNUNG DER FREQUENZKORREKTUR ANHAND DER WIEDERHOLUNGEN MIT 16KHZ ALS BASIS
-svpwm_sw_upd_angle_f2_corr:             ;
-    sbrs    SVPWM_TEMPL,0               ;
-    rjmp    svpwm_sw_upd_angle_f3_corr  ;
+svpwm_calc_angelstep_corr:              ;
+    dec     SVPWM_TEMPL
+    breq    svpwm_calc_angle_dir_sel
     lsl     SVPWM_COUNTERL              ;
     rol     SVPWM_COUNTERH              ;
-svpwm_sw_upd_angle_f3_corr:             ;
-    sbrs    SVPWM_TEMPL,2               ;
-    rjmp    svpwm_upd_angle_dir_sel     ;
-    lsl     SVPWM_COUNTERL              ;
-    rol     SVPWM_COUNTERH              ;
-svpwm_upd_angle_dir_sel:                ;
+    rjmp    svpwm_calc_angelstep_corr   ;
+svpwm_calc_angle_dir_sel:               ; decide for rotation direction
     sbrc    SVPWM_FREQ,7                ;
-    rjmp    svpwm_sw_upd_angle_dec      ;
-svpwm_sw_upd_angle_inc:                 ;
+    rjmp    svpwm_calc_angle_dec        ;
+svpwm_calc_angle_inc:                   ;
     add     SVPWM_ANGLEL,SVPWM_COUNTERL ;
     adc     SVPWM_ANGLEH,SVPWM_COUNTERH ;
-    ldi     SVPWM_TEMPL,0x20            ; set TEMP registers to 7200
-    ldi     SVPWM_TEMPH,0x1C            ; set TEMP registers to 7200
-    cp      SVPWM_ANGLEL,SVPWM_TEMPL    ; check if ANGLE >= 7200
-    cpc     SVPWM_ANGLEH,SVPWM_TEMPH    ; check if ANGLE >= 7200
-    brsh    svpwm_sw_upd_angle_inc_ovf  ; if ANGLE >= 7200 : jump
+    ldi     SVPWM_TEMPL,0x20            ; set TEMP registers to 15624
+    ldi     SVPWM_TEMPH,0x1C            ; set TEMP registers to 15624
+    cp      SVPWM_ANGLEL,SVPWM_TEMPL    ; check if ANGLE >= 15624
+    cpc     SVPWM_ANGLEH,SVPWM_TEMPH    ; check if ANGLE >= 15624
+    brsh    svpwm_calc_angle_inc_ovf    ; if ANGLE >= 15624 : jump
     ret                                 ; else return
-svpwm_sw_upd_angle_inc_ovf:             ;
-    sub     SVPWM_ANGLEL,SVPWM_TEMPL    ; subtract 7200 from ANGLE
-    sbc     SVPWM_ANGLEH,SVPWM_TEMPH    ; subtract 7200 from ANGLE
+svpwm_calc_angle_inc_ovf:               ;
+    sub     SVPWM_ANGLEL,SVPWM_TEMPL    ; subtract 15624 from ANGLE
+    sbc     SVPWM_ANGLEH,SVPWM_TEMPH    ; subtract 15624 from ANGLE
     ret                                 ; return
-svpwm_sw_upd_angle_dec:                 ;
+svpwm_calc_angle_dec:                   ;
     sub     SVPWM_ANGLEL,SVPWM_COUNTERL ;
     sbc     SVPWM_ANGLEH,SVPWM_COUNTERH ;
     ldi     SVPWM_TEMPL,0x20            ;
     ldi     SVPWM_TEMPH,0x1C            ;
     cp      SVPWM_ANGLEL,SVPWM_TEMPL    ;
     cpc     SVPWM_ANGLEH,SVPWM_TEMPH    ;
-    brsh    svpwm_sw_upd_angle_dec_ovf  ;
+    brsh    svpwm_calc_angle_dec_ovf    ;
     ret                                 ;
-svpwm_sw_upd_angle_dec_ovf:             ;
+svpwm_calc_angle_dec_ovf:               ;
     add     SVPWM_ANGLEL,SVPWM_TEMPL    ;
     adc     SVPWM_ANGLEH,SVPWM_TEMPH    ;
     ret                                 ;
@@ -305,17 +302,17 @@ _SVPWM_CALC_UPDATE_INTVL:               ;
     ldi     SVPWM_COUNTERH,0x00         ;
     mov     SVPWM_CALC0L,SVPWM_ANGLEL   ;
     mov     SVPWM_CALC0H,SVPWM_ANGLEH   ;
-    ldi     SVPWM_TEMPL,0xB0            ;
+    ldi     SVPWM_TEMPL,0x00            ;
     ldi     SVPWM_TEMPH,0x04            ;
-svpwm_sw_upd_intvl_sector:              ;
+svpwm_calc_intvl_sector:                ;
     cp      SVPWM_CALC0L,SVPWM_TEMPL    ;
     cpc     SVPWM_CALC0H,SVPWM_TEMPH    ;
-    brlo    svpwm_sw_upd_intvl_t1       ;
+    brlo    svpwm_calc_intvl_t1         ;
     inc     SVPWM_COUNTERH              ;
     sub     SVPWM_CALC0L,SVPWM_TEMPL    ;
     sbc     SVPWM_CALC0H,SVPWM_TEMPH    ;
-    rjmp    svpwm_sw_upd_intvl_sector   ;
-svpwm_sw_upd_intvl_t1:                  ;
+    rjmp    svpwm_calc_intvl_sector     ;
+svpwm_calc_intvl_t1:                    ;
     sub     SVPWM_TEMPL,SVPWM_CALC0L    ;
     sbc     SVPWM_TEMPH,SVPWM_CALC0H    ;
     lsl     SVPWM_TEMPL                 ;
@@ -326,7 +323,7 @@ svpwm_sw_upd_intvl_t1:                  ;
     adc     ZH,SVPWM_TEMPH              ;
     lpm     SVPWM_INTVL1L,Z+            ;
     lpm     SVPWM_INTVL1H,Z             ;
-svpwm_sw_upd_intvl_t2:                  ;
+svpwm_calc_intvl_t2:                    ;
     lsl     SVPWM_CALC0L                ;
     rol     SVPWM_CALC0H                ;
     ldi     ZL,LOW(SINE*2)              ;
@@ -335,7 +332,7 @@ svpwm_sw_upd_intvl_t2:                  ;
     adc     ZH,SVPWM_CALC0H             ;
     lpm     SVPWM_INTVL2L,Z+            ;
     lpm     SVPWM_INTVL2H,Z             ;
-svpwm_sw_mult_t1t2:                     ;
+svpwm_calc_mult_t1t2:                   ;
     mov     SVPWM_COUNTERL,SVPWM_MAGN   ;
     ldi     SVPWM_TEMPL,0x00            ;
     ldi     SVPWM_TEMPH,0x00            ;
@@ -345,17 +342,17 @@ svpwm_sw_mult_t1t2:                     ;
     clr     SVPWM_CALC0H                ; clear t2 result byte 0
     clr     SVPWM_CALC1H                ; clear t2 result byte 1
     clr     SVPWM_CALC2H                ; clear t2 result byte 2
-svpwm_sw_mult_t1t2_a:                   ;
+svpwm_calc_mult_t1t2_a:                 ;
     clc                                 ;
     ror     SVPWM_COUNTERL              ;
-    brcc    svpwm_sw_mult_t1t2_b        ;
+    brcc    svpwm_calc_mult_t1t2_b      ;
     add     SVPWM_CALC0L,SVPWM_INTVL1L  ;
     adc     SVPWM_CALC1L,SVPWM_INTVL1H  ;
     adc     SVPWM_CALC2L,SVPWM_TEMPL    ;
     add     SVPWM_CALC0H,SVPWM_INTVL2L  ;
     adc     SVPWM_CALC1H,SVPWM_INTVL2H  ;
     adc     SVPWM_CALC2H,SVPWM_TEMPH    ;
-svpwm_sw_mult_t1t2_b:                   ;
+svpwm_calc_mult_t1t2_b:                 ;
     clc                                 ;
     rol     SVPWM_INTVL1L               ;
     rol     SVPWM_INTVL1H               ;
@@ -365,13 +362,13 @@ svpwm_sw_mult_t1t2_b:                   ;
     rol     SVPWM_INTVL2H               ;
     rol     SVPWM_TEMPH                 ;
     tst     SVPWM_COUNTERL              ;
-    brne    svpwm_sw_mult_t1t2_a        ;
-svpwm_sw_div_t1t2:                      ;
+    brne    svpwm_calc_mult_t1t2_a      ;
+svpwm_calc_div_t1t2:                    ;
     mov     SVPWM_INTVL1L,SVPWM_CALC1L  ;
     mov     SVPWM_INTVL1H,SVPWM_CALC2L  ;
     mov     SVPWM_INTVL2L,SVPWM_CALC1H  ;
     mov     SVPWM_INTVL2H,SVPWM_CALC2H  ;
-svpwm_sw_upd_intvl_t0:                  ;
+svpwm_calc_intvl_t0:                    ;
     mov     SVPWM_CALC0L,SVPWM_INTVL1L  ;
     mov     SVPWM_CALC0H,SVPWM_INTVL1H  ;
     add     SVPWM_CALC0L,SVPWM_INTVL2L  ;
@@ -384,7 +381,7 @@ svpwm_sw_upd_intvl_t0:                  ;
     ror     SVPWM_TEMPL                 ;
     mov     SVPWM_INTVL0L,SVPWM_TEMPL   ;
     mov     SVPWM_INTVL0H,SVPWM_TEMPH   ;
-svpwm_sw_upd_intvl_set_comp:            ;
+svpwm_calc_intvl_setcomp:               ;
     ldi     SVPWM_TEMPL,0x00            ;
     ldi     ZL,low(_SVPWM_CALC_JTB)     ;
     ldi     ZH,high(_SVPWM_CALC_JTB)    ;
@@ -490,6 +487,7 @@ _SVPWM_CALC_SETCOMP_SECTOR5:            ;
 ; ==============================================================================
 ;    S V P W M  -  S I N E   L O O K U P   T A B L E   0 - 6 0   D E G R E E
 ; ==============================================================================
+; (8 x 325) + 3 = 2604 Values / 60 Degrees = 15624 Values / 360 Degrees
 .cseg
 SINE:
     .dw     0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0004, 0x0005, 0x0006
