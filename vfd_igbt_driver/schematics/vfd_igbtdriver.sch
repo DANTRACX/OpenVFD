@@ -8,34 +8,34 @@
 </settings>
 <grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
-<layer number="1" name="Top" color="4" fill="1" visible="yes" active="no"/>
-<layer number="2" name="Route2" color="16" fill="1" visible="yes" active="no"/>
-<layer number="3" name="Route3" color="17" fill="1" visible="yes" active="no"/>
-<layer number="4" name="Route4" color="18" fill="1" visible="yes" active="no"/>
-<layer number="5" name="Route5" color="19" fill="1" visible="yes" active="no"/>
-<layer number="6" name="Route6" color="25" fill="1" visible="yes" active="no"/>
-<layer number="7" name="Route7" color="26" fill="1" visible="yes" active="no"/>
-<layer number="8" name="Route8" color="27" fill="1" visible="yes" active="no"/>
-<layer number="9" name="Route9" color="28" fill="1" visible="yes" active="no"/>
-<layer number="10" name="Route10" color="29" fill="1" visible="yes" active="no"/>
-<layer number="11" name="Route11" color="30" fill="1" visible="yes" active="no"/>
-<layer number="12" name="Route12" color="20" fill="1" visible="yes" active="no"/>
-<layer number="13" name="Route13" color="21" fill="1" visible="yes" active="no"/>
-<layer number="14" name="Route14" color="22" fill="1" visible="yes" active="no"/>
-<layer number="15" name="Route15" color="23" fill="1" visible="yes" active="no"/>
-<layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="no"/>
-<layer number="17" name="Pads" color="2" fill="1" visible="yes" active="no"/>
-<layer number="18" name="Vias" color="2" fill="1" visible="yes" active="no"/>
-<layer number="19" name="Unrouted" color="6" fill="1" visible="yes" active="no"/>
-<layer number="20" name="Dimension" color="24" fill="1" visible="yes" active="no"/>
-<layer number="21" name="tPlace" color="7" fill="1" visible="yes" active="no"/>
-<layer number="22" name="bPlace" color="7" fill="1" visible="yes" active="no"/>
-<layer number="23" name="tOrigins" color="15" fill="1" visible="yes" active="no"/>
-<layer number="24" name="bOrigins" color="15" fill="1" visible="yes" active="no"/>
-<layer number="25" name="tNames" color="7" fill="1" visible="yes" active="no"/>
-<layer number="26" name="bNames" color="7" fill="1" visible="yes" active="no"/>
-<layer number="27" name="tValues" color="7" fill="1" visible="yes" active="no"/>
-<layer number="28" name="bValues" color="7" fill="1" visible="yes" active="no"/>
+<layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
+<layer number="2" name="Route2" color="16" fill="1" visible="no" active="no"/>
+<layer number="3" name="Route3" color="17" fill="1" visible="no" active="no"/>
+<layer number="4" name="Route4" color="18" fill="1" visible="no" active="no"/>
+<layer number="5" name="Route5" color="19" fill="1" visible="no" active="no"/>
+<layer number="6" name="Route6" color="25" fill="1" visible="no" active="no"/>
+<layer number="7" name="Route7" color="26" fill="1" visible="no" active="no"/>
+<layer number="8" name="Route8" color="27" fill="1" visible="no" active="no"/>
+<layer number="9" name="Route9" color="28" fill="1" visible="no" active="no"/>
+<layer number="10" name="Route10" color="29" fill="1" visible="no" active="no"/>
+<layer number="11" name="Route11" color="30" fill="1" visible="no" active="no"/>
+<layer number="12" name="Route12" color="20" fill="1" visible="no" active="no"/>
+<layer number="13" name="Route13" color="21" fill="1" visible="no" active="no"/>
+<layer number="14" name="Route14" color="22" fill="1" visible="no" active="no"/>
+<layer number="15" name="Route15" color="23" fill="1" visible="no" active="no"/>
+<layer number="16" name="Bottom" color="1" fill="1" visible="no" active="no"/>
+<layer number="17" name="Pads" color="2" fill="1" visible="no" active="no"/>
+<layer number="18" name="Vias" color="2" fill="1" visible="no" active="no"/>
+<layer number="19" name="Unrouted" color="6" fill="1" visible="no" active="no"/>
+<layer number="20" name="Dimension" color="24" fill="1" visible="no" active="no"/>
+<layer number="21" name="tPlace" color="7" fill="1" visible="no" active="no"/>
+<layer number="22" name="bPlace" color="7" fill="1" visible="no" active="no"/>
+<layer number="23" name="tOrigins" color="15" fill="1" visible="no" active="no"/>
+<layer number="24" name="bOrigins" color="15" fill="1" visible="no" active="no"/>
+<layer number="25" name="tNames" color="7" fill="1" visible="no" active="no"/>
+<layer number="26" name="bNames" color="7" fill="1" visible="no" active="no"/>
+<layer number="27" name="tValues" color="7" fill="1" visible="no" active="no"/>
+<layer number="28" name="bValues" color="7" fill="1" visible="no" active="no"/>
 <layer number="29" name="tStop" color="7" fill="3" visible="no" active="no"/>
 <layer number="30" name="bStop" color="7" fill="6" visible="no" active="no"/>
 <layer number="31" name="tCream" color="7" fill="4" visible="no" active="no"/>
@@ -44,8 +44,8 @@
 <layer number="34" name="bFinish" color="6" fill="6" visible="no" active="no"/>
 <layer number="35" name="tGlue" color="7" fill="4" visible="no" active="no"/>
 <layer number="36" name="bGlue" color="7" fill="5" visible="no" active="no"/>
-<layer number="37" name="tTest" color="7" fill="1" visible="yes" active="no"/>
-<layer number="38" name="bTest" color="7" fill="1" visible="yes" active="no"/>
+<layer number="37" name="tTest" color="7" fill="1" visible="no" active="no"/>
+<layer number="38" name="bTest" color="7" fill="1" visible="no" active="no"/>
 <layer number="39" name="tKeepout" color="4" fill="11" visible="no" active="no"/>
 <layer number="40" name="bKeepout" color="1" fill="11" visible="no" active="no"/>
 <layer number="41" name="tRestrict" color="4" fill="10" visible="no" active="no"/>
@@ -53,12 +53,12 @@
 <layer number="43" name="vRestrict" color="2" fill="10" visible="no" active="no"/>
 <layer number="44" name="Drills" color="7" fill="1" visible="no" active="no"/>
 <layer number="45" name="Holes" color="7" fill="1" visible="no" active="no"/>
-<layer number="46" name="Milling" color="3" fill="1" visible="yes" active="no"/>
-<layer number="47" name="Measures" color="7" fill="1" visible="yes" active="no"/>
-<layer number="48" name="Document" color="7" fill="1" visible="yes" active="no"/>
-<layer number="49" name="Reference" color="7" fill="1" visible="yes" active="no"/>
-<layer number="51" name="tDocu" color="7" fill="1" visible="yes" active="no"/>
-<layer number="52" name="bDocu" color="7" fill="1" visible="yes" active="no"/>
+<layer number="46" name="Milling" color="3" fill="1" visible="no" active="no"/>
+<layer number="47" name="Measures" color="7" fill="1" visible="no" active="no"/>
+<layer number="48" name="Document" color="7" fill="1" visible="no" active="no"/>
+<layer number="49" name="Reference" color="7" fill="1" visible="no" active="no"/>
+<layer number="51" name="tDocu" color="7" fill="1" visible="no" active="no"/>
+<layer number="52" name="bDocu" color="7" fill="1" visible="no" active="no"/>
 <layer number="88" name="SimResults" color="9" fill="1" visible="yes" active="yes"/>
 <layer number="89" name="SimProbes" color="9" fill="1" visible="yes" active="yes"/>
 <layer number="90" name="Modules" color="5" fill="1" visible="yes" active="yes"/>
@@ -7486,93 +7486,6 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 </deviceset>
 </devicesets>
 </library>
-<library name="dc-dc-converter" urn="urn:adsk.eagle:library:208">
-<description>&lt;b&gt;DC-DC Converters&lt;/b&gt;&lt;p&gt;
-&lt;author&gt;Created by librarian@cadsoft.de&lt;/author&gt;</description>
-<packages>
-<package name="NMA" urn="urn:adsk.eagle:footprint:12290/1" library_version="1">
-<description>&lt;b&gt;DC-DC CONVERTER&lt;/b&gt;</description>
-<wire x1="1.143" y1="8.763" x2="-4.953" y2="8.763" width="0.1524" layer="21"/>
-<wire x1="-4.953" y1="8.763" x2="-4.953" y2="-10.795" width="0.1524" layer="21"/>
-<wire x1="-4.953" y1="-10.795" x2="1.143" y2="-10.795" width="0.1524" layer="21"/>
-<wire x1="1.143" y1="-10.795" x2="1.143" y2="-7.112" width="0.1524" layer="21"/>
-<wire x1="1.143" y1="-4.572" x2="1.143" y2="-3.048" width="0.1524" layer="51"/>
-<wire x1="1.143" y1="7.112" x2="1.143" y2="8.763" width="0.1524" layer="21"/>
-<wire x1="1.143" y1="-2.032" x2="1.143" y2="-0.508" width="0.1524" layer="51"/>
-<wire x1="1.143" y1="-3.048" x2="1.143" y2="-2.032" width="0.1524" layer="21"/>
-<wire x1="1.143" y1="-0.508" x2="1.143" y2="3.048" width="0.1524" layer="21"/>
-<wire x1="1.143" y1="3.048" x2="1.143" y2="4.572" width="0.1524" layer="51"/>
-<wire x1="1.143" y1="4.572" x2="1.143" y2="5.588" width="0.1524" layer="21"/>
-<wire x1="1.143" y1="5.588" x2="1.143" y2="7.112" width="0.1524" layer="51"/>
-<wire x1="1.143" y1="-5.588" x2="1.143" y2="-4.572" width="0.1524" layer="21"/>
-<wire x1="1.143" y1="-7.112" x2="1.143" y2="-5.588" width="0.1524" layer="51"/>
-<pad name="1" x="0" y="6.35" drill="0.8128" shape="long"/>
-<pad name="2" x="0" y="3.81" drill="0.8128" shape="long"/>
-<pad name="4" x="0" y="-1.27" drill="0.8128" shape="long"/>
-<pad name="5" x="0" y="-3.81" drill="0.8128" shape="long"/>
-<pad name="6" x="0" y="-6.35" drill="0.8128" shape="long"/>
-<text x="-4.953" y="9.144" size="1.27" layer="25" ratio="10">&gt;NAME</text>
-<text x="-2.54" y="-3.937" size="1.27" layer="27" ratio="10" rot="R90">&gt;VALUE</text>
-<text x="-4.191" y="-10.16" size="1.016" layer="21" ratio="12">DC-DC</text>
-<text x="-2.54" y="5.842" size="1.016" layer="21" ratio="12">1</text>
-<text x="-2.54" y="-6.985" size="1.016" layer="21" ratio="12">6</text>
-</package>
-</packages>
-<packages3d>
-<package3d name="NMA" urn="urn:adsk.eagle:package:12322/1" type="box" library_version="1">
-<description>DC-DC CONVERTER</description>
-<packageinstances>
-<packageinstance name="NMA"/>
-</packageinstances>
-</package3d>
-</packages3d>
-<symbols>
-<symbol name="DC+-" urn="urn:adsk.eagle:symbol:12289/1" library_version="1">
-<wire x1="-10.16" y1="5.08" x2="10.16" y2="5.08" width="0.4064" layer="94"/>
-<wire x1="10.16" y1="5.08" x2="10.16" y2="-7.62" width="0.4064" layer="94"/>
-<wire x1="10.16" y1="-7.62" x2="-10.16" y2="-7.62" width="0.4064" layer="94"/>
-<wire x1="-10.16" y1="-7.62" x2="-10.16" y2="5.08" width="0.4064" layer="94"/>
-<text x="-10.16" y="5.715" size="1.778" layer="95">&gt;NAME</text>
-<text x="-10.16" y="-10.16" size="1.778" layer="96">&gt;VALUE</text>
-<text x="-8.763" y="-6.604" size="1.27" layer="94">DC/DC CONVERTER</text>
-<pin name="+VIN" x="-12.7" y="2.54" length="short" direction="pas"/>
-<pin name="-VIN" x="-12.7" y="-2.54" length="short" direction="pas"/>
-<pin name="+VOUT" x="12.7" y="2.54" length="short" direction="pas" rot="R180"/>
-<pin name="COM" x="12.7" y="0" length="short" direction="pas" rot="R180"/>
-<pin name="-VOUT" x="12.7" y="-2.54" length="short" direction="pas" rot="R180"/>
-</symbol>
-</symbols>
-<devicesets>
-<deviceset name="NMA" urn="urn:adsk.eagle:component:12336/1" prefix="DC" uservalue="yes" library_version="1">
-<description>&lt;b&gt;DC-DC CONVERTER&lt;/b&gt;</description>
-<gates>
-<gate name="G$1" symbol="DC+-" x="0" y="0"/>
-</gates>
-<devices>
-<device name="" package="NMA">
-<connects>
-<connect gate="G$1" pin="+VIN" pad="1"/>
-<connect gate="G$1" pin="+VOUT" pad="6"/>
-<connect gate="G$1" pin="-VIN" pad="2"/>
-<connect gate="G$1" pin="-VOUT" pad="4"/>
-<connect gate="G$1" pin="COM" pad="5"/>
-</connects>
-<package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:12322/1"/>
-</package3dinstances>
-<technologies>
-<technology name="">
-<attribute name="MF" value="C &amp; D TECHNOLOGIES, INC" constant="no"/>
-<attribute name="MPN" value="NMA0515SC" constant="no"/>
-<attribute name="OC_FARNELL" value="1021434" constant="no"/>
-<attribute name="OC_NEWARK" value="61K3064" constant="no"/>
-</technology>
-</technologies>
-</device>
-</devices>
-</deviceset>
-</devicesets>
-</library>
 <library name="diode" urn="urn:adsk.eagle:library:210">
 <description>&lt;b&gt;Diodes&lt;/b&gt;&lt;p&gt;
 Based on the following sources:
@@ -8086,6 +7999,81 @@ Source: http://www.buerklin.com, http://catalog.tycoelectronics.com</description
 </deviceset>
 </devicesets>
 </library>
+<library name="custom">
+<packages>
+<package name="MGJ2" urn="urn:adsk.eagle:footprint:12290/1" locally_modified="yes">
+<description>&lt;b&gt;DC-DC CONVERTER&lt;/b&gt;</description>
+<pad name="1" x="-2.413" y="-6.7564" drill="0.8128" shape="long" rot="R180"/>
+<pad name="2" x="-2.413" y="-4.2164" drill="0.8128" shape="long" rot="R180"/>
+<pad name="5" x="-2.413" y="3.4036" drill="0.8128" shape="long" rot="R180"/>
+<pad name="6" x="-2.413" y="5.9436" drill="0.8128" shape="long" rot="R180"/>
+<pad name="7" x="-2.413" y="8.4836" drill="0.8128" shape="long" rot="R180"/>
+<text x="-3.1496" y="11.0744" size="1.27" layer="25" ratio="10">&gt;NAME</text>
+<text x="1.143" y="-3.2258" size="1.27" layer="27" ratio="10" rot="R90">&gt;VALUE</text>
+<text x="-2.08" y="-8.6106" size="1.016" layer="21" ratio="12">DC-DC</text>
+<text x="0.254" y="-6.9342" size="1.016" layer="21" ratio="12">1</text>
+<text x="0.4572" y="5.7912" size="1.016" layer="21" ratio="12">6</text>
+<wire x1="-5.08" y1="-8.89" x2="4.72" y2="-8.89" width="0.127" layer="21"/>
+<wire x1="-5.08" y1="-8.89" x2="-5.08" y2="10.61" width="0.127" layer="21"/>
+<wire x1="4.72" y1="-8.89" x2="4.72" y2="10.61" width="0.127" layer="21"/>
+<wire x1="-5.08" y1="10.61" x2="4.72" y2="10.61" width="0.127" layer="21"/>
+</package>
+</packages>
+<packages3d>
+<package3d name="NMA" urn="urn:adsk.eagle:package:12322/1" locally_modified="yes" type="box">
+<description>DC-DC CONVERTER</description>
+<packageinstances>
+<packageinstance name="MGJ2"/>
+</packageinstances>
+</package3d>
+</packages3d>
+<symbols>
+<symbol name="DC+-">
+<wire x1="-10.16" y1="5.08" x2="10.16" y2="5.08" width="0.4064" layer="94"/>
+<wire x1="10.16" y1="5.08" x2="10.16" y2="-7.62" width="0.4064" layer="94"/>
+<wire x1="10.16" y1="-7.62" x2="-10.16" y2="-7.62" width="0.4064" layer="94"/>
+<wire x1="-10.16" y1="-7.62" x2="-10.16" y2="5.08" width="0.4064" layer="94"/>
+<text x="-10.16" y="5.715" size="1.778" layer="95">&gt;NAME</text>
+<text x="-10.16" y="-10.16" size="1.778" layer="96">&gt;VALUE</text>
+<text x="-8.763" y="-6.604" size="1.27" layer="94">DC/DC CONVERTER</text>
+<pin name="+VIN" x="-12.7" y="2.54" length="short" direction="pas"/>
+<pin name="-VIN" x="-12.7" y="-2.54" length="short" direction="pas"/>
+<pin name="+VOUT" x="12.7" y="2.54" length="short" direction="pas" rot="R180"/>
+<pin name="COM" x="12.7" y="0" length="short" direction="pas" rot="R180"/>
+<pin name="-VOUT" x="12.7" y="-2.54" length="short" direction="pas" rot="R180"/>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="MGJ2" prefix="DC" uservalue="yes">
+<description>&lt;b&gt;DC-DC CONVERTER&lt;/b&gt;</description>
+<gates>
+<gate name="G$1" symbol="DC+-" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="MGJ2">
+<connects>
+<connect gate="G$1" pin="+VIN" pad="1"/>
+<connect gate="G$1" pin="+VOUT" pad="7"/>
+<connect gate="G$1" pin="-VIN" pad="2"/>
+<connect gate="G$1" pin="-VOUT" pad="5"/>
+<connect gate="G$1" pin="COM" pad="6"/>
+</connects>
+<package3dinstances>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:12322/1"/>
+</package3dinstances>
+<technologies>
+<technology name="">
+<attribute name="MF" value="C &amp; D TECHNOLOGIES, INC" constant="no"/>
+<attribute name="MPN" value="NMA0515SC" constant="no"/>
+<attribute name="OC_FARNELL" value="1021434" constant="no"/>
+<attribute name="OC_NEWARK" value="61K3064" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
 </libraries>
 <attributes>
 </attributes>
@@ -8099,7 +8087,6 @@ Source: http://www.buerklin.com, http://catalog.tycoelectronics.com</description
 <part name="FRAME1" library="frames" library_urn="urn:adsk.eagle:library:229" deviceset="DINA4_L" device=""/>
 <part name="C2" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="C-EU" device="050-025X075" package3d_urn="urn:adsk.eagle:package:23637/1" value="100n"/>
 <part name="R2" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0617/22" package3d_urn="urn:adsk.eagle:package:23577/1" value="15R"/>
-<part name="DC1" library="dc-dc-converter" library_urn="urn:adsk.eagle:library:208" deviceset="NMA" device="" package3d_urn="urn:adsk.eagle:package:12322/1" value="MGJ2D121505SC"/>
 <part name="C4" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="C-EU" device="050-035X075" package3d_urn="urn:adsk.eagle:package:23677/1" value="0,47µ"/>
 <part name="C3" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="C-EU" device="050-035X075" package3d_urn="urn:adsk.eagle:package:23677/1" value="0,47µ"/>
 <part name="C1" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="C-EU" device="050-035X075" package3d_urn="urn:adsk.eagle:package:23677/1" value="0,47µ"/>
@@ -8115,6 +8102,7 @@ Source: http://www.buerklin.com, http://catalog.tycoelectronics.com</description
 <part name="OK1" library="ic-package" library_urn="urn:adsk.eagle:library:239" deviceset="DIL8" device="" package3d_urn="urn:adsk.eagle:package:29519/2" value="FOD3120V"/>
 <part name="X1" library="wirepad" library_urn="urn:adsk.eagle:library:412" deviceset="PAD-N" device=""/>
 <part name="X2" library="wirepad" library_urn="urn:adsk.eagle:library:412" deviceset="PAD-N" device=""/>
+<part name="DC1" library="custom" deviceset="MGJ2" device="" package3d_urn="urn:adsk.eagle:package:12322/1" value="MGJ2D121505SC"/>
 </parts>
 <sheets>
 <sheet>
@@ -8140,10 +8128,6 @@ Source: http://www.buerklin.com, http://catalog.tycoelectronics.com</description
 <instance part="R2" gate="G$1" x="160.02" y="86.36" smashed="yes" rot="R180">
 <attribute name="NAME" x="161.29" y="89.9414" size="1.778" layer="95" rot="R180"/>
 <attribute name="VALUE" x="161.29" y="84.582" size="1.778" layer="96" rot="R180"/>
-</instance>
-<instance part="DC1" gate="G$1" x="114.3" y="124.46" smashed="yes">
-<attribute name="NAME" x="104.14" y="130.175" size="1.778" layer="95"/>
-<attribute name="VALUE" x="104.14" y="114.3" size="1.778" layer="96"/>
 </instance>
 <instance part="C4" gate="G$1" x="160.02" y="121.92" smashed="yes" rot="R270">
 <attribute name="NAME" x="153.924" y="119.761" size="1.778" layer="95"/>
@@ -8199,6 +8183,10 @@ Source: http://www.buerklin.com, http://catalog.tycoelectronics.com</description
 </instance>
 <instance part="X1" gate="G$1" x="104.14" y="91.44" smashed="yes"/>
 <instance part="X2" gate="G$1" x="104.14" y="83.82" smashed="yes"/>
+<instance part="DC1" gate="G$1" x="114.3" y="124.46" smashed="yes">
+<attribute name="NAME" x="104.14" y="130.175" size="1.778" layer="95"/>
+<attribute name="VALUE" x="104.14" y="114.3" size="1.778" layer="96"/>
+</instance>
 </instances>
 <busses>
 </busses>
@@ -8208,7 +8196,6 @@ Source: http://www.buerklin.com, http://catalog.tycoelectronics.com</description
 <pinref part="C2" gate="G$1" pin="1"/>
 <wire x1="121.92" y1="83.82" x2="132.08" y2="83.82" width="0.1524" layer="91"/>
 <wire x1="132.08" y1="83.82" x2="132.08" y2="78.74" width="0.1524" layer="91"/>
-<pinref part="DC1" gate="G$1" pin="-VOUT"/>
 <wire x1="127" y1="121.92" x2="132.08" y2="121.92" width="0.1524" layer="91"/>
 <wire x1="132.08" y1="121.92" x2="132.08" y2="83.82" width="0.1524" layer="91"/>
 <junction x="132.08" y="83.82"/>
@@ -8216,6 +8203,7 @@ Source: http://www.buerklin.com, http://catalog.tycoelectronics.com</description
 <wire x1="154.94" y1="121.92" x2="132.08" y2="121.92" width="0.1524" layer="91"/>
 <junction x="132.08" y="121.92"/>
 <pinref part="OK1" gate="G$1" pin="5"/>
+<pinref part="DC1" gate="G$1" pin="-VOUT"/>
 </segment>
 </net>
 <net name="N$2" class="0">
@@ -8225,7 +8213,6 @@ Source: http://www.buerklin.com, http://catalog.tycoelectronics.com</description
 <wire x1="142.24" y1="68.58" x2="132.08" y2="68.58" width="0.1524" layer="91"/>
 <pinref part="C2" gate="G$1" pin="2"/>
 <wire x1="132.08" y1="68.58" x2="132.08" y2="71.12" width="0.1524" layer="91"/>
-<pinref part="DC1" gate="G$1" pin="+VOUT"/>
 <wire x1="127" y1="127" x2="142.24" y2="127" width="0.1524" layer="91"/>
 <wire x1="142.24" y1="127" x2="142.24" y2="91.44" width="0.1524" layer="91"/>
 <junction x="142.24" y="91.44"/>
@@ -8233,6 +8220,7 @@ Source: http://www.buerklin.com, http://catalog.tycoelectronics.com</description
 <wire x1="142.24" y1="127" x2="154.94" y2="127" width="0.1524" layer="91"/>
 <junction x="142.24" y="127"/>
 <pinref part="OK1" gate="G$1" pin="8"/>
+<pinref part="DC1" gate="G$1" pin="+VOUT"/>
 </segment>
 </net>
 <net name="N$3" class="0">
@@ -8249,7 +8237,6 @@ Source: http://www.buerklin.com, http://catalog.tycoelectronics.com</description
 </net>
 <net name="+12V" class="0">
 <segment>
-<pinref part="DC1" gate="G$1" pin="+VIN"/>
 <wire x1="101.6" y1="127" x2="73.66" y2="127" width="0.1524" layer="91"/>
 <wire x1="73.66" y1="127" x2="73.66" y2="119.38" width="0.1524" layer="91"/>
 <pinref part="C1" gate="G$1" pin="1"/>
@@ -8261,6 +8248,7 @@ Source: http://www.buerklin.com, http://catalog.tycoelectronics.com</description
 <wire x1="60.96" y1="134.62" x2="63.5" y2="134.62" width="0.1524" layer="91"/>
 <wire x1="63.5" y1="134.62" x2="63.5" y2="127" width="0.1524" layer="91"/>
 <junction x="63.5" y="127"/>
+<pinref part="DC1" gate="G$1" pin="+VIN"/>
 </segment>
 </net>
 <net name="N$8" class="0">
@@ -8298,7 +8286,6 @@ Source: http://www.buerklin.com, http://catalog.tycoelectronics.com</description
 </net>
 <net name="EMITTER" class="0">
 <segment>
-<pinref part="DC1" gate="G$1" pin="COM"/>
 <wire x1="127" y1="124.46" x2="172.72" y2="124.46" width="0.1524" layer="91"/>
 <label x="180.34" y="132.08" size="1.778" layer="95" xref="yes"/>
 <pinref part="C3" gate="G$1" pin="2"/>
@@ -8317,6 +8304,7 @@ Source: http://www.buerklin.com, http://catalog.tycoelectronics.com</description
 <wire x1="180.34" y1="132.08" x2="177.8" y2="132.08" width="0.1524" layer="91"/>
 <wire x1="177.8" y1="132.08" x2="177.8" y2="124.46" width="0.1524" layer="91"/>
 <junction x="177.8" y="124.46"/>
+<pinref part="DC1" gate="G$1" pin="COM"/>
 </segment>
 </net>
 <net name="GATE" class="0">
@@ -8347,7 +8335,6 @@ Source: http://www.buerklin.com, http://catalog.tycoelectronics.com</description
 </net>
 <net name="0V" class="0">
 <segment>
-<pinref part="DC1" gate="G$1" pin="-VIN"/>
 <pinref part="C1" gate="G$1" pin="2"/>
 <wire x1="101.6" y1="121.92" x2="81.28" y2="121.92" width="0.1524" layer="91"/>
 <junction x="81.28" y="121.92"/>
@@ -8361,6 +8348,7 @@ Source: http://www.buerklin.com, http://catalog.tycoelectronics.com</description
 <wire x1="73.66" y1="111.76" x2="73.66" y2="109.22" width="0.1524" layer="91"/>
 <wire x1="73.66" y1="109.22" x2="81.28" y2="109.22" width="0.1524" layer="91"/>
 <wire x1="81.28" y1="109.22" x2="81.28" y2="121.92" width="0.1524" layer="91"/>
+<pinref part="DC1" gate="G$1" pin="-VIN"/>
 </segment>
 </net>
 <net name="N$5" class="0">
