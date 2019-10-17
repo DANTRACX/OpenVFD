@@ -17913,7 +17913,7 @@ Number of pins: &lt;b&gt;3&lt;/b&gt;&lt;b&gt;&lt;P&gt;
 <part name="C7" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="C-EU" device="025-024X044" package3d_urn="urn:adsk.eagle:package:23630/1" value="100n"/>
 <part name="C8" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="C-EU" device="025-024X044" package3d_urn="urn:adsk.eagle:package:23630/1" value="100n"/>
 <part name="R10" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330R"/>
-<part name="R11" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/7" package3d_urn="urn:adsk.eagle:package:23498/1" value="330R"/>
+<part name="R11" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/5" package3d_urn="urn:adsk.eagle:package:23488/1" value="330R"/>
 <part name="R12" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="0204/5" package3d_urn="urn:adsk.eagle:package:23488/1" value="1k"/>
 <part name="FRAME4" library="frames" library_urn="urn:adsk.eagle:library:229" deviceset="DINA4_L" device=""/>
 <part name="IC6" library="avago" library_urn="urn:adsk.eagle:library:107" deviceset="HCPL-7800" device="" package3d_urn="urn:adsk.eagle:package:4485/1" value="HCPL-7840"/>
@@ -18569,6 +18569,14 @@ Number of pins: &lt;b&gt;3&lt;/b&gt;&lt;b&gt;&lt;P&gt;
 <junction x="76.2" y="96.52"/>
 </segment>
 </net>
+<net name="485DE" class="0">
+<segment>
+<label x="88.9" y="88.9" size="1.27" layer="95" rot="R270" xref="yes"/>
+<pinref part="IC15" gate="G$1" pin="20"/>
+<wire x1="88.9" y1="106.68" x2="88.9" y2="88.9" width="0.1524" layer="91"/>
+<wire x1="96.52" y1="106.68" x2="88.9" y2="106.68" width="0.1524" layer="91"/>
+</segment>
+</net>
 <net name="H2" class="0">
 <segment>
 <pinref part="JP2" gate="A" pin="3"/>
@@ -18778,14 +18786,6 @@ Number of pins: &lt;b&gt;3&lt;/b&gt;&lt;b&gt;&lt;P&gt;
 <wire x1="81.28" y1="91.44" x2="81.28" y2="88.9" width="0.1524" layer="91"/>
 <wire x1="104.14" y1="91.44" x2="81.28" y2="91.44" width="0.1524" layer="91"/>
 <junction x="81.28" y="91.44"/>
-</segment>
-</net>
-<net name="485DE" class="0">
-<segment>
-<pinref part="IC15" gate="G$1" pin="1"/>
-<wire x1="96.52" y1="154.94" x2="93.98" y2="154.94" width="0.1524" layer="91"/>
-<wire x1="93.98" y1="154.94" x2="93.98" y2="157.48" width="0.1524" layer="91"/>
-<label x="93.98" y="157.48" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
 </nets>
@@ -19078,6 +19078,8 @@ Number of pins: &lt;b&gt;3&lt;/b&gt;&lt;b&gt;&lt;P&gt;
 <pinref part="R12" gate="G$1" pin="1"/>
 <pinref part="OK4" gate="A" pin="VO"/>
 <wire x1="71.12" y1="152.4" x2="78.74" y2="152.4" width="0.1524" layer="91"/>
+<wire x1="71.12" y1="152.4" x2="55.88" y2="152.4" width="0.1524" layer="91"/>
+<junction x="71.12" y="152.4"/>
 <wire x1="71.12" y1="152.4" x2="71.12" y2="154.94" width="0.1524" layer="91"/>
 <label x="55.88" y="152.4" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>

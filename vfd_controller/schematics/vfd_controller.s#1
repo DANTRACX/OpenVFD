@@ -19078,6 +19078,8 @@ Number of pins: &lt;b&gt;3&lt;/b&gt;&lt;b&gt;&lt;P&gt;
 <pinref part="R12" gate="G$1" pin="1"/>
 <pinref part="OK4" gate="A" pin="VO"/>
 <wire x1="71.12" y1="152.4" x2="78.74" y2="152.4" width="0.1524" layer="91"/>
+<wire x1="71.12" y1="152.4" x2="55.88" y2="152.4" width="0.1524" layer="91"/>
+<junction x="71.12" y="152.4"/>
 <wire x1="71.12" y1="152.4" x2="71.12" y2="154.94" width="0.1524" layer="91"/>
 <label x="55.88" y="152.4" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
