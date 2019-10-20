@@ -1,0 +1,8 @@
+Qty,Value,Parts,Description,R
+5,,"X1, X2, X3, X4, X5",JST XH Connector 2 Pin,JST XH2P ST
+24,,"J2, J3, J5, J6, J7, J8, J9, J10, J11, J12, J14, J15, J16, J17, J19, J20, J21, J22, J23, J24, J25, J26, J27, J28","Flachstecker Typ Tyco/Electronics/AMP TAB, FASTON","VT FS-P 6,35"
+5,,"J1, J4, J13, J18, J29","Flachstecker Typ Tyco/Electronics/AMP TAB, FASTON","VT FS-PW 6,35"
+4,10m,"R1, R4, R7, R9","RESISTOR, European symbol",ISA SMT R010-1
+6,120µ,"C1, C2, C3, C4, C5, C6","POLARIZED CAPACITOR, European symbol",BE LXS 120/450
+1,470R,R5,"RESISTOR, European symbol",SPR-1206 470
+4,470k,"R2, R3, R6, R8","RESISTOR, European symbol",MPR 470K
