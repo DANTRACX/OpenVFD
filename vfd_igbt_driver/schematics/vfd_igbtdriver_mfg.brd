@@ -243,6 +243,30 @@
 </polygon>
 <rectangle x1="130.4925" y1="21.9075" x2="134.62" y2="22.5425" layer="42" rot="R180"/>
 <wire x1="119.0625" y1="55.245" x2="119.0625" y2="27.94" width="0.0254" layer="46"/>
+<circle x="6.35" y="93.6625" radius="0.762" width="0.508" layer="16"/>
+<circle x="43.4975" y="93.6625" radius="0.762" width="0.508" layer="16"/>
+<circle x="56.1975" y="93.6625" radius="0.762" width="0.508" layer="16"/>
+<circle x="93.345" y="93.6625" radius="0.762" width="0.508" layer="16"/>
+<circle x="106.045" y="93.6625" radius="0.762" width="0.508" layer="16"/>
+<circle x="143.1925" y="93.6625" radius="0.762" width="0.508" layer="16"/>
+<circle x="143.1925" y="56.515" radius="0.762" width="0.508" layer="16"/>
+<circle x="106.045" y="56.515" radius="0.762" width="0.508" layer="16"/>
+<circle x="93.345" y="56.515" radius="0.762" width="0.508" layer="16"/>
+<circle x="56.1975" y="56.515" radius="0.762" width="0.508" layer="16"/>
+<circle x="43.4975" y="56.515" radius="0.762" width="0.508" layer="16"/>
+<circle x="6.35" y="56.515" radius="0.762" width="0.508" layer="16"/>
+<circle x="6.35" y="43.4975" radius="0.762" width="0.508" layer="16"/>
+<circle x="43.4975" y="43.4975" radius="0.762" width="0.508" layer="16"/>
+<circle x="56.1975" y="43.4975" radius="0.762" width="0.508" layer="16"/>
+<circle x="93.345" y="43.4975" radius="0.762" width="0.508" layer="16"/>
+<circle x="106.045" y="43.4975" radius="0.762" width="0.508" layer="16"/>
+<circle x="143.1925" y="43.4975" radius="0.762" width="0.508" layer="16"/>
+<circle x="143.1925" y="6.35" radius="0.762" width="0.508" layer="16"/>
+<circle x="106.045" y="6.35" radius="0.762" width="0.508" layer="16"/>
+<circle x="93.345" y="6.35" radius="0.762" width="0.508" layer="16"/>
+<circle x="56.1975" y="6.35" radius="0.762" width="0.508" layer="16"/>
+<circle x="43.4975" y="6.35" radius="0.762" width="0.508" layer="16"/>
+<circle x="6.35" y="6.35" radius="0.762" width="0.508" layer="16"/>
 </plain>
 <libraries>
 <library name="frames" urn="urn:adsk.eagle:library:229">

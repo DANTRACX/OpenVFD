@@ -182,6 +182,30 @@
 <text x="116.68125" y="-23.8125" size="2.54" layer="48">Variable Frequency Drive</text>
 <text x="125.43306875" y="-28.8925" size="2.54" layer="48">VFD-Conroller</text>
 <text x="118.16294375" y="-33.9725" size="2.54" layer="48">(C) 2019 Christoph Klie</text>
+<circle x="6.4516" y="93.5736" radius="0.762" width="0.508" layer="16"/>
+<circle x="43.6372" y="93.5736" radius="0.762" width="0.508" layer="16"/>
+<circle x="61.5696" y="93.5736" radius="0.762" width="0.508" layer="16"/>
+<circle x="98.7044" y="93.5736" radius="0.762" width="0.508" layer="16"/>
+<circle x="116.2812" y="93.5736" radius="0.762" width="0.508" layer="16"/>
+<circle x="153.4668" y="93.5736" radius="0.762" width="0.508" layer="16"/>
+<circle x="153.4668" y="56.4388" radius="0.762" width="0.508" layer="16"/>
+<circle x="116.332" y="56.4388" radius="0.762" width="0.508" layer="16"/>
+<circle x="98.7044" y="56.4388" radius="0.762" width="0.508" layer="16"/>
+<circle x="61.5696" y="56.4388" radius="0.762" width="0.508" layer="16"/>
+<circle x="43.6372" y="56.4388" radius="0.762" width="0.508" layer="16"/>
+<circle x="6.5024" y="56.4388" radius="0.762" width="0.508" layer="16"/>
+<circle x="6.4516" y="43.6372" radius="0.762" width="0.508" layer="16"/>
+<circle x="43.6372" y="43.6372" radius="0.762" width="0.508" layer="16"/>
+<circle x="61.5696" y="43.6372" radius="0.762" width="0.508" layer="16"/>
+<circle x="98.7044" y="43.6372" radius="0.762" width="0.508" layer="16"/>
+<circle x="116.332" y="43.6372" radius="0.762" width="0.508" layer="16"/>
+<circle x="153.4668" y="43.6372" radius="0.762" width="0.508" layer="16"/>
+<circle x="153.4668" y="6.5024" radius="0.762" width="0.508" layer="16"/>
+<circle x="116.332" y="6.5024" radius="0.762" width="0.508" layer="16"/>
+<circle x="98.7044" y="6.5024" radius="0.762" width="0.508" layer="16"/>
+<circle x="61.5696" y="6.5024" radius="0.762" width="0.508" layer="16"/>
+<circle x="43.6372" y="6.5024" radius="0.762" width="0.508" layer="16"/>
+<circle x="6.4516" y="6.5024" radius="0.762" width="0.508" layer="16"/>
 </plain>
 <libraries>
 <library name="resistor" urn="urn:adsk.eagle:library:348">

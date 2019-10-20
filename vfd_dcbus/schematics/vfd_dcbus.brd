@@ -223,6 +223,30 @@
 <text x="133.0952375" y="-28.575" size="2.54" layer="48">DC-BUS</text>
 <text x="121.17919375" y="-33.655" size="2.54" layer="48">(C) 2019 Christoph Klie</text>
 <wire x1="70.63105" y1="39.360475" x2="70.786625" y2="39.2049" width="0.0254" layer="46"/>
+<circle x="6.477" y="93.599" radius="0.762" width="0.508" layer="16"/>
+<circle x="43.6118" y="93.599" radius="0.762" width="0.508" layer="16"/>
+<circle x="61.5442" y="93.599" radius="0.762" width="0.508" layer="16"/>
+<circle x="98.679" y="93.599" radius="0.762" width="0.508" layer="16"/>
+<circle x="116.3066" y="93.599" radius="0.762" width="0.508" layer="16"/>
+<circle x="153.4414" y="93.599" radius="0.762" width="0.508" layer="16"/>
+<circle x="153.4922" y="56.4642" radius="0.762" width="0.508" layer="16"/>
+<circle x="116.3066" y="56.4642" radius="0.762" width="0.508" layer="16"/>
+<circle x="98.679" y="56.4134" radius="0.762" width="0.508" layer="16"/>
+<circle x="61.5442" y="56.4134" radius="0.762" width="0.508" layer="16"/>
+<circle x="43.6118" y="56.4134" radius="0.762" width="0.508" layer="16"/>
+<circle x="6.477" y="56.4134" radius="0.762" width="0.508" layer="16"/>
+<circle x="6.477" y="43.6626" radius="0.762" width="0.508" layer="16"/>
+<circle x="43.6118" y="43.6626" radius="0.762" width="0.508" layer="16"/>
+<circle x="61.5442" y="43.6626" radius="0.762" width="0.508" layer="16"/>
+<circle x="98.679" y="43.6626" radius="0.762" width="0.508" layer="16"/>
+<circle x="116.3066" y="43.6118" radius="0.762" width="0.508" layer="16"/>
+<circle x="153.4414" y="43.6626" radius="0.762" width="0.508" layer="16"/>
+<circle x="153.4414" y="6.477" radius="0.762" width="0.508" layer="16"/>
+<circle x="116.3066" y="6.477" radius="0.762" width="0.508" layer="16"/>
+<circle x="98.679" y="6.477" radius="0.762" width="0.508" layer="16"/>
+<circle x="61.5442" y="6.477" radius="0.762" width="0.508" layer="16"/>
+<circle x="43.6118" y="6.477" radius="0.762" width="0.508" layer="16"/>
+<circle x="6.477" y="6.477" radius="0.762" width="0.508" layer="16"/>
 </plain>
 <libraries>
 <library name="resistor" urn="urn:adsk.eagle:library:348">

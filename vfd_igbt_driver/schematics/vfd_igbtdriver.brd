@@ -101,6 +101,10 @@
 <rectangle x1="16.1925" y1="27.305" x2="20.32" y2="27.94" layer="42"/>
 <wire x1="31.75" y1="-5.3975" x2="31.75" y2="21.9075" width="0.0254" layer="46"/>
 <wire x1="41.91" y1="5.08" x2="41.91" y2="5.3975" width="0.0254" layer="46"/>
+<circle x="7.62" y="43.4975" radius="0.762" width="0.508" layer="16"/>
+<circle x="44.7675" y="43.4975" radius="0.762" width="0.508" layer="16"/>
+<circle x="44.7675" y="6.35" radius="0.762" width="0.508" layer="16"/>
+<circle x="7.62" y="6.35" radius="0.762" width="0.508" layer="16"/>
 </plain>
 <libraries>
 <library name="resistor" urn="urn:adsk.eagle:library:348">
