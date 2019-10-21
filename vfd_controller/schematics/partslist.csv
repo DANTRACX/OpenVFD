@@ -4,13 +4,12 @@ Qty,Value,Parts,Description,R
 7,,"X6, X7, X8, X9, X10, X11, X12",JST XH Connector 2 Pin,JST XH4P ST
 4,,"J5, J6, J7, J8","Flachstecker Typ Tyco/Electronics/AMP TAB, FASTON","FS-PW-6,35"
 4, ,"J1, J2, J3, J4","Flachstecker Typ Tyco/Electronics/AMP TAB, FASTON","FS-PW-6,35"
-4,100n,"C10, C11, C12, C13","CAPACITOR, European symbol",MKS2-63 100N
-15,100n,"C1, C3, C6, C8, C9, C14, C15, C16, C17, C22, C23, C24, C25, C26, C27","CAPACITOR, European symbol",MKS2-63 100N
-1,100n,C7,"CAPACITOR, European symbol",MKS2-63 100N
-1,100n,C5,"CAPACITOR, European symbol",MKS2-63 100N
+4,100n,"C10, C11, C12, C13","CAPACITOR, European symbol",MKS02-63 100N
+9,100n,"C1, C3, C7, C8, C9, C14, C22, C23, C27","CAPACITOR, European symbol",MKS02-63 100N
+8,100n,"C5, C6, C15, C16, C17, C24, C25, C26","CAPACITOR, European symbol",MKS2-63 100N
 1,10k,R1,"RESISTOR, European symbol","METALL 10,0K"
 1,10k,R2,"RESISTOR, European symbol","METALL 10,0K"
-4,10n,"C18, C19, C20, C21","CAPACITOR, European symbol",MKS2-63 10N
+4,10n,"C18, C19, C20, C21","CAPACITOR, European symbol",MKS02-63 10N
 1,"12V in, 5V out",DC1,DC-DC CONVERTER,MEV1S1205SC
 3,1k,"R6, R8, R9","RESISTOR, European symbol","METALL 1,00K"
 1,1x10,JP3,PIN HEADER,MPE 087-1-010
