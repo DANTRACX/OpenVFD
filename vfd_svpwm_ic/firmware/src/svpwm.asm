@@ -33,11 +33,13 @@
 .def SVPWM_TEMPH    = r17               ; temp register high byte
 .def SVPWM_COUNTERL = r18               ; counter register low byte
 .def SVPWM_COUNTERH = r19               ; counter register high byte
+.def SVPWM_DEADTIME = r20               ; holds the dead time values high:low
 .def SVPWM_PWMFREQ  = r21               ; holds the desired pwm frequency
 .def SVPWM_MAGN     = r22               ; holds the desired magnitude
 .def SVPWM_FREQ     = r23               ; holds the desired frequency
-.def SVPWM_ANGLEL   = r24               ; low byte of the current angle
-.def SVPWM_ANGLEH   = r25               ; high byte of the current angle
+.def SVPWM_PHASEL   = r24               ; low byte of the current angle
+.def SVPWM_PHASEH   = r25               ; high byte of the current angle
+.equ SVPWM_CTRLEVNT = GPIOR0            ;
 
 
 ; ==============================================================================
@@ -52,10 +54,11 @@
 ; ==============================================================================
 .cseg
 SVPWM_INIT:                             ;
-    ldi     SVPWM_MAGN,0xE1             ; init SVPWM_MAGN register
-    ldi     SVPWM_FREQ,0xFF             ; init SVPWM_FREQ register
-    ldi     SVPWM_ANGLEL,0x00           ; init SVPWM_ANGLEL register
-    ldi     SVPWM_ANGLEH,0x00           ; init SVPWM_ANGLEH register
+    ldi     SVPWM_DEADTIME,0xFF         ;
+    ldi     SVPWM_MAGN,0x50             ; init SVPWM_MAGN register
+    ldi     SVPWM_FREQ,0x01             ; init SVPWM_FREQ register
+    ldi     SVPWM_PHASEL,0x00           ; init SVPWM_PHASEL register
+    ldi     SVPWM_PHASEH,0x00           ; init SVPWM_PHASEH register
     ldi     SVPWM_PWMFREQ,0x10          ;
     rcall   _SVPWM_TIMER_OUTPUTS_SETUP  ;
     rcall   _SVPWM_TIMER_DEADTIME_SETUP ;
@@ -102,7 +105,7 @@ update_pwmfreq_stop:                    ;
 update_angle:                           ;
     in      SVPWM_TEMPL,TIFR            ;
     sbrs    TEMPL,2                     ;
-    ret                                 ;
+    ret
     rcall   _SVPWM_CALC_UPDATE_ANGLE    ;
     rcall   _SVPWM_CALC_UPDATE_INTVL    ;
     ldi     SVPWM_TEMPL,0b00000100      ;
@@ -113,11 +116,9 @@ update_angle:                           ;
 ; ==============================================================================
 ;      S V P W M  -  H A R D W A R E   G E N E R A T O R   ( T I M E R 1 )
 ; ==============================================================================
-; PLL low speed mode
-
 .cseg
 _SVPWM_TIMER_OUTPUTS_SETUP:             ;
-    ldi     SVPWM_TEMPL,0b01111111      ; load bit mask in temp
+    ldi     SVPWM_TEMPL,0b00111111      ; load bit mask in temp
     out     DDRB,SVPWM_TEMPL            ; set i/o to output
     ldi     SVPWM_TEMPL,0b00000000      ; load bit mask in temp
     out     PORTB,SVPWM_TEMPL           ; set all outputs to off
@@ -125,8 +126,7 @@ _SVPWM_TIMER_OUTPUTS_SETUP:             ;
 
 
 _SVPWM_TIMER_DEADTIME_SETUP:            ;
-    ldi     SVPWM_TEMPL,0xFF            ; dead time cycles (0xHigh:Low)
-    out     DT1,SVPWM_TEMPL             ; set dead time
+    out     DT1,SVPWM_DEADTIME          ; set dead time cycles (0xHigh:Low)
     ret                                 ;
 
 
@@ -135,7 +135,7 @@ _SVPWM_TIMER_CTRLREG_SETUP:             ;
     out     TCCR1A,SVPWM_TEMPL          ; set bit for control register A
     ldi     SVPWM_TEMPL,0b00110000      ; load settings for register
     out     TCCR1B,SVPWM_TEMPL          ; set bit for control register B
-    ldi     SVPWM_TEMPL,0b00000000      ; load settings for register
+    ldi     SVPWM_TEMPL,0b00000001      ; load settings for register
     out     TCCR1C,SVPWM_TEMPL          ; set bit for control register C
     ldi     SVPWM_TEMPL,0b00000001      ; load settings for register
     out     TCCR1D,SVPWM_TEMPL          ; set bit for control register D
@@ -153,7 +153,7 @@ _SVPWM_TIMER_RANGE_SETUP:               ;
 
 
 _SVPWM_TIMER_PLL_SETUP:                 ;
-    ldi     SVPWM_TEMPL,0b10000010      ; load settings for register
+    ldi     SVPWM_TEMPL,0b00000010      ; load settings for register
     out     PLLCSR,SVPWM_TEMPL          ; trigger pll start mechanism
     ldi     SVPWM_COUNTERL,0xFF         ; set counter to max value
 svpwm_hw_pll_wait:                      ; wait for pll to lock
@@ -166,7 +166,7 @@ svpwm_hw_plock_check:                   ; check if plock is set
     in      SVPWM_TEMPL,PLLCSR          ; load pll register data
     sbrs    SVPWM_TEMPL,0               ; check if plock bit is set
     rjmp    svpwm_hw_plock_check        ; if not set goto pll wait
-    ldi     SVPWM_TEMPL,0b10000111      ; else load new register data
+    ldi     SVPWM_TEMPL,0b00000111      ; else load new register data
     out     PLLCSR,SVPWM_TEMPL          ; set pll register - enable pll timer
     ret                                 ; end function
 
@@ -195,7 +195,7 @@ _SVPWM_TIMER_1KHZ:                      ;
     rcall   _SVPWM_TIMER_PWMOUT_ENABLE  ;
     in      SVPWM_TEMPL,TCCR1B          ;
     cbr     SVPWM_TEMPL,0b00001111      ;
-    sbr     SVPWM_TEMPL,0b00000101      ;
+    sbr     SVPWM_TEMPL,0b00000110      ;
     out     TCCR1B,SVPWM_TEMPL          ;
     ret                                 ;
 
@@ -204,7 +204,7 @@ _SVPWM_TIMER_2KHZ:                      ;
     rcall   _SVPWM_TIMER_PWMOUT_ENABLE  ;
     in      SVPWM_TEMPL,TCCR1B          ;
     cbr     SVPWM_TEMPL,0b00001111      ;
-    sbr     SVPWM_TEMPL,0b00000100      ;
+    sbr     SVPWM_TEMPL,0b00000101      ;
     out     TCCR1B,SVPWM_TEMPL          ;
     ret                                 ;
 
@@ -213,7 +213,7 @@ _SVPWM_TIMER_4KHZ:                      ;
     rcall   _SVPWM_TIMER_PWMOUT_ENABLE  ;
     in      SVPWM_TEMPL,TCCR1B          ;
     cbr     SVPWM_TEMPL,0b00001111      ;
-    sbr     SVPWM_TEMPL,0b00000011      ;
+    sbr     SVPWM_TEMPL,0b00000100      ;
     out     TCCR1B,SVPWM_TEMPL          ;
     ret                                 ;
 
@@ -222,7 +222,7 @@ _SVPWM_TIMER_8KHZ:                      ;
     rcall   _SVPWM_TIMER_PWMOUT_ENABLE  ;
     in      SVPWM_TEMPL,TCCR1B          ;
     cbr     SVPWM_TEMPL,0b00001111      ;
-    sbr     SVPWM_TEMPL,0b00000010      ;
+    sbr     SVPWM_TEMPL,0b00000011      ;
     out     TCCR1B,SVPWM_TEMPL          ;
     ret                                 ;
 
@@ -231,13 +231,20 @@ _SVPWM_TIMER_16KHZ:                     ;
     rcall   _SVPWM_TIMER_PWMOUT_ENABLE  ;
     in      SVPWM_TEMPL,TCCR1B          ;
     cbr     SVPWM_TEMPL,0b00001111      ;
-    sbr     SVPWM_TEMPL,0b00000001      ;
+    sbr     SVPWM_TEMPL,0b00000010      ;
     out     TCCR1B,SVPWM_TEMPL          ;
     ret                                 ;
 
 
 _SVPWM_TIMER_FAULT_ISR:                 ;
+    reti
+    push    SVPWM_TEMPL                 ;
+    in      SVPWM_TEMPL,SREG            ;
+    push    SVPWM_TEMPL                 ;
     rcall   _SVPWM_TIMER_STOP           ;
+    pop     SVPWM_TEMPL                 ;
+    out     SREG,SVPWM_TEMPL            ;
+    pop     SVPWM_TEMPL                 ;
     reti                                ;
 
 
@@ -248,6 +255,7 @@ _SVPWM_TIMER_FAULT_ISR:                 ;
 _SVPWM_CALC_UPDATE_ANGLE:               ;
     in      SVPWM_TEMPL,TCCR1B          ; setup counter for anglestep correction
     cbr     SVPWM_TEMPL,0b11110000      ;
+    dec     SVPWM_TEMPL
     sbrc    SVPWM_FREQ,7                ;
     rjmp    svpwm_calc_load_neg_freq    ;
 svpwm_calc_load_pos_freq:               ;
@@ -269,37 +277,37 @@ svpwm_calc_angle_dir_sel:               ; decide for rotation direction
     sbrc    SVPWM_FREQ,7                ;
     rjmp    svpwm_calc_angle_dec        ;
 svpwm_calc_angle_inc:                   ;
-    add     SVPWM_ANGLEL,SVPWM_COUNTERL ;
-    adc     SVPWM_ANGLEH,SVPWM_COUNTERH ;
+    add     SVPWM_PHASEL,SVPWM_COUNTERL ;
+    adc     SVPWM_PHASEH,SVPWM_COUNTERH ;
     ldi     SVPWM_TEMPL,0x08            ; set TEMP registers to 15624
     ldi     SVPWM_TEMPH,0x3D            ; set TEMP registers to 15624
-    cp      SVPWM_ANGLEL,SVPWM_TEMPL    ; check if ANGLE >= 15624
-    cpc     SVPWM_ANGLEH,SVPWM_TEMPH    ; check if ANGLE >= 15624
+    cp      SVPWM_PHASEL,SVPWM_TEMPL    ; check if ANGLE >= 15624
+    cpc     SVPWM_PHASEH,SVPWM_TEMPH    ; check if ANGLE >= 15624
     brsh    svpwm_calc_angle_inc_ovf    ; if ANGLE >= 15624 : jump
     ret                                 ; else return
 svpwm_calc_angle_inc_ovf:               ;
-    sub     SVPWM_ANGLEL,SVPWM_TEMPL    ; subtract 15624 from ANGLE
-    sbc     SVPWM_ANGLEH,SVPWM_TEMPH    ; subtract 15624 from ANGLE
+    sub     SVPWM_PHASEL,SVPWM_TEMPL    ; subtract 15624 from ANGLE
+    sbc     SVPWM_PHASEH,SVPWM_TEMPH    ; subtract 15624 from ANGLE
     ret                                 ; return
 svpwm_calc_angle_dec:                   ;
-    sub     SVPWM_ANGLEL,SVPWM_COUNTERL ;
-    sbc     SVPWM_ANGLEH,SVPWM_COUNTERH ;
+    sub     SVPWM_PHASEL,SVPWM_COUNTERL ;
+    sbc     SVPWM_PHASEH,SVPWM_COUNTERH ;
     ldi     SVPWM_TEMPL,0x08            ;
     ldi     SVPWM_TEMPH,0x3D            ;
-    cp      SVPWM_ANGLEL,SVPWM_TEMPL    ;
-    cpc     SVPWM_ANGLEH,SVPWM_TEMPH    ;
+    cp      SVPWM_PHASEL,SVPWM_TEMPL    ;
+    cpc     SVPWM_PHASEH,SVPWM_TEMPH    ;
     brsh    svpwm_calc_angle_dec_ovf    ;
     ret                                 ;
 svpwm_calc_angle_dec_ovf:               ;
-    add     SVPWM_ANGLEL,SVPWM_TEMPL    ;
-    adc     SVPWM_ANGLEH,SVPWM_TEMPH    ;
+    add     SVPWM_PHASEL,SVPWM_TEMPL    ;
+    adc     SVPWM_PHASEH,SVPWM_TEMPH    ;
     ret                                 ;
 
 
 _SVPWM_CALC_UPDATE_INTVL:               ;
     ldi     SVPWM_COUNTERH,0x00         ;
-    mov     SVPWM_CALC0L,SVPWM_ANGLEL   ;
-    mov     SVPWM_CALC0H,SVPWM_ANGLEH   ;
+    mov     SVPWM_CALC0L,SVPWM_PHASEL   ;
+    mov     SVPWM_CALC0H,SVPWM_PHASEH   ;
     ldi     SVPWM_TEMPL,0x2C            ;
     ldi     SVPWM_TEMPH,0x0A            ;
 svpwm_calc_intvl_sector:                ; calculate sector number of curr. angle
@@ -358,7 +366,7 @@ svpwm_calc_mult_t1t2_b:                 ;
     rol     SVPWM_TEMPH                 ;
     tst     SVPWM_COUNTERL              ;
     brne    svpwm_calc_mult_t1t2_a      ;
-svpwm_calc_div_t1t2:                    ; devide both by 256 with little trick
+svpwm_calc_div_t1t2:                    ; devide both by 256 by rearranging reg
     mov     SVPWM_INTVL1L,SVPWM_CALC1L  ;
     mov     SVPWM_INTVL1H,SVPWM_CALC2L  ;
     mov     SVPWM_INTVL2L,SVPWM_CALC1H  ;

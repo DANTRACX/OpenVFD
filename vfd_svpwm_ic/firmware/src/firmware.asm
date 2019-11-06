@@ -15,65 +15,57 @@
 ; ==============================================================================
 ;          R  E  G  I  S  T  E  R     D  E  F  I  N  I  T  I  O  N  S
 ; ==============================================================================
-;.def CALC0L     = r0
-;.def CALC0H     = r1
-;.def CALC1L     = r2
-;.def CALC1H     = r3
-;.def CALC2L     = r4
-;.def CALC2H     = r5
 .def TEMPL      = r16                   ; temp register low byte
 .def TEMPH      = r17                   ; temp register high byte
-;.def COUNTERL   = r18                   ; counter register low byte
-;.def COUNTERH   = r19                   ; counter register high byte
 
 
 ; ==============================================================================
 ;         V  A  R  I  A  B  L  E     D  E  F  I  N  I  T  I  O  N  S
 ; ==============================================================================
 .dseg
-    ERROR:                  .byte   1
+
 
 ; ==============================================================================
 ;              I  N  T  E  R  R  U  P  T     V  E  C  T  O  R  S
 ; ==============================================================================
 .cseg
-.org 0x000                              ; RESET program address
+.org 0x0000                             ; RESET program address
     rjmp    INIT
-.org 0x001                              ; INT0 program address
+.org 0x0001                             ; INT0 program address
     reti
-.org 0x002                              ; PCINT vecprogramtor address
+.org 0x0002                             ; PCINT program address
+    rjmp    _INTF_SPI_SS_ISR
+.org 0x0003                             ; TIMER1_COMPA program address
     reti
-.org 0x003                              ; TIMER1_COMPA program address
+.org 0x0004                             ; TIMER1_COMPB program address
     reti
-.org 0x004                              ; TIMER1_COMPB program address
+.org 0x0005                             ; TIMER1_OVF program address
     reti
-.org 0x005                              ; TIMER1_OVF program address
+.org 0x0006                             ; TIMER0_OVF program address
     reti
-.org 0x006                              ; TIMER0_OVF program address
+.org 0x0007                             ; USI_START program address
     reti
-.org 0x007                              ; USI_START program address
+.org 0x0008                             ; USI_OVF program address
+    rjmp    _INTF_SPI_BYTE_RDY_ISR
+.org 0x0009                             ; EE_RDY program address
     reti
-.org 0x008                              ; USI_OVF program address
+.org 0x000A                             ; ANA_COMP program address
     reti
-.org 0x009                              ; EE_RDY program address
+.org 0x000B                             ; ADC program address
     reti
-.org 0x00A                              ; ANA_COMP program address
+.org 0x000C                             ; WDT program address
     reti
-.org 0x00B                              ; ADC program address
-    reti
-.org 0x00C                              ; WDT program address
-    reti
-.org 0x00D                              ; INT1 program address
+.org 0x000D                             ; INT1 program address
     reti
 .org 0x00E                              ; TIMER0_COMPA program address
     reti
-.org 0x00F                              ; TIMER0_COMPB program address
+.org 0x000F                             ; TIMER0_COMPB program address
     reti
-.org 0x010                              ; TIMER0_CAPT program address
+.org 0x0010                             ; TIMER0_CAPT program address
     reti
-.org 0x011                              ; TIMER1_COMPD program address
+.org 0x0011                             ; TIMER1_COMPD program address
     reti
-.org 0x012                              ; FAULT_PROTECTION program address
+.org 0x0012                             ; FAULT_PROTECTION program address
     rjmp    _SVPWM_TIMER_FAULT_ISR
 
 
@@ -91,24 +83,31 @@ INIT:
     out     WDTCR,TEMPL                 ; start watchdog change sequence
     ldi     TEMPL,0b00000100            ; set new watchdog timeout settings
     out     WDTCR,TEMPL                 ; write new watchdog timeout settings
+    ldi     TEMPL,0b00000001
+    out     PRR,TEMPL
     sei                                 ; global interrupts enable
+
 
 SOFT_INIT:
     rcall   SVPWM_INIT                  ;
+    rcall   INTF_INIT                   ;
 
 
 MAIN_LOOP:
+    wdr
+    rcall   INTF_LOOP
     wdr
     rcall   SVPWM_LOOP
     rjmp    MAIN_LOOP
 
 
 ; ==============================================================================
+;                         I  N  T  E  R  F  A  C  E
+; ==============================================================================
+.include "interface.asm"
+
+
+; ==============================================================================
 ;                               S  V  P  W  M
 ; ==============================================================================
 .include "svpwm.asm"
-
-; ==============================================================================
-;                         I  N  T  E  R  F  A  C  E
-; ==============================================================================
-;.include "interface.asm"
