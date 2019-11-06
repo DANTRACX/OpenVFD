@@ -73,7 +73,7 @@
 ;                      M  A  I  N     P  R  O  G  R  A  M  M
 ; ==============================================================================
 .cseg
-INIT:
+INIT:                                   ;
     wdr                                 ; reset watchdog timer
     ldi     TEMPL,HIGH(RAMEND)          ; set high byte for stack ptr
     out     SPH,TEMPL                   ; init stack ptr high byte
@@ -83,22 +83,22 @@ INIT:
     out     WDTCR,TEMPL                 ; start watchdog change sequence
     ldi     TEMPL,0b00000100            ; set new watchdog timeout settings
     out     WDTCR,TEMPL                 ; write new watchdog timeout settings
-    ldi     TEMPL,0b00000001
-    out     PRR,TEMPL
+    ldi     TEMPL,0b00000101            ;
+    out     PRR,TEMPL                   ; enable power saving for timer0 and adc
     sei                                 ; global interrupts enable
 
 
-SOFT_INIT:
+SOFT_INIT:                              ;
     rcall   SVPWM_INIT                  ;
     rcall   INTF_INIT                   ;
 
 
-MAIN_LOOP:
-    wdr
-    rcall   INTF_LOOP
-    wdr
-    rcall   SVPWM_LOOP
-    rjmp    MAIN_LOOP
+MAIN_LOOP:                              ;
+    wdr                                 ;
+    rcall   INTF_LOOP                   ;
+    wdr                                 ;
+    rcall   SVPWM_LOOP                  ;
+    rjmp    MAIN_LOOP                   ;
 
 
 ; ==============================================================================

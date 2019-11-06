@@ -29,17 +29,29 @@
 .def SVPWM_INTVL1H  = r9                ; channel B interval high byte
 .def SVPWM_INTVL2L  = r10               ; channel C interval low byte
 .def SVPWM_INTVL2H  = r11               ; channel C interval high byte
+.def SVPWM_CPHASE0  = r12               ;
+.def SVPWM_CPHASE1  = r13               ;
+.def SVPWM_CPHASE2  = r14               ;
+.def SVPWM_CPHASE3  = r15               ;
 .def SVPWM_TEMPL    = r16               ; temp register low byte
 .def SVPWM_TEMPH    = r17               ; temp register high byte
 .def SVPWM_COUNTERL = r18               ; counter register low byte
 .def SVPWM_COUNTERH = r19               ; counter register high byte
-.def SVPWM_DEADTIME = r20               ; holds the dead time values high:low
-.def SVPWM_PWMFREQ  = r21               ; holds the desired pwm frequency
-.def SVPWM_MAGN     = r22               ; holds the desired magnitude
-.def SVPWM_FREQ     = r23               ; holds the desired frequency
-.def SVPWM_PHASEL   = r24               ; low byte of the current angle
-.def SVPWM_PHASEH   = r25               ; high byte of the current angle
-.equ SVPWM_CTRLEVNT = GPIOR0            ;
+.def SVPWM_MAGN     = r20               ; holds the desired magnitude
+.def SVPWM_FREQL    = r21               ; holds the desired frequency
+.def SVPWM_FREQH    = r22               ; holds the desired frequency
+.def SVPWM_PHASEL   = r23               ; low byte of the current angle
+.def SVPWM_PHASEH   = r24               ; high byte of the current angle
+.def SVPWM_ESREG    = r25               ;
+.equ SVPWM_OFFSETL  = GPIOR0            ;
+.equ SVPWM_OFFSETH  = GPIOR1            ;
+.equ SVPWM_DEADTIME = GPIOR2            ;
+
+;SVPWM_ESREG BIT DEFINITIONS
+;———————————————————————————————————————————————————————————————————————————————
+;    7    |    6    |    5    |    4    |    3    |    2    |    1    |    0
+;  CW/CCW | DATARDY |  BUF1/2 |  DTPS1  |  DTPS0  |  FPWM2  |  FPWM1  |  FPWM0
+;———————————————————————————————————————————————————————————————————————————————
 
 
 ; ==============================================================================
@@ -54,19 +66,23 @@
 ; ==============================================================================
 .cseg
 SVPWM_INIT:                             ;
-    ldi     SVPWM_DEADTIME,0xFF         ;
-    ldi     SVPWM_MAGN,0x50             ; init SVPWM_MAGN register
-    ldi     SVPWM_FREQ,0x01             ; init SVPWM_FREQ register
+    ldi     SVPWM_ESREG,0b00011000      ;
+    ldi     SVPWM_MAGN,0x00             ; init SVPWM_MAGN register
+    ldi     SVPWM_FREQL,0x00            ; init SVPWM_FREQ register
+    ldi     SVPWM_FREQH,0x00            ;
     ldi     SVPWM_PHASEL,0x00           ; init SVPWM_PHASEL register
     ldi     SVPWM_PHASEH,0x00           ; init SVPWM_PHASEH register
-    ldi     SVPWM_PWMFREQ,0x10          ;
+    ldi     SVPWM_TEMPL,0xFF            ;
+    out     SVPWM_OFFSETL,SVPWM_PHASEL  ;
+    out     SVPWM_OFFSETH,SVPWM_PHASEH  ;
+    out     SVPWM_DEADTIME,SVPWM_TEMPL  ;
     rcall   _SVPWM_TIMER_OUTPUTS_SETUP  ;
     rcall   _SVPWM_TIMER_DEADTIME_SETUP ;
     rcall   _SVPWM_TIMER_CTRLREG_SETUP  ;
     rcall   _SVPWM_TIMER_RANGE_SETUP    ;
     rcall   _SVPWM_TIMER_PLL_SETUP      ;
     rcall   _SVPWM_TIMER_PWMOUT_DISABLE ;
-    rcall   _SVPWM_CALC_UPDATE_ANGLE    ;
+    rcall   _SVPWM_CALC_UPDATE_PHASE    ;
     rcall   _SVPWM_CALC_UPDATE_INTVL    ;
     ret                                 ;
 
@@ -74,28 +90,31 @@ SVPWM_INIT:                             ;
 SVPWM_LOOP:                             ;
     ;sbis    PINB,6                      ;
     ;ret                                 ;
+update_pwmfreq:                         ;
+    mov     SVPWM_TEMPL,SVPWM_ESREG     ;
+    cbr     SVPWM_TEMPL,0b11111000      ;
 update_pwmfreq_1khz:                    ;
-    cpi     SVPWM_PWMFREQ,0x01          ;
+    cpi     SVPWM_TEMPL,0x01            ;
     brne    update_pwmfreq_2khz         ;
     rcall   _SVPWM_TIMER_1KHZ           ;
     rjmp    update_angle                ;
 update_pwmfreq_2khz:                    ;
-    cpi     SVPWM_PWMFREQ,0x02          ;
+    cpi     SVPWM_TEMPL,0x02            ;
     brne    update_pwmfreq_4khz         ;
     rcall   _SVPWM_TIMER_2KHZ           ;
     rjmp    update_angle                ;
 update_pwmfreq_4khz:                    ;
-    cpi     SVPWM_PWMFREQ,0x04          ;
+    cpi     SVPWM_TEMPL,0x03            ;
     brne    update_pwmfreq_8khz         ;
     rcall   _SVPWM_TIMER_4KHZ           ;
     rjmp    update_angle                ;
 update_pwmfreq_8khz:                    ;
-    cpi     SVPWM_PWMFREQ,0x08          ;
+    cpi     SVPWM_TEMPL,0x04            ;
     brne    update_pwmfreq_16khz        ;
     rcall   _SVPWM_TIMER_8KHZ           ;
     rjmp    update_angle                ;
 update_pwmfreq_16khz:                   ;
-    cpi     SVPWM_PWMFREQ,0x10          ;
+    cpi     SVPWM_TEMPL,0x05            ;
     brne    update_pwmfreq_stop         ;
     rcall   _SVPWM_TIMER_16KHZ          ;
     rjmp    update_angle                ;
@@ -105,12 +124,13 @@ update_pwmfreq_stop:                    ;
 update_angle:                           ;
     in      SVPWM_TEMPL,TIFR            ;
     sbrs    TEMPL,2                     ;
-    ret
-    rcall   _SVPWM_CALC_UPDATE_ANGLE    ;
+    ret                                 ;
+    rcall   _SVPWM_CALC_UPDATE_PHASE    ;
     rcall   _SVPWM_CALC_UPDATE_INTVL    ;
     ldi     SVPWM_TEMPL,0b00000100      ;
     out     TIFR,SVPWM_TEMPL            ;
     ret                                 ;
+
 
 
 ; ==============================================================================
@@ -126,7 +146,8 @@ _SVPWM_TIMER_OUTPUTS_SETUP:             ;
 
 
 _SVPWM_TIMER_DEADTIME_SETUP:            ;
-    out     DT1,SVPWM_DEADTIME          ; set dead time cycles (0xHigh:Low)
+    ldi     SVPWM_TEMPL,0xFF            ;
+    out     DT1,SVPWM_TEMPL             ; set dead time cycles (0xHigh:Low)
     ret                                 ;
 
 
@@ -194,45 +215,85 @@ _SVPWM_TIMER_STOP:                      ;
 _SVPWM_TIMER_1KHZ:                      ;
     rcall   _SVPWM_TIMER_PWMOUT_ENABLE  ;
     in      SVPWM_TEMPL,TCCR1B          ;
-    cbr     SVPWM_TEMPL,0b00001111      ;
+    cbr     SVPWM_TEMPL,0b00111111      ;
     sbr     SVPWM_TEMPL,0b00000110      ;
+    sbrc    SVPWM_ESREG,3               ;
+    sbr     SVPWM_TEMPL,0b00010000      ;
+    sbrc    SVPWM_ESREG,4               ;
+    sbr     SVPWM_TEMPL,0b00100000      ;
     out     TCCR1B,SVPWM_TEMPL          ;
+    ldi     SVPWM_TEMPL,0x00            ;
+    in      SVPWM_TEMPH,SVPWM_DEADTIME  ;
+    cpse    SVPWM_TEMPH,SVPWM_TEMPL     ;
+    out     DT1,SVPWM_TEMPH             ;
     ret                                 ;
 
 
 _SVPWM_TIMER_2KHZ:                      ;
     rcall   _SVPWM_TIMER_PWMOUT_ENABLE  ;
     in      SVPWM_TEMPL,TCCR1B          ;
-    cbr     SVPWM_TEMPL,0b00001111      ;
+    cbr     SVPWM_TEMPL,0b00111111      ;
     sbr     SVPWM_TEMPL,0b00000101      ;
+    sbrc    SVPWM_ESREG,3               ;
+    sbr     SVPWM_TEMPL,0b00010000      ;
+    sbrc    SVPWM_ESREG,4               ;
+    sbr     SVPWM_TEMPL,0b00100000      ;
     out     TCCR1B,SVPWM_TEMPL          ;
+    ldi     SVPWM_TEMPL,0x00            ;
+    in      SVPWM_TEMPH,SVPWM_DEADTIME  ;
+    cpse    SVPWM_TEMPH,SVPWM_TEMPL     ;
+    out     DT1,SVPWM_TEMPH             ;
     ret                                 ;
 
 
 _SVPWM_TIMER_4KHZ:                      ;
     rcall   _SVPWM_TIMER_PWMOUT_ENABLE  ;
     in      SVPWM_TEMPL,TCCR1B          ;
-    cbr     SVPWM_TEMPL,0b00001111      ;
+    cbr     SVPWM_TEMPL,0b00111111      ;
     sbr     SVPWM_TEMPL,0b00000100      ;
+    sbrc    SVPWM_ESREG,3               ;
+    sbr     SVPWM_TEMPL,0b00010000      ;
+    sbrc    SVPWM_ESREG,4               ;
+    sbr     SVPWM_TEMPL,0b00100000      ;
     out     TCCR1B,SVPWM_TEMPL          ;
+    ldi     SVPWM_TEMPL,0x00            ;
+    in      SVPWM_TEMPH,SVPWM_DEADTIME  ;
+    cpse    SVPWM_TEMPH,SVPWM_TEMPL     ;
+    out     DT1,SVPWM_TEMPH             ;
     ret                                 ;
 
 
 _SVPWM_TIMER_8KHZ:                      ;
     rcall   _SVPWM_TIMER_PWMOUT_ENABLE  ;
     in      SVPWM_TEMPL,TCCR1B          ;
-    cbr     SVPWM_TEMPL,0b00001111      ;
+    cbr     SVPWM_TEMPL,0b00111111      ;
     sbr     SVPWM_TEMPL,0b00000011      ;
+    sbrc    SVPWM_ESREG,3               ;
+    sbr     SVPWM_TEMPL,0b00010000      ;
+    sbrc    SVPWM_ESREG,4               ;
+    sbr     SVPWM_TEMPL,0b00100000      ;
     out     TCCR1B,SVPWM_TEMPL          ;
+    ldi     SVPWM_TEMPL,0x00            ;
+    in      SVPWM_TEMPH,SVPWM_DEADTIME  ;
+    cpse    SVPWM_TEMPH,SVPWM_TEMPL     ;
+    out     DT1,SVPWM_TEMPH             ;
     ret                                 ;
 
 
 _SVPWM_TIMER_16KHZ:                     ;
     rcall   _SVPWM_TIMER_PWMOUT_ENABLE  ;
     in      SVPWM_TEMPL,TCCR1B          ;
-    cbr     SVPWM_TEMPL,0b00001111      ;
+    cbr     SVPWM_TEMPL,0b00111111      ;
     sbr     SVPWM_TEMPL,0b00000010      ;
+    sbrc    SVPWM_ESREG,3               ;
+    sbr     SVPWM_TEMPL,0b00010000      ;
+    sbrc    SVPWM_ESREG,4               ;
+    sbr     SVPWM_TEMPL,0b00100000      ;
     out     TCCR1B,SVPWM_TEMPL          ;
+    ldi     SVPWM_TEMPL,0x00            ;
+    in      SVPWM_TEMPH,SVPWM_DEADTIME  ;
+    cpse    SVPWM_TEMPH,SVPWM_TEMPL     ;
+    out     DT1,SVPWM_TEMPH             ;
     ret                                 ;
 
 
@@ -252,55 +313,82 @@ _SVPWM_TIMER_FAULT_ISR:                 ;
 ;            S V P W M   -   S O F T W A R E   C A L C U L A T I O N
 ; ==============================================================================
 .cseg
-_SVPWM_CALC_UPDATE_ANGLE:               ;
-    in      SVPWM_TEMPL,TCCR1B          ; setup counter for anglestep correction
-    cbr     SVPWM_TEMPL,0b11110000      ;
-    dec     SVPWM_TEMPL
-    sbrc    SVPWM_FREQ,7                ;
-    rjmp    svpwm_calc_load_neg_freq    ;
-svpwm_calc_load_pos_freq:               ;
-    ldi     SVPWM_COUNTERH,0x00         ;
-    mov     SVPWM_COUNTERL,SVPWM_FREQ   ;
-    rjmp    svpwm_calc_angelstep_corr   ;
-svpwm_calc_load_neg_freq:               ;
-    ldi     SVPWM_COUNTERH,0x00         ;
-    ldi     SVPWM_COUNTERL,0xFF         ;
-    sub     SVPWM_COUNTERL,SVPWM_FREQ   ;
-    inc     SVPWM_COUNTERL              ;
-svpwm_calc_angelstep_corr:              ;
-    dec     SVPWM_TEMPL                 ;
-    breq    svpwm_calc_angle_dir_sel    ;
-    lsl     SVPWM_COUNTERL              ;
-    rol     SVPWM_COUNTERH              ;
-    rjmp    svpwm_calc_angelstep_corr   ;
-svpwm_calc_angle_dir_sel:               ; decide for rotation direction
-    sbrc    SVPWM_FREQ,7                ;
-    rjmp    svpwm_calc_angle_dec        ;
-svpwm_calc_angle_inc:                   ;
-    add     SVPWM_PHASEL,SVPWM_COUNTERL ;
-    adc     SVPWM_PHASEH,SVPWM_COUNTERH ;
-    ldi     SVPWM_TEMPL,0x08            ; set TEMP registers to 15624
-    ldi     SVPWM_TEMPH,0x3D            ; set TEMP registers to 15624
-    cp      SVPWM_PHASEL,SVPWM_TEMPL    ; check if ANGLE >= 15624
-    cpc     SVPWM_PHASEH,SVPWM_TEMPH    ; check if ANGLE >= 15624
-    brsh    svpwm_calc_angle_inc_ovf    ; if ANGLE >= 15624 : jump
-    ret                                 ; else return
-svpwm_calc_angle_inc_ovf:               ;
-    sub     SVPWM_PHASEL,SVPWM_TEMPL    ; subtract 15624 from ANGLE
-    sbc     SVPWM_PHASEH,SVPWM_TEMPH    ; subtract 15624 from ANGLE
-    ret                                 ; return
-svpwm_calc_angle_dec:                   ;
-    sub     SVPWM_PHASEL,SVPWM_COUNTERL ;
-    sbc     SVPWM_PHASEH,SVPWM_COUNTERH ;
+_SVPWM_CALC_UPDATE_PHASE:               ;
+    ldi     SVPWM_TEMPL,0x00            ;
+    ldi     SVPWM_TEMPH,0x00            ;
+    mov     SVPWM_CALC0L,SVPWM_FREQL    ;
+    mov     SVPWM_CALC0H,SVPWM_FREQH    ;
+    in      SVPWM_COUNTERL,TCCR1B       ; read prescaler for compensation
+    cbr     SVPWM_COUNTERL,0b11110000   ;
+    subi    SVPWM_COUNTERL,0x02         ;
+    breq    svpwm_calc_decide_direction ;
+svpwm_calc_presc_comp:                  ;
+    lsl     SVPWM_CALC0L                ;
+    rol     SVPWM_CALC0H                ;
+    rol     SVPWM_TEMPL                 ;
+    dec     SVPWM_COUNTERL              ;
+    brne    svpwm_calc_presc_comp       ;
+svpwm_calc_decide_direction:            ;
+    sbic    SVPWM_ESREG,7               ;
+    rjmp    svpwm_calc_ccw              ;
+svpwm_calc_cw:                          ;
+    add     SVPWM_CPHASE0,SVPWM_CALC0L  ;
+    adc     SVPWM_CPHASE1,SVPWM_CALC0H  ;
+    adc     SVPWM_CPHASE2,SVPWM_TEMPL   ;
+    adc     SVPWM_CPHASE3,SVPWM_TEMPH   ;
+    ldi     SVPWM_TEMPL,0x00            ;
+    ldi     SVPWM_TEMPH,0x20            ;
+    ldi     SVPWM_COUNTERL,0xF4         ;
+    cp      SVPWM_CPHASE0,SVPWM_TEMPL   ;
+    cpc     SVPWM_CPHASE1,SVPWM_TEMPH   ;
+    cpc     SVPWM_CPHASE2,SVPWM_COUNTERL;
+    cpc     SVPWM_CPHASE3,SVPWM_TEMPL   ;
+    brsh    svpwm_calc_fix_pos_ovf      ;
+    rjmp    svpwm_calc_finalize_result  ;
+svpwm_calc_ccw:                         ;
+    sub     SVPWM_CPHASE0,SVPWM_CALC0L  ;
+    sbc     SVPWM_CPHASE1,SVPWM_CALC0H  ;
+    sbc     SVPWM_CPHASE2,SVPWM_TEMPL   ;
+    sbc     SVPWM_CPHASE3,SVPWM_TEMPH   ;
+    ldi     SVPWM_TEMPL,0x00            ;
+    ldi     SVPWM_TEMPH,0x20            ;
+    ldi     SVPWM_COUNTERL,0xF4         ;
+    cp      SVPWM_CPHASE0,SVPWM_TEMPL   ;
+    cpc     SVPWM_CPHASE1,SVPWM_TEMPH   ;
+    cpc     SVPWM_CPHASE2,SVPWM_COUNTERL;
+    cpc     SVPWM_CPHASE3,SVPWM_TEMPL   ;
+    brsh    svpwm_calc_fix_neg_ovf      ;
+    rjmp    svpwm_calc_finalize_result  ;
+svpwm_calc_fix_pos_ovf:                 ;
+    sub     SVPWM_CPHASE1,SVPWM_TEMPH   ;
+    sbc     SVPWM_CPHASE2,SVPWM_COUNTERL;
+    sbc     SVPWM_CPHASE3,SVPWM_TEMPL   ;
+    rjmp    svpwm_calc_finalize_result  ;
+svpwm_calc_fix_neg_ovf:                 ;
+    add     SVPWM_CPHASE1,SVPWM_TEMPH   ;
+    adc     SVPWM_CPHASE2,SVPWM_COUNTERL;
+    adc     SVPWM_CPHASE3,SVPWM_TEMPL   ;
+svpwm_calc_finalize_result:             ;
+    mov     SVPWM_PHASEL,SVPWM_CPHASE1  ;
+    mov     SVPWM_PHASEH,SVPWM_CPHASE2  ;
+    lsr     SVPWM_PHASEH                ;
+    ror     SVPWM_PHASEL                ;
+    lsr     SVPWM_PHASEH                ;
+    ror     SVPWM_PHASEL                ;
+svpwm_calc_add_phase_offset:            ;
+    in      SVPWM_TEMPL,SVPWM_OFFSETL   ;
+    in      SVPWM_TEMPH,SVPWM_OFFSETH   ;
+    add     SVPWM_PHASEL,SVPWM_TEMPL    ;
+    adc     SVPWM_PHASEH,SVPWM_TEMPH    ;
     ldi     SVPWM_TEMPL,0x08            ;
     ldi     SVPWM_TEMPH,0x3D            ;
     cp      SVPWM_PHASEL,SVPWM_TEMPL    ;
     cpc     SVPWM_PHASEH,SVPWM_TEMPH    ;
-    brsh    svpwm_calc_angle_dec_ovf    ;
+    brsh    svpwm_calc_fix_phase_ovf    ;
     ret                                 ;
-svpwm_calc_angle_dec_ovf:               ;
-    add     SVPWM_PHASEL,SVPWM_TEMPL    ;
-    adc     SVPWM_PHASEH,SVPWM_TEMPH    ;
+svpwm_calc_fix_phase_ovf:               ;
+    sub     SVPWM_PHASEL,SVPWM_TEMPL    ;
+    sbc     SVPWM_PHASEH,SVPWM_TEMPH    ;
     ret                                 ;
 
 
