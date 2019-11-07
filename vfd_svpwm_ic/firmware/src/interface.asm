@@ -24,6 +24,7 @@
 .def INTF_PHASEL    = r23               ; low byte of the current angle
 .def INTF_PHASEH    = r24               ; high byte of the current angle
 .def INTF_ESREG     = r25               ;
+.equ INTF_EESREG    = EEARL             ;
 .equ INTF_DEADTIME  = GPIOR2            ;
 
 
@@ -114,7 +115,6 @@ INTF_INIT:                              ;
 INTF_LOOP:                              ;
     sbrs    INTF_ESREG,6                ;
     ret                                 ;
-    cbr     INTF_ESREG,0b01000000       ;
     ldi     INTF_COUNTERL,0x20          ;
 intf_loop_assign_process:               ;
     dec     INTF_COUNTERL               ;
@@ -166,10 +166,12 @@ intf_loop_pwmfreq:                      ;
     cbr     INTF_TEMPL,0b11111000       ;
     cbr     INTF_ESREG,0b00000111       ;
     or      INTF_ESREG,INTF_TEMPL       ;
+    sbi     INTF_EESREG,0               ;
     rjmp    intf_loop_assign_process    ;
 intf_loop_deadtime:                     ;
     ld      INTF_TEMPL,X+               ;
     out     INTF_DEADTIME,INTF_TEMPL    ;
+    sbi     INTF_EESREG,0               ;
     rjmp    intf_loop_assign_process    ;
 intf_loop_deadtime_prsc:                ;
     ld      INTF_TEMPL,X+               ;
@@ -178,8 +180,10 @@ intf_loop_deadtime_prsc:                ;
     sbr     INTF_ESREG,0b00001000       ;
     sbrc    INTF_ESREG,4                ;
     sbr     INTF_ESREG,0b00010000       ;
+    sbi     INTF_EESREG,0               ;
     rjmp    intf_loop_assign_process    ;
 intf_loop_exit:                         ;
+    cbr     INTF_ESREG,0b01000000       ;
     ret                                 ;
 
 
@@ -255,6 +259,8 @@ intf_spi_isr_pinH:                      ;
     ldi     INTF_TEMPL,0x00             ;
     st      Y,INTF_TEMPL                ;
     pop     INTF_TEMPL                  ;
+    sbrc    INTF_ESREG,6
+    rjmp    intf_spi_isr_pinh_sw00
     sbrc    INTF_ESREG,5                ;
     rjmp    intf_spi_isr_pinh_sw21      ;
 intf_spi_isr_pinh_sw12:                 ;
@@ -273,6 +279,10 @@ intf_spi_isr_pinh_sw21:                 ;
     ldi     XH,high(INTF_BUFF2)         ;
     sbr     INTF_ESREG,0b01000000       ;
     reti                                ;
+intf_spi_isr_pinh_sw00:                 ;
+    sbrc    INTF_ESREG,5                ;
+    rjmp    intf_spi_isr_pinh_sw12      ;
+    rjmp    intf_spi_isr_pinh_sw21      ;
 intf_spi_isr_pinL:                      ;
     sbi     USICR,3                     ;
     reti                                ;

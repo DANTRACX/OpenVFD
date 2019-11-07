@@ -43,6 +43,7 @@
 .def SVPWM_PHASEL   = r23               ; low byte of the current angle
 .def SVPWM_PHASEH   = r24               ; high byte of the current angle
 .def SVPWM_ESREG    = r25               ;
+.equ SVPWM_EESREG   = EEARL             ;
 .equ SVPWM_OFFSETL  = GPIOR0            ;
 .equ SVPWM_OFFSETH  = GPIOR1            ;
 .equ SVPWM_DEADTIME = GPIOR2            ;
@@ -73,6 +74,7 @@ SVPWM_INIT:                             ;
     ldi     SVPWM_PHASEL,0x00           ; init SVPWM_PHASEL register
     ldi     SVPWM_PHASEH,0x00           ; init SVPWM_PHASEH register
     ldi     SVPWM_TEMPL,0xFF            ;
+    out     SVPWM_EESREG,SVPWM_TEMPL    ;
     out     SVPWM_OFFSETL,SVPWM_PHASEL  ;
     out     SVPWM_OFFSETH,SVPWM_PHASEH  ;
     out     SVPWM_DEADTIME,SVPWM_TEMPL  ;
@@ -90,6 +92,9 @@ SVPWM_INIT:                             ;
 SVPWM_LOOP:                             ;
     ;sbis    PINB,6                      ;
     ;ret                                 ;
+    sbis    SVPWM_EESREG,0              ;
+    rjmp    update_angle                ;
+    cbi     SVPWM_EESREG,0              ;
 update_pwmfreq:                         ;
     mov     SVPWM_TEMPL,SVPWM_ESREG     ;
     cbr     SVPWM_TEMPL,0b11111000      ;
@@ -490,6 +495,7 @@ _SVPWM_CALC_JTB:                        ;
 
 
 _SVPWM_CALC_SETCOMP_SECTOR0:            ;
+    cli                                 ;
     out     TC1H,SVPWM_INTVL0H          ;
     out     OCR1A,SVPWM_INTVL0L         ;
     add     SVPWM_INTVL0L,SVPWM_INTVL1L ;
@@ -500,10 +506,12 @@ _SVPWM_CALC_SETCOMP_SECTOR0:            ;
     adc     SVPWM_INTVL0H,SVPWM_INTVL2H ;
     out     TC1H,SVPWM_INTVL0H          ;
     out     OCR1D,SVPWM_INTVL0L         ;
+    sei                                 ;
     ret                                 ;
 
 
 _SVPWM_CALC_SETCOMP_SECTOR1:            ;
+    cli                                 ;
     out     TC1H,SVPWM_INTVL0H          ;
     out     OCR1B,SVPWM_INTVL0L         ;
     add     SVPWM_INTVL0L,SVPWM_INTVL2L ;
@@ -514,10 +522,12 @@ _SVPWM_CALC_SETCOMP_SECTOR1:            ;
     adc     SVPWM_INTVL0H,SVPWM_INTVL1H ;
     out     TC1H,SVPWM_INTVL0H          ;
     out     OCR1D,SVPWM_INTVL0L         ;
+    sei                                 ;
     ret                                 ;
 
 
 _SVPWM_CALC_SETCOMP_SECTOR2:            ;
+    cli                                 ;
     out     TC1H,SVPWM_INTVL0H          ;
     out     OCR1B,SVPWM_INTVL0L         ;
     add     SVPWM_INTVL0L,SVPWM_INTVL1L ;
@@ -528,10 +538,12 @@ _SVPWM_CALC_SETCOMP_SECTOR2:            ;
     adc     SVPWM_INTVL0H,SVPWM_INTVL2H ;
     out     TC1H,SVPWM_INTVL0H          ;
     out     OCR1A,SVPWM_INTVL0L         ;
+    sei                                 ;
     ret                                 ;
 
 
 _SVPWM_CALC_SETCOMP_SECTOR3:            ;
+    cli                                 ;
     out     TC1H,SVPWM_INTVL0H          ;
     out     OCR1D,SVPWM_INTVL0L         ;
     add     SVPWM_INTVL0L,SVPWM_INTVL2L ;
@@ -542,10 +554,12 @@ _SVPWM_CALC_SETCOMP_SECTOR3:            ;
     adc     SVPWM_INTVL0H,SVPWM_INTVL1H ;
     out     TC1H,SVPWM_INTVL0H          ;
     out     OCR1A,SVPWM_INTVL0L         ;
+    sei                                 ;
     ret                                 ;
 
 
 _SVPWM_CALC_SETCOMP_SECTOR4:            ;
+    cli                                 ;
     out     TC1H,SVPWM_INTVL0H          ;
     out     OCR1D,SVPWM_INTVL0L         ;
     add     SVPWM_INTVL0L,SVPWM_INTVL1L ;
@@ -556,10 +570,12 @@ _SVPWM_CALC_SETCOMP_SECTOR4:            ;
     adc     SVPWM_INTVL0H,SVPWM_INTVL2H ;
     out     TC1H,SVPWM_INTVL0H          ;
     out     OCR1B,SVPWM_INTVL0L         ;
+    sei                                 ;
     ret                                 ;
 
 
 _SVPWM_CALC_SETCOMP_SECTOR5:            ;
+    cli                                 ;
     out     TC1H,SVPWM_INTVL0H          ;
     out     OCR1A,SVPWM_INTVL0L         ;
     add     SVPWM_INTVL0L,SVPWM_INTVL2L ;
@@ -570,6 +586,7 @@ _SVPWM_CALC_SETCOMP_SECTOR5:            ;
     adc     SVPWM_INTVL0H,SVPWM_INTVL1H ;
     out     TC1H,SVPWM_INTVL0H          ;
     out     OCR1B,SVPWM_INTVL0L         ;
+    sei                                 ;
     ret                                 ;
 
 
