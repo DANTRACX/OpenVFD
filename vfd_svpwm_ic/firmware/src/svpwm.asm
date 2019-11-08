@@ -12,7 +12,6 @@
 
 ; !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ; TODO: - Alle zeilen kommentieren
-;       - Fault Protection einbinden
 
 ; ==============================================================================
 ;          R  E  G  I  S  T  E  R     D  E  F  I  N  I  T  I  O  N  S
@@ -74,7 +73,7 @@ SVPWM_INIT:                             ;
     ldi     SVPWM_PHASEL,0x00           ; init SVPWM_PHASEL register
     ldi     SVPWM_PHASEH,0x00           ; init SVPWM_PHASEH register
     ldi     SVPWM_TEMPL,0xFF            ;
-    out     SVPWM_EESREG,SVPWM_TEMPL    ;
+    out     SVPWM_EESREG,SVPWM_PHASEL   ;
     out     SVPWM_OFFSETL,SVPWM_PHASEL  ;
     out     SVPWM_OFFSETH,SVPWM_PHASEH  ;
     out     SVPWM_DEADTIME,SVPWM_TEMPL  ;
@@ -90,8 +89,8 @@ SVPWM_INIT:                             ;
 
 
 SVPWM_LOOP:                             ;
-    ;sbis    PINB,6                      ;
-    ;ret                                 ;
+    sbis    PINB,6                      ;
+    rcall   _SVPWM_TIMER_FAULT_ISR      ;
     sbis    SVPWM_EESREG,0              ;
     rjmp    update_angle                ;
     cbi     SVPWM_EESREG,0              ;
@@ -163,7 +162,7 @@ _SVPWM_TIMER_CTRLREG_SETUP:             ;
     out     TCCR1B,SVPWM_TEMPL          ; set bit for control register B
     ldi     SVPWM_TEMPL,0b00000001      ; load settings for register
     out     TCCR1C,SVPWM_TEMPL          ; set bit for control register C
-    ldi     SVPWM_TEMPL,0b00000001      ; load settings for register
+    ldi     SVPWM_TEMPL,0b11100001      ; load settings for register
     out     TCCR1D,SVPWM_TEMPL          ; set bit for control register D
     ldi     SVPWM_TEMPL,0b00000000      ; load settings for register
     out     TCCR1E,SVPWM_TEMPL          ; set bit for control register E
@@ -303,14 +302,20 @@ _SVPWM_TIMER_16KHZ:                     ;
 
 
 _SVPWM_TIMER_FAULT_ISR:                 ;
-    reti
-    push    SVPWM_TEMPL                 ;
-    in      SVPWM_TEMPL,SREG            ;
-    push    SVPWM_TEMPL                 ;
+    cli                                 ;
     rcall   _SVPWM_TIMER_STOP           ;
-    pop     SVPWM_TEMPL                 ;
-    out     SREG,SVPWM_TEMPL            ;
-    pop     SVPWM_TEMPL                 ;
+svpwm_timer_fault_isr_loop:             ;
+    wdr                                 ;
+    sbis    PINB,6                      ;
+    rjmp    svpwm_timer_fault_isr_loop  ;
+    ldi     SVPWM_MAGN,0b11100001       ;
+    out     TCCR1D,SVPWM_MAGN           ;
+    ldi     SVPWM_MAGN,0x00             ;
+    ldi     SVPWM_FREQL,0x00            ;
+    ldi     SVPWM_FREQH,0x00            ;
+    out     SVPWM_EESREG,SVPWM_MAGN     ;
+    cbr     SVPWM_ESREG,6               ;
+    sei                                 ;
     reti                                ;
 
 
