@@ -478,8 +478,6 @@ svpwm_calc_intvl_t0:                    ;
     sbc     SVPWM_INTVL0H,SVPWM_INTVL1H ;
     sub     SVPWM_INTVL0L,SVPWM_INTVL2L ;
     sbc     SVPWM_INTVL0H,SVPWM_INTVL2H ;
-    lsr     SVPWM_INTVL0L               ;
-    ror     SVPWM_INTVL0H               ;
 svpwm_calc_intvl_setcomp:               ;
     ldi     SVPWM_TEMPL,0x00            ;
     ldi     ZL,low(_SVPWM_CALC_JTB)     ;

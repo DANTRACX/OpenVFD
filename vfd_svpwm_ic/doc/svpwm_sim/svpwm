@@ -59,7 +59,7 @@ function [t0, t1, t2] = calcTimings(modIdx, angle, periodcycles)
     temp1 = floor((temp1 *modIdx) / 256);
     temp2 = sine_lookup(sectorAngle + 1);
     temp2 = floor((temp2 *modIdx) / 256);
-    temp0 = floor((periodcycles - (temp1 + temp2)) / 2);
+    temp0 = floor((periodcycles - (temp1 + temp2)) / 2); % /2????
     
     %DETECT SECTOR CALCULATE CTC VALUES
     a = floor(angle/(20*60));

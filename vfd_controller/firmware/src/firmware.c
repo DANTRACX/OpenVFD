@@ -14,23 +14,18 @@ int main(void)
     __builtin_avr_delay_cycles(60000000);
 
     SVPWM_QUEUE_SET_PWM_FREQUENCY(KHZ_8);
-    SVPWM_QUEUE_SET_MAGNITUDE(128);
-    SVPWM_QUEUE_SET_FREQUENCY(0);
+    SVPWM_QUEUE_SET_MAGNITUDE(0);
+    SVPWM_QUEUE_SET_FREQUENCY(1250);
     SVPWM_QUEUE_SEND();
 
-    uint16_t counter = 0;
+    uint8_t counter = 0;
 
     while(1)
     {
-        __builtin_avr_delay_cycles(200);
-        SVPWM_QUEUE_SET_PHASE(counter);
+        __builtin_avr_delay_cycles(20000000);
+        SVPWM_QUEUE_SET_MAGNITUDE(counter);
         SVPWM_QUEUE_SEND();
-
         counter++;
-        if(counter > 15624)
-        {
-            counter = 0;
-        }
     }
 
 

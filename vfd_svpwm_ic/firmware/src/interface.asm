@@ -21,10 +21,10 @@
 .def INTF_MAGN      = r20               ; holds the desired magnitude
 .def INTF_FREQL     = r21               ; holds the desired frequency
 .def INTF_FREQH     = r22               ; holds the desired frequency
-.def INTF_PHASEL    = r23               ; low byte of the current angle
-.def INTF_PHASEH    = r24               ; high byte of the current angle
 .def INTF_ESREG     = r25               ;
 .equ INTF_EESREG    = EEARL             ;
+.equ INTF_OFFSETL   = GPIOR0            ;
+.equ INTF_OFFSETH   = GPIOR1            ;
 .equ INTF_DEADTIME  = GPIOR2            ;
 
 
@@ -156,9 +156,9 @@ intf_loop_freq:                         ;
     rjmp    intf_loop_assign_process    ;
 intf_loop_phase:                        ;
     ld      INTF_TEMPL,X+               ;
-    mov     INTF_PHASEL,INTF_TEMPL      ;
+    out     INTF_OFFSETL,INTF_TEMPL     ;
     ld      INTF_TEMPL,X+               ;
-    mov     INTF_PHASEH,INTF_TEMPL      ;
+    out     INTF_OFFSETH,INTF_TEMPL     ;
     dec     INTF_COUNTERL               ;
     rjmp    intf_loop_assign_process    ;
 intf_loop_pwmfreq:                      ;
