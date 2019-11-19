@@ -1,4 +1,4 @@
-#include "RS232.h"
+#include "RS485.h"
 
 static volatile struct SENDBUFFER_s
 {
@@ -18,7 +18,7 @@ static volatile struct RECVBUFFER_s
 }
 RECVBUFFER;
 
-void RS232_INIT(void)
+void RS485_INIT(void)
 {
     /* initialize sendbuffer */
     SENDBUFFER.readIdx = 0;
@@ -31,15 +31,15 @@ void RS232_INIT(void)
     RECVBUFFER.size = 0;
 
     /* setup baudrate - 20Mhz, U2X, 4800 bps */
-    UBRR1H = (uint8_t)(520 >> 8);
-    UBRR1L = (uint8_t)(520 >> 0);
+    UBRR0H = (uint8_t)(520 >> 8);
+    UBRR0L = (uint8_t)(520 >> 0);
 
-    UCSR1A |= ((1 << U2X1));
-    UCSR1B |= ((1 << RXCIE1) | (0 << UDRIE1) | (1 << RXEN1) | (1 << TXEN1));
-    UCSR1C |= ((1 << UCSZ11) | (1 << UCSZ10));
+    UCSR0A |= ((1 << U2X0));
+    UCSR0B |= ((1 << RXCIE0) | (0 << UDRIE0) | (1 << RXEN0) | (1 << TXEN0));
+    UCSR0C |= ((1 << UCSZ01) | (1 << UCSZ00));
 }
 
-void RS232_SEND(char *data, uint8_t size)
+void RS485_SEND(char *data, uint8_t size)
 {
     uint8_t counter = 0;
 
@@ -56,17 +56,17 @@ void RS232_SEND(char *data, uint8_t size)
     SENDBUFFER.size = SENDBUFFER.size + size;
 
     /* trigger new transmission start */
-    if(!(UCSR1B & (1 << UDRIE1)))
+    if(!(UCSR0B & (1 << UDRIE0)))
     {
         /* start new transmission */
 
         /* clear flag and enable interrupt */
-        UCSR1A |= ((1 << TXC1));
-        UCSR1B |= ((1 << UDRIE1));
+        UCSR0A |= ((1 << TXC0));
+        UCSR0B |= ((1 << UDRIE0));
     }
 }
 
-void RS232_FETCH(char *data, uint8_t size)
+void RS485_FETCH(char *data, uint8_t size)
 {
     uint8_t counter = 0;
 
@@ -81,35 +81,35 @@ void RS232_FETCH(char *data, uint8_t size)
     RECVBUFFER.size = RECVBUFFER.size - size;
 }
 
-void RS232_TX_CLEAR(void)
+void RS485_TX_CLEAR(void)
 {
     SENDBUFFER.size = 0;
 }
 
-void RS232_RX_CLEAR(void)
+void RS485_RX_CLEAR(void)
 {
     RECVBUFFER.size = 0;
 }
 
-ISR(USART1_RX_vect)
+ISR(USART0_RX_vect)
 {
     if(RECVBUFFER.size != 0xFF)
     {
-        RECVBUFFER.buffer[RECVBUFFER.writeIdx] = UDR1;
+        RECVBUFFER.buffer[RECVBUFFER.writeIdx] = UDR0;
         RECVBUFFER.writeIdx++;
         RECVBUFFER.size++;
     }
 }
 
-ISR(USART1_UDRE_vect)
+ISR(USART0_UDRE_vect)
 {
     if(SENDBUFFER.size != 0x00)
     {
-        UDR1 = SENDBUFFER.buffer[SENDBUFFER.readIdx];
+        UDR0 = SENDBUFFER.buffer[SENDBUFFER.readIdx];
         SENDBUFFER.readIdx++;
         SENDBUFFER.size--;
         return;
     }
 
-    UCSR1B &= ~((1 << UDRIE1));
+    UCSR0B &= ~((1 << UDRIE0));
 }

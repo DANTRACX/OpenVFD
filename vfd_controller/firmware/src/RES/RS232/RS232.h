@@ -11,8 +11,8 @@ extern void RS232_SEND(char *data, uint8_t size);
 extern void RS232_FETCH(char *data, uint8_t size);
 extern void RS232_TX_CLEAR(void);
 extern void RS232_RX_CLEAR(void);
-extern ISR(USART0_RX_vect);
-extern ISR(USART0_UDRE_vect);
+extern ISR(USART1_RX_vect);
+extern ISR(USART1_UDRE_vect);
 
 
 #endif
