@@ -5,6 +5,7 @@
 
 typedef struct SETPOINTS_s
 {
+    int16_t  TIMED_ENABLE;
     uint16_t TARGET_FREQUENCY;
     int16_t  RELATIVE_TORQUE;
     uint16_t REVERSAL;
@@ -18,7 +19,7 @@ typedef struct MEASUREMENTS_s
 {
     int16_t  LINE_VOLTAGE;      /*  [V]  */
     int16_t  LINE_CURRENT;      /*  [mA] */
-    int16_t  BUS_VOLTGE;        /*  [V]  */
+    int16_t  BUS_VOLTAGE;       /*  [V]  */
     int16_t  BUS_CURRENT;       /*  [mA] */
     uint16_t OUTPUT_FREQUENCY;  /* [mHz] */
     int16_t  OUTPUT_POWER;      /*  [W]  */
@@ -36,6 +37,10 @@ typedef struct PARAMETERS_s
     uint16_t OVERDRIVE_FORWARD_LINE_CURRENT;
     uint16_t OVERDRIVE_REVERSE_LINE_CURRENT;
     uint8_t  PWM_FREQUENCY;
+    uint64_t ENABLE_TIMEOUT;
+    uint64_t OVERDRIVE_TIMEOUT;
+    uint64_t OVERDRIVE_COOLDOWN;
+    uint64_t CONTROLLER_SAMPLETIME;
     int16_t  CONTROLLER_P_VALUE;
     int16_t  CONTROLLER_I_VALUE;
     uint16_t CONTROLLER_UF_VALUE[1024];
