@@ -44,6 +44,7 @@ typedef struct PARAMETERS_s
     int16_t  CONTROLLER_P_VALUE;
     int16_t  CONTROLLER_I_VALUE;
     uint16_t CONTROLLER_UF_VALUE[1024];
+    char     SYSTEM_STATUS[100];
 }
 PARAMETERS_s;
 
@@ -53,6 +54,7 @@ extern MEASUREMENTS_s MEASUREMENTS;
 extern PARAMETERS_s PARAMETERS;
 
 extern void REGISTRY_INIT(void);
-
+extern void REGISTRY_READ(void);
+extern void REGISTRY_UPDATE(void);
 
 #endif
