@@ -66,6 +66,11 @@ void RS232_SEND(char *data, uint8_t size)
     }
 }
 
+uint8_t RS232_RXSIZE(void)
+{
+    return RECVBUFFER.size;
+}
+
 void RS232_FETCH(char *data, uint8_t size)
 {
     uint8_t counter = 0;

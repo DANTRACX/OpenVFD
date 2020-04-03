@@ -26,24 +26,24 @@ static inline void _controller_check_enable(void)
     uint8_t expired = TIME_CHECKEXP(&(CONTROLLERSTATES.enableTimer));
 
     /* enable flag 0 - normal operation until timer timeout */
-    if(SETPOINTS.TIMED_ENABLE == 0)
+    if(SETPOINTS.ENABLE == 0)
     {
         /* check timeout - disable controller if expired */
         if(expired)
         {
             CONTROLLERSTATES.enable = 0;
-            MEASUREMENTS.OUTPUT_FREQUENCY = 0;
+            PROCESSVALUES.MOTOR_FREQUENCY = 0;
             SVPWM_STOP();
             return;
         }
     }
 
     /* enable flag 1 - normal/startup operation until timer timeout */
-    else if(SETPOINTS.TIMED_ENABLE == 1)
+    else if(SETPOINTS.ENABLE == 1)
     {
         /* reset enable timer */
-        SETPOINTS.TIMED_ENABLE = 0;
-        TIME_SET(&(CONTROLLERSTATES.enableTimer), PARAMETERS.ENABLE_TIMEOUT);
+        SETPOINTS.ENABLE = 0;
+        TIME_SET(&(CONTROLLERSTATES.enableTimer), PARAMETERS.CONTROLLER_ENABLE_TIMEOUT);
 
         /* check if controller was previously disabled - reactivate it */
         if(CONTROLLERSTATES.enable == 0)
@@ -73,9 +73,9 @@ static inline void _controller_check_enable(void)
     /* emergency stop for any other value */
     else
     {
-        SETPOINTS.TIMED_ENABLE = -1;
+        SETPOINTS.ENABLE = -1;
         CONTROLLERSTATES.enable = 0;
-        MEASUREMENTS.OUTPUT_FREQUENCY = 0;
+        PROCESSVALUES.MOTOR_FREQUENCY = 0;
         SVPWM_STOP();
         return;
     }
@@ -92,7 +92,7 @@ static inline void _controller_check_overdrive(void)
         /* disable overdrive, start cooldown */
         CONTROLLERSTATES.currentOverdrive = 0;
         SETPOINTS.ENABLE_CURRENT_OVERDRIVE = 0;
-        TIME_SET(&(CONTROLLERSTATES.overdriveTimer), PARAMETERS.OVERDRIVE_COOLDOWN);
+        TIME_SET(&(CONTROLLERSTATES.overdriveTimer), PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN);
     }
 
     /* reset cooldown after timeout */
@@ -102,7 +102,7 @@ static inline void _controller_check_overdrive(void)
         if(SETPOINTS.ENABLE_CURRENT_OVERDRIVE == 1)
         {
             CONTROLLERSTATES.currentOverdrive = 1;
-            TIME_SET(&(CONTROLLERSTATES.overdriveTimer), PARAMETERS.OVERDRIVE_TIMEOUT);
+            TIME_SET(&(CONTROLLERSTATES.overdriveTimer), PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT);
         }
     }
 }
@@ -125,7 +125,7 @@ void CONTROLLER_INIT(void)
     MAVG_INIT(&(CONTROLLERSTATES.filtered_buscurrent));
     TIME_INIT();
     TIME_SET(&(CONTROLLERSTATES.stepCycleTimer), PARAMETERS.CONTROLLER_SAMPLETIME);
-    TIME_SET(&(CONTROLLERSTATES.overdriveTimer), PARAMETERS.OVERDRIVE_TIMEOUT);
+    TIME_SET(&(CONTROLLERSTATES.overdriveTimer), PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT);
     TIME_SET(&(CONTROLLERSTATES.enableTimer), 1);
     SENSE_INIT();
     SVPWM_INIT();
@@ -140,8 +140,8 @@ void CONTROLLER_STEP_CYCLE(void)
 {
     /* declare some working variables */
     int64_t reference_current = 0;
-    int64_t feedback_current = (int64_t)(MEASUREMENTS.BUS_CURRENT);
-    int64_t feedback_voltage = (int64_t)(MEASUREMENTS.BUS_VOLTAGE);
+    int64_t feedback_current = (int64_t)(PROCESSVALUES.DCBUS_CURRENT);
+    int64_t feedback_voltage = (int64_t)(PROCESSVALUES.DCBUS_VOLTAGE);
     int64_t antiwindup_ierror = CONTROLLERSTATES.ierror;
     int64_t proportional = 0;
     int64_t integral = 0;
@@ -150,11 +150,11 @@ void CONTROLLER_STEP_CYCLE(void)
 
     /* calculate depending measurement values */
     /* approximation of sqrt(2) by (1448/1024) and 1/sqrt(2) by (1448/2028) */
-    feedback_voltage = ((((feedback_voltage * 1448) / 2048) * ((PARAMETERS.CONTROLLER_UF_VALUE[(MEASUREMENTS.OUTPUT_FREQUENCY) >> 6]))) >> 8);
+    feedback_voltage = ((((feedback_voltage * 1448) / 2048) * ((PROCESSVALUES.CONTROLLER_UF_VALUE[(PROCESSVALUES.MOTOR_FREQUENCY) >> 6]))) >> 8);
     feedback_current = ((feedback_current * 1448) / 2048);
 
-    MEASUREMENTS.LINE_VOLTAGE = (uint16_t)feedback_voltage;
-    MEASUREMENTS.LINE_CURRENT = (int16_t)feedback_current;
+    PROCESSVALUES.MOTOR_VOLTAGE = (uint16_t)feedback_voltage;
+    PROCESSVALUES.MOTOR_CURRENT = (int16_t)feedback_current;
 
 
     /* check for enable and overdrive */
@@ -174,14 +174,14 @@ void CONTROLLER_STEP_CYCLE(void)
     /* read input currents */
     if(CONTROLLERSTATES.currentOverdrive == 1)
     {
-        if(SETPOINTS.RELATIVE_TORQUE > 0)
+        if(SETPOINTS.TARGET_TORQUE > 0)
         {
-            reference_current = ((((int64_t)(PARAMETERS.OVERDRIVE_FORWARD_LINE_CURRENT)) * SETPOINTS.RELATIVE_TORQUE) / 100) * 1;
+            reference_current = ((((int64_t)(PARAMETERS.MOTOR_OVERDRIVE_FWD_CURRENT)) * SETPOINTS.TARGET_TORQUE) / 100) * 1;
         }
 
-        else if(SETPOINTS.RELATIVE_TORQUE < 0)
+        else if(SETPOINTS.TARGET_TORQUE < 0)
         {
-            reference_current = ((((int64_t)(PARAMETERS.OVERDRIVE_REVERSE_LINE_CURRENT)) * SETPOINTS.RELATIVE_TORQUE) / 100) * -1;
+            reference_current = ((((int64_t)(PARAMETERS.MOTOR_OVERDRIVE_REV_CURRENT)) * SETPOINTS.TARGET_TORQUE) / 100) * -1;
         }
 
         else
@@ -192,14 +192,14 @@ void CONTROLLER_STEP_CYCLE(void)
 
     else
     {
-        if(SETPOINTS.RELATIVE_TORQUE > 0)
+        if(SETPOINTS.TARGET_TORQUE > 0)
         {
-            reference_current = ((((int64_t)(PARAMETERS.NOMINAL_FORWARD_LINE_CURRENT)) * SETPOINTS.RELATIVE_TORQUE) / 100) * 1;
+            reference_current = ((((int64_t)(PARAMETERS.MOTOR_NOMINAL_FWD_CURRENT)) * SETPOINTS.TARGET_TORQUE) / 100) * 1;
         }
 
-        else if(SETPOINTS.RELATIVE_TORQUE < 0)
+        else if(SETPOINTS.TARGET_TORQUE < 0)
         {
-            reference_current = ((((int64_t)(PARAMETERS.NOMINAL_REVERSE_LINE_CURRENT)) * SETPOINTS.RELATIVE_TORQUE) / 100) * -1;
+            reference_current = ((((int64_t)(PARAMETERS.MOTOR_NOMINAL_REV_CURRENT)) * SETPOINTS.TARGET_TORQUE) / 100) * -1;
         }
 
         else
@@ -215,8 +215,8 @@ void CONTROLLER_STEP_CYCLE(void)
 
 
     /* calculate the controller parts */
-    proportional = (int64_t)(PARAMETERS.CONTROLLER_P_VALUE) * CONTROLLERSTATES.error;
-    integral = (int64_t)(PARAMETERS.CONTROLLER_I_VALUE) * CONTROLLERSTATES.ierror;
+    proportional = (int64_t)(PARAMETERS.CONTROLLER_PROPORTIONAL_FACTOR) * CONTROLLERSTATES.error;
+    integral = (int64_t)(PARAMETERS.CONTROLLER_INTEGRAL_FACTOR) * CONTROLLERSTATES.ierror;
 
 
     /* calculate the controller (scaled) output */
@@ -249,12 +249,12 @@ void CONTROLLER_STEP_CYCLE(void)
         }
     }
 
-    MEASUREMENTS.OUTPUT_FREQUENCY = (uint16_t)output;
+    PROCESSVALUES.MOTOR_FREQUENCY = (uint16_t)output;
 
 
     /* get values from lookuptable for outputs and send to svpwm ic */
     SVPWM_QUEUE_SET_FREQUENCY((uint16_t)output);
-    SVPWM_QUEUE_SET_MAGNITUDE((uint8_t)(PARAMETERS.CONTROLLER_UF_VALUE[((uint16_t)output) >> 6]));
+    SVPWM_QUEUE_SET_MAGNITUDE((uint8_t)(PROCESSVALUES.CONTROLLER_UF_VALUE[((uint16_t)output) >> 6]));
     SVPWM_QUEUE_SEND();
 
 
@@ -287,10 +287,10 @@ uint8_t CONTROLLER_WAIT_CYCLE(void)
 
 
     /* apply moving average filter for smoothing */
-    MEASUREMENTS.BUS_VOLTAGE = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_busvoltage), (int16_t)(busvoltage));
-    MEASUREMENTS.BUS_CURRENT = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_buscurrent), (int16_t)(buscurrent));
-    //MEASUREMENTS.LINE_CURRENT = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_linecurrent), (int16_t)(lineAcurrent));
-    //MEASUREMENTS.LINE_CURRENT = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_linecurrent), (int16_t)(lineCcurrent));
+    PROCESSVALUES.DCBUS_VOLTAGE = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_busvoltage), (int16_t)(busvoltage));
+    PROCESSVALUES.DCBUS_CURRENT = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_buscurrent), (int16_t)(buscurrent));
+    //MEASUREMENTS.DCBUS_CURRENT = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_linecurrent), (int16_t)(lineAcurrent));
+    //MEASUREMENTS.DCBUS_CURRENT = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_linecurrent), (int16_t)(lineCcurrent));
 
 
     /* check controller sample time */
