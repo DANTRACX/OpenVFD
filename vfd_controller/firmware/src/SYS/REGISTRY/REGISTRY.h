@@ -26,7 +26,7 @@ typedef struct PROCESSVALUES_s
     int16_t  MOTOR_POWER;                   /* P30205 - [ W ]             */
 
     /* controller process values */
-    uint8_t  CONTROLLER_UF_VALUE[1024];
+    uint16_t CONTROLLER_UF_VALUE[1024];     /* P30206                     */
 
     /* system status */
     char     SYSTEM_STATUS[50];             /* P30210 : P30260 - [ASCII]  */

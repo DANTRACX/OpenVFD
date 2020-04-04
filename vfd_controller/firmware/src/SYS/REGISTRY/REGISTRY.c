@@ -45,9 +45,11 @@ void REGISTRY_INIT(void)
     PARAMETERS.PWM_DEADTIME_PRESCALING = 0;
     PARAMETERS.MODBUS_ADDRESS = 0;
 
-    strcpy(PROCESSVALUES.SYSTEM_STATUS, "INITIALIZING");
+    strcpy(PROCESSVALUES.SYSTEM_STATUS, " SYSTEM OK\n");
+    PROCESSVALUES.SYSTEM_STATUS[0] = 10;
     REGISTRY_READ();
-    strcpy(PROCESSVALUES.SYSTEM_STATUS, "SYSTEM OK");
+    //strcpy(PROCESSVALUES.SYSTEM_STATUS, " SYSTEM OK\n");
+    //PROCESSVALUES.SYSTEM_STATUS[0] = 10;
 }
 
 
@@ -77,6 +79,8 @@ void REGISTRY_UPDATE(void)
     MEM_WRITE64(19, (uint64_t)PARAMETERS.PWM_DEADTIME_PRESCALING);
 
     MEM_WRITE64(20, (uint64_t)PARAMETERS.MODBUS_ADDRESS);
+
+    while(1);
 }
 
 void REGISTRY_READ(void)
@@ -88,7 +92,8 @@ void REGISTRY_READ(void)
     {
         if(MEM_READ64(counter, &temp[counter]) < 0)
         {
-            strcpy(PROCESSVALUES.SYSTEM_STATUS, "ERROR P4030X");
+            strcpy(PROCESSVALUES.SYSTEM_STATUS, " ERROR P4030X\n");
+            PROCESSVALUES.SYSTEM_STATUS[0] = 13;
             PROCESSVALUES.SYSTEM_STATUS[11] = counter + 0x30;
             return;
         }
@@ -110,27 +115,32 @@ void REGISTRY_READ(void)
         {
             if(counter == 4)
             {
-                strcpy(PROCESSVALUES.SYSTEM_STATUS, "ERROR P40314");
+                strcpy(PROCESSVALUES.SYSTEM_STATUS, " ERROR P40314\n");
+                PROCESSVALUES.SYSTEM_STATUS[0] = 13;
             }
 
             else if(counter == 5)
             {
-                strcpy(PROCESSVALUES.SYSTEM_STATUS, "ERROR P40322");
+                strcpy(PROCESSVALUES.SYSTEM_STATUS + 1, " ERROR P40322\n");
+                PROCESSVALUES.SYSTEM_STATUS[0] = 13;
             }
 
             else if(counter == 6)
             {
-                strcpy(PROCESSVALUES.SYSTEM_STATUS, "ERROR P40330");
+                strcpy(PROCESSVALUES.SYSTEM_STATUS, " ERROR P40330\n");
+                PROCESSVALUES.SYSTEM_STATUS[0] = 13;
             }
 
             else if (counter == 7)
             {
-                strcpy(PROCESSVALUES.SYSTEM_STATUS, "ERROR P40338");
+                strcpy(PROCESSVALUES.SYSTEM_STATUS, " ERROR P40338\n");
+                PROCESSVALUES.SYSTEM_STATUS[0] = 13;
             }
 
             else
             {
-                strcpy(PROCESSVALUES.SYSTEM_STATUS, "ERROR P4031X");
+                strcpy(PROCESSVALUES.SYSTEM_STATUS, " ERROR P4031X\n");
+                PROCESSVALUES.SYSTEM_STATUS[0] = 13;
                 PROCESSVALUES.SYSTEM_STATUS[11] = counter + 0x30;
             }
 
@@ -151,7 +161,8 @@ void REGISTRY_READ(void)
     {
         if(MEM_READ64(8 + 9 + counter, &temp[counter]) < 0)
         {
-            strcpy(PROCESSVALUES.SYSTEM_STATUS, "ERROR P4035X");
+            strcpy(PROCESSVALUES.SYSTEM_STATUS, " ERROR P4035X\n");
+            PROCESSVALUES.SYSTEM_STATUS[0] = 13;
             PROCESSVALUES.SYSTEM_STATUS[11] = counter + 0x30;
             return;
         }
@@ -163,7 +174,8 @@ void REGISTRY_READ(void)
 
     if(MEM_READ64(8 + 9 + 3, &temp[0]) < 0)
     {
-        strcpy(PROCESSVALUES.SYSTEM_STATUS, "ERROR P40360");
+        strcpy(PROCESSVALUES.SYSTEM_STATUS, " ERROR P40360\n");
+        PROCESSVALUES.SYSTEM_STATUS[0] = 13;
         return;
     }
 

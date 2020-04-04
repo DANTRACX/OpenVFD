@@ -17,6 +17,7 @@ int main(void)
     SCPI_INIT();
     MODBUS_INIT();
     CONTROLLER_INIT();
+    wdt_enable(WDTO_1S);
 
     while(1)
     {
@@ -24,6 +25,7 @@ int main(void)
 
         SCPI_PROCESS();
         CONTROLLER_STEP_CYCLE();
+        wdt_reset();
     }
 
     return 0;
