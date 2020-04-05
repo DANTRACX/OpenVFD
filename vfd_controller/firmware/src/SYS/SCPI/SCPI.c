@@ -18,7 +18,7 @@ void SCPI_INIT(void)
 void SCPI_PROCESS(void)
 {
     char     temp;
-    uint16_t counter = 0;
+    uint64_t counter = 0;
     uint8_t  frameComplete = 0;
     uint16_t registerAddress = 0;
     int64_t registerValue = 0;
@@ -68,6 +68,7 @@ void SCPI_PROCESS(void)
         if((SCPISTATES.framePtr < 10) || (SCPISTATES.frame[0] != 'R') || (SCPISTATES.frame[1] != 'E') || (SCPISTATES.frame[2] != 'G') || (SCPISTATES.frame[3] != ':'))
         {
             /* send a hint for help command? */
+            RS232_SEND("Send REG:00000? for help\n", 25);
             SCPISTATES.framePtr = 0;
             return;
         }
@@ -88,7 +89,13 @@ void SCPI_PROCESS(void)
                 /* registry address does not exist - check if user wants help text */
                 if(registerAddress == 00000)
                 {
+                    counter = 0;
 
+                    while((temp = pgm_read_byte(SCPI_INFO + counter)) != '\0')
+                    {
+                        RS232_SEND(&temp, 1);
+                        counter++;
+                    }
                 }
 
                 /* or the plot of the U/F curve */
