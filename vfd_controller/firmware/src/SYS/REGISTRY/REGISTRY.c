@@ -8,6 +8,7 @@ PARAMETERS_s PARAMETERS;
 
 void REGISTRY_INIT(void)
 {
+    /* initialize the setpoints */
     SETPOINTS.ENABLE = 0;
     SETPOINTS.ENABLE_FREQUENCY_OVERDRIVE = 0;
     SETPOINTS.ENABLE_CURRENT_OVERDRIVE = 0;
@@ -16,13 +17,16 @@ void REGISTRY_INIT(void)
     SETPOINTS.TARGET_TORQUE = 0;
     SETPOINTS.REVERSAL = 0;
 
+    /* initialize the process values */
     PROCESSVALUES.DCBUS_VOLTAGE = 0;
     PROCESSVALUES.DCBUS_CURRENT = 0;
     PROCESSVALUES.MOTOR_VOLTAGE = 0;
     PROCESSVALUES.MOTOR_CURRENT = 0;
     PROCESSVALUES.MOTOR_FREQUENCY = 0;
     PROCESSVALUES.MOTOR_POWER = 0;
+    PROCESSVALUES.SYSTEM_ERROR = 0;
 
+    /* initialize the parameters before non-volatile memory read */
     PARAMETERS.DCBUS_NOMINAL_VOLTAGE = 0;
     PARAMETERS.MOTOR_NOMINAL_VOLTAGE = 0;
     PARAMETERS.MOTOR_MINIMAL_VOLTAGE = 0;
@@ -45,16 +49,42 @@ void REGISTRY_INIT(void)
     PARAMETERS.PWM_DEADTIME_PRESCALING = 0;
     PARAMETERS.MODBUS_ADDRESS = 0;
 
-    strcpy(PROCESSVALUES.SYSTEM_STATUS, " SYSTEM OK\n");
-    PROCESSVALUES.SYSTEM_STATUS[0] = 10;
-    REGISTRY_READ();
-    //strcpy(PROCESSVALUES.SYSTEM_STATUS, " SYSTEM OK\n");
-    //PROCESSVALUES.SYSTEM_STATUS[0] = 10;
+    REGISTRY_SETSTATUS("[ INFO ] SYSTEM INITIALIZING", 28);
+
+    if(REGISTRY_POPEEMEM() == -1)
+    {
+        PROCESSVALUES.SYSTEM_ERROR = 1;
+    }
+
+    else
+    {
+        PROCESSVALUES.SYSTEM_ERROR = 0;
+        REGISTRY_SETSTATUS("[ INFO ] SYSTEM STOP", 20);
+    }
+}
+
+void REGISTRY_SETSTATUS(char *msg, uint8_t size)
+{
+    uint8_t counter = 0;
+
+    if(size > 47)
+    {
+        return;
+    }
+
+    for(counter = 1; counter <= size; counter++)
+    {
+        PROCESSVALUES.SYSTEM_STATUS[counter] = msg[counter - 1];
+    }
+
+    PROCESSVALUES.SYSTEM_STATUS[counter] = '\n';
+    PROCESSVALUES.SYSTEM_STATUS[0] = size + 1;
 }
 
 
-void REGISTRY_UPDATE(void)
+void REGISTRY_PUSHEEMEM(void)
 {
+    /* write new data to parameter non-volatile memory */
     MEM_WRITE64( 0, (uint64_t)PARAMETERS.DCBUS_NOMINAL_VOLTAGE);
     MEM_WRITE64( 1, (uint64_t)PARAMETERS.MOTOR_NOMINAL_VOLTAGE);
     MEM_WRITE64( 2, (uint64_t)PARAMETERS.MOTOR_MINIMAL_VOLTAGE);
@@ -64,7 +94,6 @@ void REGISTRY_UPDATE(void)
     MEM_WRITE64( 6, (uint64_t)PARAMETERS.MOTOR_NOMINAL_REV_CURRENT);
     MEM_WRITE64( 7, (uint64_t)PARAMETERS.MOTOR_OVERDRIVE_FWD_CURRENT);
     MEM_WRITE64( 8, (uint64_t)PARAMETERS.MOTOR_OVERDRIVE_REV_CURRENT);
-
     MEM_WRITE64( 9, (uint64_t)PARAMETERS.CONTROLLER_NOMINAL_FREQUENCY);
     MEM_WRITE64(10, (uint64_t)PARAMETERS.CONTROLLER_OVERDRIVE_FREQUENCY);
     MEM_WRITE64(11, (uint64_t)PARAMETERS.CONTROLLER_PROPORTIONAL_FACTOR);
@@ -73,111 +102,142 @@ void REGISTRY_UPDATE(void)
     MEM_WRITE64(14, (uint64_t)PARAMETERS.CONTROLLER_ENABLE_TIMEOUT);
     MEM_WRITE64(15, (uint64_t)PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT);
     MEM_WRITE64(16, (uint64_t)PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN);
-
     MEM_WRITE64(17, (uint64_t)PARAMETERS.PWM_FREQUENCY);
     MEM_WRITE64(18, (uint64_t)PARAMETERS.PWM_DEADTIME);
     MEM_WRITE64(19, (uint64_t)PARAMETERS.PWM_DEADTIME_PRESCALING);
-
     MEM_WRITE64(20, (uint64_t)PARAMETERS.MODBUS_ADDRESS);
 
+    /* trigger the watchdog to restart the program */
     while(1);
 }
 
-void REGISTRY_READ(void)
+int8_t REGISTRY_POPEEMEM(void)
 {
-    uint64_t temp[10];
-    uint8_t counter = 0;
-
-    for(counter = 0; counter < 9; counter++)
+    if(MEM_READ64(0, (uint64_t *)&(PARAMETERS.DCBUS_NOMINAL_VOLTAGE)) < 0)
     {
-        if(MEM_READ64(counter, &temp[counter]) < 0)
-        {
-            strcpy(PROCESSVALUES.SYSTEM_STATUS, " ERROR P4030X\n");
-            PROCESSVALUES.SYSTEM_STATUS[0] = 13;
-            PROCESSVALUES.SYSTEM_STATUS[11] = counter + 0x30;
-            return;
-        }
+        REGISTRY_SETSTATUS("[ERROR] P40300", 14);
+        return -1;
     }
 
-    PARAMETERS.DCBUS_NOMINAL_VOLTAGE = temp[0];
-    PARAMETERS.MOTOR_NOMINAL_VOLTAGE = temp[1];
-    PARAMETERS.MOTOR_MINIMAL_VOLTAGE = temp[2];
-    PARAMETERS.MOTOR_NOMINAL_FREQUENCY = temp[3];
-    PARAMETERS.MOTOR_VOLTBOOST_FREQUENCY = temp[4];
-    PARAMETERS.MOTOR_NOMINAL_FWD_CURRENT = temp[5];
-    PARAMETERS.MOTOR_NOMINAL_REV_CURRENT = temp[6];
-    PARAMETERS.MOTOR_OVERDRIVE_FWD_CURRENT = temp[7];
-    PARAMETERS.MOTOR_OVERDRIVE_REV_CURRENT = temp[8];
-
-    for(counter = 0; counter < 8; counter++)
+    if(MEM_READ64(1, (uint64_t *)&(PARAMETERS.MOTOR_NOMINAL_VOLTAGE)) < 0)
     {
-        if(MEM_READ64(9 + counter, &temp[counter]) < 0)
-        {
-            if(counter == 4)
-            {
-                strcpy(PROCESSVALUES.SYSTEM_STATUS, " ERROR P40314\n");
-                PROCESSVALUES.SYSTEM_STATUS[0] = 13;
-            }
-
-            else if(counter == 5)
-            {
-                strcpy(PROCESSVALUES.SYSTEM_STATUS + 1, " ERROR P40322\n");
-                PROCESSVALUES.SYSTEM_STATUS[0] = 13;
-            }
-
-            else if(counter == 6)
-            {
-                strcpy(PROCESSVALUES.SYSTEM_STATUS, " ERROR P40330\n");
-                PROCESSVALUES.SYSTEM_STATUS[0] = 13;
-            }
-
-            else if (counter == 7)
-            {
-                strcpy(PROCESSVALUES.SYSTEM_STATUS, " ERROR P40338\n");
-                PROCESSVALUES.SYSTEM_STATUS[0] = 13;
-            }
-
-            else
-            {
-                strcpy(PROCESSVALUES.SYSTEM_STATUS, " ERROR P4031X\n");
-                PROCESSVALUES.SYSTEM_STATUS[0] = 13;
-                PROCESSVALUES.SYSTEM_STATUS[11] = counter + 0x30;
-            }
-
-            return;
-        }
+        REGISTRY_SETSTATUS("[ERROR] P40301", 14);
+        return -1;
     }
 
-    PARAMETERS.CONTROLLER_NOMINAL_FREQUENCY = temp[0];
-    PARAMETERS.CONTROLLER_OVERDRIVE_FREQUENCY = temp[1];
-    PARAMETERS.CONTROLLER_PROPORTIONAL_FACTOR = temp[2];
-    PARAMETERS.CONTROLLER_INTEGRAL_FACTOR = temp[3];
-    PARAMETERS.CONTROLLER_SAMPLETIME = temp[4];
-    PARAMETERS.CONTROLLER_ENABLE_TIMEOUT = temp[5];
-    PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT = temp[6];
-    PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN = temp[7];
-
-    for(counter = 0; counter < 3; counter++)
+    if(MEM_READ64(2, (uint64_t *)&(PARAMETERS.MOTOR_MINIMAL_VOLTAGE)) < 0)
     {
-        if(MEM_READ64(8 + 9 + counter, &temp[counter]) < 0)
-        {
-            strcpy(PROCESSVALUES.SYSTEM_STATUS, " ERROR P4035X\n");
-            PROCESSVALUES.SYSTEM_STATUS[0] = 13;
-            PROCESSVALUES.SYSTEM_STATUS[11] = counter + 0x30;
-            return;
-        }
+        REGISTRY_SETSTATUS("[ERROR] P40302", 14);
+        return -1;
     }
 
-    PARAMETERS.PWM_FREQUENCY = temp[0];
-    PARAMETERS.PWM_DEADTIME = temp[1];
-    PARAMETERS.PWM_DEADTIME_PRESCALING = temp[2];
-
-    if(MEM_READ64(8 + 9 + 3, &temp[0]) < 0)
+    if(MEM_READ64(3, (uint64_t *)&(PARAMETERS.MOTOR_NOMINAL_FREQUENCY)) < 0)
     {
-        strcpy(PROCESSVALUES.SYSTEM_STATUS, " ERROR P40360\n");
-        PROCESSVALUES.SYSTEM_STATUS[0] = 13;
-        return;
+        REGISTRY_SETSTATUS("[ERROR] P40303", 14);
+        return -1;
     }
 
-    PARAMETERS.MODBUS_ADDRESS = temp[0];
+    if(MEM_READ64(4, (uint64_t *)&(PARAMETERS.MOTOR_VOLTBOOST_FREQUENCY)) < 0)
+    {
+        REGISTRY_SETSTATUS("[ERROR] P40304", 14);
+        return -1;
+    }
+
+    if(MEM_READ64(5, (uint64_t *)&(PARAMETERS.MOTOR_NOMINAL_FWD_CURRENT)) < 0)
+    {
+        REGISTRY_SETSTATUS("[ERROR] P40305", 14);
+        return -1;
+    }
+
+    if(MEM_READ64(6, (uint64_t *)&(PARAMETERS.MOTOR_NOMINAL_REV_CURRENT)) < 0)
+    {
+        REGISTRY_SETSTATUS("[ERROR] P40306", 14);
+        return -1;
+    }
+
+    if(MEM_READ64(7, (uint64_t *)&(PARAMETERS.MOTOR_OVERDRIVE_FWD_CURRENT)) < 0)
+    {
+        REGISTRY_SETSTATUS("[ERROR] P40307", 14);
+        return -1;
+    }
+
+    if(MEM_READ64(8, (uint64_t *)&(PARAMETERS.MOTOR_OVERDRIVE_REV_CURRENT)) < 0)
+    {
+        REGISTRY_SETSTATUS("[ERROR] P40308", 14);
+        return -1;
+    }
+
+    if(MEM_READ64(9, (uint64_t *)&(PARAMETERS.CONTROLLER_NOMINAL_FREQUENCY)) < 0)
+    {
+        REGISTRY_SETSTATUS("[ERROR] P40310", 14);
+        return -1;
+    }
+
+    if(MEM_READ64(10, (uint64_t *)&(PARAMETERS.CONTROLLER_OVERDRIVE_FREQUENCY)) < 0)
+    {
+        REGISTRY_SETSTATUS("[ERROR] P40311", 14);
+        return -1;
+    }
+
+    if(MEM_READ64(11, (uint64_t *)&(PARAMETERS.CONTROLLER_PROPORTIONAL_FACTOR)) < 0)
+    {
+        REGISTRY_SETSTATUS("[ERROR] P40312", 14);
+        return -1;
+    }
+
+    if(MEM_READ64(12, (uint64_t *)&(PARAMETERS.CONTROLLER_INTEGRAL_FACTOR)) < 0)
+    {
+        REGISTRY_SETSTATUS("[ERROR] P40313", 14);
+        return -1;
+    }
+
+    if(MEM_READ64(13, (uint64_t *)&(PARAMETERS.CONTROLLER_SAMPLETIME)) < 0)
+    {
+        REGISTRY_SETSTATUS("[ERROR] P40314", 14);
+        return -1;
+    }
+
+    if(MEM_READ64(14, (uint64_t *)&(PARAMETERS.CONTROLLER_ENABLE_TIMEOUT)) < 0)
+    {
+        REGISTRY_SETSTATUS("[ERROR] P40322", 14);
+        return -1;
+    }
+
+    if(MEM_READ64(15, (uint64_t *)&(PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT)) < 0)
+    {
+        REGISTRY_SETSTATUS("[ERROR] P40330", 14);
+        return -1;
+    }
+
+    if(MEM_READ64(16, (uint64_t *)&(PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN)) < 0)
+    {
+        REGISTRY_SETSTATUS("[ERROR] P40338", 14);
+        return -1;
+    }
+
+    if(MEM_READ64(17, (uint64_t *)&(PARAMETERS.PWM_FREQUENCY)) < 0)
+    {
+        REGISTRY_SETSTATUS("[ERROR] P40350", 14);
+        return -1;
+    }
+
+    if(MEM_READ64(18, (uint64_t *)&(PARAMETERS.PWM_DEADTIME)) < 0)
+    {
+        REGISTRY_SETSTATUS("[ERROR] P40351", 14);
+        return -1;
+    }
+
+    if(MEM_READ64(19, (uint64_t *)&(PARAMETERS.PWM_DEADTIME_PRESCALING)) < 0)
+    {
+        REGISTRY_SETSTATUS("[ERROR] P40352", 14);
+        return -1;
+    }
+
+    if(MEM_READ64(20, (uint64_t *)&(PARAMETERS.MODBUS_ADDRESS)) < 0)
+    {
+        REGISTRY_SETSTATUS("[ERROR] P40360", 14);
+        return -1;
+    }
+
+    return 0;
 }

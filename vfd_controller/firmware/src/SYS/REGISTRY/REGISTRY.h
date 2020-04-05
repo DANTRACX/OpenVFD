@@ -26,10 +26,11 @@ typedef struct PROCESSVALUES_s
     int16_t  MOTOR_POWER;                   /* P30205 - [ W ]             */
 
     /* controller process values */
-    uint16_t CONTROLLER_UF_VALUE[1024];     /* P30206                     */
+    uint16_t CONTROLLER_UF_VALUE[2048];     /* P30206                     */
 
     /* system status */
-    char     SYSTEM_STATUS[50];             /* P30210 : P30260 - [ASCII]  */
+    char     SYSTEM_STATUS[50];             /* P30210 : P30248 - [ASCII]  */
+    uint16_t SYSTEM_ERROR;                  /* P30250 - [ 0, 1 ]          */
 }
 PROCESSVALUES_s;
 
@@ -68,12 +69,15 @@ typedef struct PARAMETERS_s
 PARAMETERS_s;
 
 
-extern SETPOINTS_s SETPOINTS;
-extern PROCESSVALUES_s PROCESSVALUES;
-extern PARAMETERS_s PARAMETERS;
+extern SETPOINTS_s      SETPOINTS;
+extern PROCESSVALUES_s  PROCESSVALUES;
+extern PARAMETERS_s     PARAMETERS;
 
-extern void REGISTRY_INIT(void);
-extern void REGISTRY_READ(void);
-extern void REGISTRY_UPDATE(void);
+extern void             REGISTRY_INIT(void);
+extern void             REGISTRY_SETSTATUS(char *msg, uint8_t size);
+extern int8_t           REGISTRY_POPEEMEM(void);
+extern void             REGISTRY_PUSHEEMEM(void);
+extern uint8_t          REGISTRY_REGREAD(uint16_t registerAddress, int64_t *registerValue);
+extern void             REGISTRY_REGWRITE(uint16_t registerAddress, int64_t registerValue);
 
 #endif

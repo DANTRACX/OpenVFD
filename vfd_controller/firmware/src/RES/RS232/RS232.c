@@ -44,6 +44,7 @@ void RS232_SEND(char *data, uint8_t size)
     uint8_t counter = 0;
 
     /* wait until buffer has enaugh free space */
+    wdt_reset();
     while((0xFF - SENDBUFFER.size) <= size);
 
     /* add data to buffer */
@@ -75,6 +76,7 @@ void RS232_FETCH(char *data, uint8_t size)
 {
     uint8_t counter = 0;
 
+    wdt_reset();
     while(RECVBUFFER.size < size);
 
     for(counter = 0; counter < size; counter++)

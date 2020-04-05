@@ -5,6 +5,8 @@
 #include "../../RES/SENSE/SENSE.h"
 #include "../../RES/TIME/TIME.h"
 
+#include "../../RES/RS232/RS232.h"
+
 static struct CONTROLLERSTATES_s
 {
     uint8_t enable;
@@ -21,6 +23,20 @@ CONTROLLERSTATES;
 
 
 __attribute__((always_inline))
+static inline uint8_t _controller_check_error(void)
+{
+    if(PROCESSVALUES.SYSTEM_ERROR != 0)
+    {
+        CONTROLLERSTATES.enable = 0;
+        PROCESSVALUES.MOTOR_FREQUENCY = 0;
+        SVPWM_STOP();
+        return 1;
+    }
+
+    return 0;
+}
+
+__attribute__((always_inline))
 static inline void _controller_check_enable(void)
 {
     uint8_t expired = TIME_CHECKEXP(&(CONTROLLERSTATES.enableTimer));
@@ -34,6 +50,7 @@ static inline void _controller_check_enable(void)
             CONTROLLERSTATES.enable = 0;
             PROCESSVALUES.MOTOR_FREQUENCY = 0;
             SVPWM_STOP();
+            REGISTRY_SETSTATUS("[ INFO ] SYSTEM STOP", 20);
             return;
         }
     }
@@ -67,6 +84,7 @@ static inline void _controller_check_enable(void)
             SVPWM_QUEUE_SEND();
             __builtin_avr_delay_cycles(20000);
             SVPWM_START();
+            REGISTRY_SETSTATUS("[ INFO ] SYSTEM RUN", 19);
         }
     }
 
@@ -77,6 +95,7 @@ static inline void _controller_check_enable(void)
         CONTROLLERSTATES.enable = 0;
         PROCESSVALUES.MOTOR_FREQUENCY = 0;
         SVPWM_STOP();
+        REGISTRY_SETSTATUS("[ INFO ] SYSTEM STOP", 20);
         return;
     }
 }
@@ -116,24 +135,73 @@ static inline void _controller_check_overload(void)
 
 void CONTROLLER_INIT(void)
 {
+    uint16_t counter = 0;
+    uint64_t temp = 0;
+    uint64_t scaled_motorvoltage = 0;
+    uint64_t scaled_dcbusvoltage = 0;
+    uint64_t uboost_startvoltage = 0;
+    uint64_t uboost_finalvoltage = 0;
+
+    /* initialize controller states */
     CONTROLLERSTATES.enable = 0;
     CONTROLLERSTATES.error = 0;
     CONTROLLERSTATES.ierror = 0;
     CONTROLLERSTATES.currentOverdrive = 0;
 
+    /* initialize filter */
     MAVG_INIT(&(CONTROLLERSTATES.filtered_busvoltage));
     MAVG_INIT(&(CONTROLLERSTATES.filtered_buscurrent));
+
+    /* initialize timing intervals */
     TIME_INIT();
     TIME_SET(&(CONTROLLERSTATES.stepCycleTimer), PARAMETERS.CONTROLLER_SAMPLETIME);
     TIME_SET(&(CONTROLLERSTATES.overdriveTimer), PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT);
     TIME_SET(&(CONTROLLERSTATES.enableTimer), 1);
+
+    /* initialize measuring */
     SENSE_INIT();
+
+    /* initialize svpwm subsystem */
     SVPWM_INIT();
     SVPWM_STOP();
     SVPWM_QUEUE_SET_PWM_FREQUENCY(KHZ_8);
     SVPWM_QUEUE_SET_MAGNITUDE(0);
     SVPWM_QUEUE_SET_FREQUENCY(0);
     SVPWM_QUEUE_SEND();
+
+    /* calculate u/f lookup-table base values */
+    scaled_dcbusvoltage = ((PARAMETERS.DCBUS_NOMINAL_VOLTAGE * (1.10 * 1774)) / 2048);
+    scaled_motorvoltage = ((PARAMETERS.MOTOR_NOMINAL_VOLTAGE * (1.00 * 1448)) / 1024);
+    scaled_motorvoltage = ((scaled_motorvoltage * 255) / scaled_dcbusvoltage);
+
+    /* calculate u/f lookup-table general curve */
+    for(counter = 0; counter < 2048; counter++)
+    {
+        temp = ((scaled_motorvoltage * counter) / (PARAMETERS.MOTOR_NOMINAL_FREQUENCY / 32));
+        PROCESSVALUES.CONTROLLER_UF_VALUE[counter] = (uint16_t)temp;
+
+        if(PROCESSVALUES.CONTROLLER_UF_VALUE[counter] > 0xFF)
+        {
+            PROCESSVALUES.CONTROLLER_UF_VALUE[counter] = 0x00FF;
+        }
+    }
+
+    /* calculate u/f lookup-table voltage boost enhancement */
+    uboost_startvoltage = ((PARAMETERS.MOTOR_MINIMAL_VOLTAGE * (1.00 * 1774)) / 1024);
+    uboost_startvoltage = ((uboost_startvoltage * 255) / scaled_dcbusvoltage);
+    uboost_finalvoltage = PROCESSVALUES.CONTROLLER_UF_VALUE[(PARAMETERS.MOTOR_VOLTBOOST_FREQUENCY / 32)];
+    scaled_motorvoltage = uboost_finalvoltage - uboost_startvoltage;
+
+    for(counter = 0; counter <= (PARAMETERS.MOTOR_VOLTBOOST_FREQUENCY / 32); counter++)
+    {
+        temp = uboost_startvoltage + ((scaled_motorvoltage * counter) / (PARAMETERS.MOTOR_VOLTBOOST_FREQUENCY / 32));
+        PROCESSVALUES.CONTROLLER_UF_VALUE[counter] = (uint16_t)temp;
+
+        if(PROCESSVALUES.CONTROLLER_UF_VALUE[counter] > 0xFF)
+        {
+            PROCESSVALUES.CONTROLLER_UF_VALUE[counter] = 0x00FF;
+        }
+    }
 }
 
 void CONTROLLER_STEP_CYCLE(void)
@@ -150,12 +218,18 @@ void CONTROLLER_STEP_CYCLE(void)
 
     /* calculate depending measurement values */
     /* approximation of sqrt(2) by (1448/1024) and 1/sqrt(2) by (1448/2028) */
-    feedback_voltage = ((((feedback_voltage * 1448) / 2048) * ((PROCESSVALUES.CONTROLLER_UF_VALUE[(PROCESSVALUES.MOTOR_FREQUENCY) >> 6]))) >> 8);
+    feedback_voltage = ((((feedback_voltage * 1448) / 2048) * ((PROCESSVALUES.CONTROLLER_UF_VALUE[(PROCESSVALUES.MOTOR_FREQUENCY) / 32]))) >> 8);
     feedback_current = ((feedback_current * 1448) / 2048);
 
     PROCESSVALUES.MOTOR_VOLTAGE = (uint16_t)feedback_voltage;
     PROCESSVALUES.MOTOR_CURRENT = (int16_t)feedback_current;
 
+    /* check for system error */
+    if(_controller_check_error())
+    {
+        TIME_SET(&(CONTROLLERSTATES.stepCycleTimer), PARAMETERS.CONTROLLER_SAMPLETIME);
+        return;
+    }
 
     /* check for enable and overdrive */
     _controller_check_enable();
@@ -164,7 +238,7 @@ void CONTROLLER_STEP_CYCLE(void)
 
 
     /* check if controller calculation is necessary */
-    if(CONTROLLERSTATES.enable == 0)
+    if((CONTROLLERSTATES.enable == 0) || (PROCESSVALUES.SYSTEM_ERROR == 1))
     {
         TIME_SET(&(CONTROLLERSTATES.stepCycleTimer), PARAMETERS.CONTROLLER_SAMPLETIME);
         return;
@@ -254,7 +328,7 @@ void CONTROLLER_STEP_CYCLE(void)
 
     /* get values from lookuptable for outputs and send to svpwm ic */
     SVPWM_QUEUE_SET_FREQUENCY((uint16_t)output);
-    SVPWM_QUEUE_SET_MAGNITUDE((uint8_t)(PROCESSVALUES.CONTROLLER_UF_VALUE[((uint16_t)output) >> 6]));
+    SVPWM_QUEUE_SET_MAGNITUDE((uint8_t)(PROCESSVALUES.CONTROLLER_UF_VALUE[((uint16_t)output) / 32]));
     SVPWM_QUEUE_SEND();
 
 

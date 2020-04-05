@@ -10,22 +10,28 @@
 
 int main(void)
 {
-    wdt_disable();
+    wdt_enable(WDTO_1S);
+    wdt_reset();
     sei();
 
     REGISTRY_INIT();
+    wdt_reset();
     SCPI_INIT();
+    wdt_reset();
     MODBUS_INIT();
+    wdt_reset();
     CONTROLLER_INIT();
-    wdt_enable(WDTO_1S);
+    wdt_reset();
 
     while(1)
     {
-        while(CONTROLLER_WAIT_CYCLE());
+        while(CONTROLLER_WAIT_CYCLE())
+        {
+                wdt_reset();
+        }
 
         SCPI_PROCESS();
         CONTROLLER_STEP_CYCLE();
-        wdt_reset();
     }
 
     return 0;
