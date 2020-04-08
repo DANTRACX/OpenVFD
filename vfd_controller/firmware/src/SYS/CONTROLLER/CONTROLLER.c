@@ -5,8 +5,6 @@
 #include "../../RES/SENSE/SENSE.h"
 #include "../../RES/TIME/TIME.h"
 
-#include "../../RES/RS232/RS232.h"
-
 static struct CONTROLLERSTATES_s
 {
     uint8_t enable;
@@ -135,13 +133,6 @@ static inline void _controller_check_overload(void)
 
 void CONTROLLER_INIT(void)
 {
-    uint16_t counter = 0;
-    uint64_t temp = 0;
-    uint64_t scaled_motorvoltage = 0;
-    uint64_t scaled_dcbusvoltage = 0;
-    uint64_t uboost_startvoltage = 0;
-    uint64_t uboost_finalvoltage = 0;
-
     /* initialize controller states */
     CONTROLLERSTATES.enable = 0;
     CONTROLLERSTATES.error = 0;
@@ -164,44 +155,12 @@ void CONTROLLER_INIT(void)
     /* initialize svpwm subsystem */
     SVPWM_INIT();
     SVPWM_STOP();
-    SVPWM_QUEUE_SET_PWM_FREQUENCY(KHZ_8);
+    SVPWM_QUEUE_SET_PWM_FREQUENCY(PARAMETERS.PWM_FREQUENCY);
+    SVPWM_QUEUE_SET_DEADTIME_PRESCALER(PARAMETERS.PWM_DEADTIME_PRESCALING);
+    SVPWM_QUEUE_SET_DEADTIME_TIMINGS(((PARAMETERS.PWM_FREQUENCY >> 8) & 0x0F), ((PARAMETERS.PWM_FREQUENCY >> 0) & 0x0F));
     SVPWM_QUEUE_SET_MAGNITUDE(0);
     SVPWM_QUEUE_SET_FREQUENCY(0);
     SVPWM_QUEUE_SEND();
-
-    /* calculate u/f lookup-table base values */
-    scaled_dcbusvoltage = ((PARAMETERS.DCBUS_NOMINAL_VOLTAGE * (1.10 * 1774)) / 2048);
-    scaled_motorvoltage = ((PARAMETERS.MOTOR_NOMINAL_VOLTAGE * (1.00 * 1448)) / 1024);
-    scaled_motorvoltage = ((scaled_motorvoltage * 255) / scaled_dcbusvoltage);
-
-    /* calculate u/f lookup-table general curve */
-    for(counter = 0; counter < 2048; counter++)
-    {
-        temp = ((scaled_motorvoltage * counter) / (PARAMETERS.MOTOR_NOMINAL_FREQUENCY / 32));
-        PROCESSVALUES.CONTROLLER_UF_VALUE[counter] = (uint16_t)temp;
-
-        if(PROCESSVALUES.CONTROLLER_UF_VALUE[counter] > 0xFF)
-        {
-            PROCESSVALUES.CONTROLLER_UF_VALUE[counter] = 0x00FF;
-        }
-    }
-
-    /* calculate u/f lookup-table voltage boost enhancement */
-    uboost_startvoltage = ((PARAMETERS.MOTOR_MINIMAL_VOLTAGE * (1.00 * 1774)) / 1024);
-    uboost_startvoltage = ((uboost_startvoltage * 255) / scaled_dcbusvoltage);
-    uboost_finalvoltage = PROCESSVALUES.CONTROLLER_UF_VALUE[(PARAMETERS.MOTOR_VOLTBOOST_FREQUENCY / 32)];
-    scaled_motorvoltage = uboost_finalvoltage - uboost_startvoltage;
-
-    for(counter = 0; counter <= (PARAMETERS.MOTOR_VOLTBOOST_FREQUENCY / 32); counter++)
-    {
-        temp = uboost_startvoltage + ((scaled_motorvoltage * counter) / (PARAMETERS.MOTOR_VOLTBOOST_FREQUENCY / 32));
-        PROCESSVALUES.CONTROLLER_UF_VALUE[counter] = (uint16_t)temp;
-
-        if(PROCESSVALUES.CONTROLLER_UF_VALUE[counter] > 0xFF)
-        {
-            PROCESSVALUES.CONTROLLER_UF_VALUE[counter] = 0x00FF;
-        }
-    }
 }
 
 void CONTROLLER_STEP_CYCLE(void)
@@ -217,8 +176,8 @@ void CONTROLLER_STEP_CYCLE(void)
 
 
     /* calculate depending measurement values */
-    /* approximation of sqrt(2) by (1448/1024) and 1/sqrt(2) by (1448/2028) */
-    feedback_voltage = ((((feedback_voltage * 1448) / 2048) * ((PROCESSVALUES.CONTROLLER_UF_VALUE[(PROCESSVALUES.MOTOR_FREQUENCY) / 32]))) >> 8);
+    /* approximation of sqrt(2) by (1448/1024) and 1/sqrt(2) by (1448/2048) */
+    feedback_voltage = ((((feedback_voltage * 1448) / (2048 * 2)) * ((PARAMETERS.CONTROLLER_UF_VALUE[(PROCESSVALUES.MOTOR_FREQUENCY) / 32]))) >> 8);
     feedback_current = ((feedback_current * 1448) / 2048);
 
     PROCESSVALUES.MOTOR_VOLTAGE = (uint16_t)feedback_voltage;
@@ -246,39 +205,37 @@ void CONTROLLER_STEP_CYCLE(void)
 
 
     /* read input currents */
-    if(CONTROLLERSTATES.currentOverdrive == 1)
+    if((PROCESSVALUES.MOTOR_FREQUENCY > SETPOINTS.TARGET_FREQUENCY) || (SETPOINTS.TARGET_TORQUE == 0))
     {
-        if(SETPOINTS.TARGET_TORQUE > 0)
-        {
-            reference_current = ((((int64_t)(PARAMETERS.MOTOR_OVERDRIVE_FWD_CURRENT)) * SETPOINTS.TARGET_TORQUE) / 100) * 1;
-        }
-
-        else if(SETPOINTS.TARGET_TORQUE < 0)
-        {
-            reference_current = ((((int64_t)(PARAMETERS.MOTOR_OVERDRIVE_REV_CURRENT)) * SETPOINTS.TARGET_TORQUE) / 100) * -1;
-        }
-
-        else
-        {
-            reference_current = 0;
-        }
+        reference_current = 0;
     }
 
     else
     {
-        if(SETPOINTS.TARGET_TORQUE > 0)
+        if(CONTROLLERSTATES.currentOverdrive == 1)
         {
-            reference_current = ((((int64_t)(PARAMETERS.MOTOR_NOMINAL_FWD_CURRENT)) * SETPOINTS.TARGET_TORQUE) / 100) * 1;
-        }
+            if(SETPOINTS.TARGET_TORQUE > 0)
+            {
+                reference_current = ((((int64_t)(PARAMETERS.MOTOR_OVERDRIVE_FWD_CURRENT)) * SETPOINTS.TARGET_TORQUE) / 100) * 1;
+            }
 
-        else if(SETPOINTS.TARGET_TORQUE < 0)
-        {
-            reference_current = ((((int64_t)(PARAMETERS.MOTOR_NOMINAL_REV_CURRENT)) * SETPOINTS.TARGET_TORQUE) / 100) * -1;
+            else if(SETPOINTS.TARGET_TORQUE < 0)
+            {
+                reference_current = ((((int64_t)(PARAMETERS.MOTOR_OVERDRIVE_REV_CURRENT)) * SETPOINTS.TARGET_TORQUE) / 100) * -1;
+            }
         }
 
         else
         {
-            reference_current = 0;
+            if(SETPOINTS.TARGET_TORQUE > 0)
+            {
+                reference_current = ((((int64_t)(PARAMETERS.MOTOR_NOMINAL_FWD_CURRENT)) * SETPOINTS.TARGET_TORQUE) / 100) * 1;
+            }
+
+            else if(SETPOINTS.TARGET_TORQUE < 0)
+            {
+                reference_current = ((((int64_t)(PARAMETERS.MOTOR_NOMINAL_REV_CURRENT)) * SETPOINTS.TARGET_TORQUE) / 100) * -1;
+            }
         }
     }
 
@@ -328,7 +285,7 @@ void CONTROLLER_STEP_CYCLE(void)
 
     /* get values from lookuptable for outputs and send to svpwm ic */
     SVPWM_QUEUE_SET_FREQUENCY((uint16_t)output);
-    SVPWM_QUEUE_SET_MAGNITUDE((uint8_t)(PROCESSVALUES.CONTROLLER_UF_VALUE[((uint16_t)output) / 32]));
+    SVPWM_QUEUE_SET_MAGNITUDE((uint8_t)(PARAMETERS.CONTROLLER_UF_VALUE[((uint16_t)output) / 32]));
     SVPWM_QUEUE_SEND();
 
 

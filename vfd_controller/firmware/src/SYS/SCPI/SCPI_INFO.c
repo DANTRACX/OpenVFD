@@ -1,5 +1,6 @@
 #include "SCPI.h"
-
+const char SCPI_INFO[] PROGMEM = {};
+/*
 const char SCPI_INFO[] PROGMEM = {"                                             \n\
                                    OpenVFD                                      \n\
                      (C) COPYRIGHT 2020 - Christoph Klie                        \n\
@@ -40,3 +41,4 @@ to be sent after Y.                                                             
       40106    | Reversal                             |      |             |    \n\
                                                                                 \0\
 "};
+*/

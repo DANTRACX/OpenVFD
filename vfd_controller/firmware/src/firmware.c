@@ -7,7 +7,6 @@
 #include "./SYS/REGISTRY/REGISTRY.h"
 #include "./SYS/CONTROLLER/CONTROLLER.h"
 
-
 int main(void)
 {
     wdt_enable(WDTO_1S);

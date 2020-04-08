@@ -80,7 +80,7 @@ void SCPI_PROCESS(void)
         registerAddress = registerAddress + ((SCPISTATES.frame[7] - 0x30) *    10);
         registerAddress = registerAddress + ((SCPISTATES.frame[8] - 0x30) *     1);
 
-        /* check if last symbol before fram end was ? - msg is a query */
+        /* check if last symbol before frame end was ? - msg is a query */
         if(SCPISTATES.frame[--SCPISTATES.framePtr] == '?')
         {
             /* read value from registry */
@@ -99,11 +99,11 @@ void SCPI_PROCESS(void)
                 }
 
                 /* or the plot of the U/F curve */
-                else if(registerAddress == 30206)
+                else if(registerAddress == 43048)
                 {
                     for(counter = 0; counter < 2048; counter++)
                     {
-                        temp = (char)PROCESSVALUES.CONTROLLER_UF_VALUE[counter];
+                        temp = (char)PARAMETERS.CONTROLLER_UF_VALUE[counter];
                         RS232_SEND(&temp, 1);
                     }
                 }

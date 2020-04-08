@@ -2,10 +2,8 @@
 #define __MEM_H__
 
 #include <stdint.h>
-#include <avr/io.h>
-#include <avr/interrupt.h>
 
-extern int8_t MEM_READ64(uint8_t int64addr, uint64_t *data);
-extern uint8_t MEM_WRITE64(uint8_t int64addr, uint64_t data);
+extern int8_t   MEM_READ(uint16_t eememOffset, void *eememData, uint16_t size);
+extern void     MEM_WRITE(uint16_t eememOffset, void *eememData, uint16_t size);
 
 #endif

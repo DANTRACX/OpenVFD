@@ -11,32 +11,42 @@ uint8_t REGISTRY_REGREAD(uint16_t registerAddress, int64_t *registerValue)
         }
         case 40101:
         {
-            *registerValue = (int64_t)SETPOINTS.ENABLE_FREQUENCY_OVERDRIVE;
+            *registerValue = (int64_t)SETPOINTS.TARGET_TORQUE;
             return 0;
         }
         case 40102:
         {
-            *registerValue = (int64_t)SETPOINTS.ENABLE_CURRENT_OVERDRIVE;
+            *registerValue = (int64_t)SETPOINTS.TARGET_FREQUENCY;
             return 0;
         }
         case 40103:
         {
-            *registerValue = (int64_t)SETPOINTS.ENABLE_PROGMODE;
+            *registerValue = (int64_t)SETPOINTS.REVERSAL;
             return 0;
         }
         case 40104:
         {
-            *registerValue = (int64_t)SETPOINTS.TARGET_FREQUENCY;
+            *registerValue = (int64_t)SETPOINTS.ENABLE_CURRENT_OVERDRIVE;
             return 0;
         }
         case 40105:
         {
-            *registerValue = (int64_t)SETPOINTS.TARGET_TORQUE;
+            *registerValue = (int64_t)SETPOINTS.ENABLE_FREQUENCY_OVERDRIVE;
             return 0;
         }
-        case 40106:
+        case 40110:
         {
-            *registerValue = (int64_t)SETPOINTS.REVERSAL;
+            *registerValue = (int64_t)SETPOINTS.ENABLE_PROGMODE;
+            return 0;
+        }
+        case 40111:
+        {
+            *registerValue = (int64_t)SETPOINTS.TRIGGER_PARAMETER_SAVE;
+            return 0;
+        }
+        case 40120:
+        {
+            *registerValue = (int64_t)SETPOINTS.TRIGGER_UF_CALCULATION;
             return 0;
         }
         case 30200:
@@ -76,111 +86,118 @@ uint8_t REGISTRY_REGREAD(uint16_t registerAddress, int64_t *registerValue)
         }
         case 40300:
         {
-            *registerValue = (int64_t)PARAMETERS.DCBUS_NOMINAL_VOLTAGE;
+            *registerValue = (int64_t)PARAMETERS.MODBUS_ADDRESS;
             return 0;
         }
-        case 40301:
-        {
-            *registerValue = (int64_t)PARAMETERS.MOTOR_NOMINAL_VOLTAGE;
-            return 0;
-        }
-        case 40302:
-        {
-            *registerValue = (int64_t)PARAMETERS.MOTOR_MINIMAL_VOLTAGE;
-            return 0;
-        }
-        case 40303:
-        {
-            *registerValue = (int64_t)PARAMETERS.MOTOR_NOMINAL_FREQUENCY;
-            return 0;
-        }
-        case 40304:
-        {
-            *registerValue = (int64_t)PARAMETERS.MOTOR_VOLTBOOST_FREQUENCY;
-            return 0;
-        }
-        case 40305:
-        {
-            *registerValue = (int64_t)PARAMETERS.MOTOR_NOMINAL_FWD_CURRENT;
-            return 0;
-        }
-        case 40306:
-        {
-            *registerValue = (int64_t)PARAMETERS.MOTOR_NOMINAL_REV_CURRENT;
-            return 0;
-        }
-        case 40307:
-        {
-            *registerValue = (int64_t)PARAMETERS.MOTOR_OVERDRIVE_FWD_CURRENT;
-            return 0;
-        }
-        case 40308:
-        {
-            *registerValue = (int64_t)PARAMETERS.MOTOR_OVERDRIVE_REV_CURRENT;
-            return 0;
-        }
-        case 40310:
-        {
-            *registerValue = (int64_t)PARAMETERS.CONTROLLER_NOMINAL_FREQUENCY;
-            return 0;
-        }
-        case 40311:
-        {
-            *registerValue = (int64_t)PARAMETERS.CONTROLLER_OVERDRIVE_FREQUENCY;
-            return 0;
-        }
-        case 40312:
-        {
-            *registerValue = (int64_t)PARAMETERS.CONTROLLER_PROPORTIONAL_FACTOR;
-            return 0;
-        }
-        case 40313:
-        {
-            *registerValue = (int64_t)PARAMETERS.CONTROLLER_INTEGRAL_FACTOR;
-            return 0;
-        }
-        case 40314:
-        {
-            *registerValue = (int64_t)PARAMETERS.CONTROLLER_SAMPLETIME;
-            return 0;
-        }
-        case 40322:
-        {
-            *registerValue = (int64_t)PARAMETERS.CONTROLLER_ENABLE_TIMEOUT;
-            return 0;
-        }
-        case 40330:
-        {
-            *registerValue = (int64_t)PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT;
-            return 0;
-        }
-        case 40338:
-        {
-            *registerValue = (int64_t)PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN;
-            return 0;
-        }
-        case 40350:
+        case 40400:
         {
             *registerValue = (int64_t)PARAMETERS.PWM_FREQUENCY;
             return 0;
         }
-        case 40351:
+        case 40401:
         {
             *registerValue = (int64_t)PARAMETERS.PWM_DEADTIME;
             return 0;
         }
-        case 40352:
+        case 40402:
         {
             *registerValue = (int64_t)PARAMETERS.PWM_DEADTIME_PRESCALING;
             return 0;
         }
-        case 40360:
+        case 40500:
         {
-            *registerValue = (int64_t)PARAMETERS.MODBUS_ADDRESS;
+            *registerValue = (int64_t)PARAMETERS.DCBUS_NOMINAL_VOLTAGE;
+            return 0;
+        }
+        case 40501:
+        {
+            *registerValue = (int64_t)PARAMETERS.MOTOR_NOMINAL_VOLTAGE;
+            return 0;
+        }
+        case 40502:
+        {
+            *registerValue = (int64_t)PARAMETERS.MOTOR_MINIMAL_VOLTAGE;
+            return 0;
+        }
+        case 40503:
+        {
+            *registerValue = (int64_t)PARAMETERS.MOTOR_NOMINAL_FREQUENCY;
+            return 0;
+        }
+        case 40504:
+        {
+            *registerValue = (int64_t)PARAMETERS.MOTOR_VOLTBOOST_FREQUENCY;
+            return 0;
+        }
+        case 40505:
+        {
+            *registerValue = (int64_t)PARAMETERS.MOTOR_NOMINAL_FWD_CURRENT;
+            return 0;
+        }
+        case 40506:
+        {
+            *registerValue = (int64_t)PARAMETERS.MOTOR_NOMINAL_REV_CURRENT;
+            return 0;
+        }
+        case 40507:
+        {
+            *registerValue = (int64_t)PARAMETERS.MOTOR_OVERDRIVE_FWD_CURRENT;
+            return 0;
+        }
+        case 40508:
+        {
+            *registerValue = (int64_t)PARAMETERS.MOTOR_OVERDRIVE_REV_CURRENT;
+            return 0;
+        }
+
+        case 40600:
+        {
+            *registerValue = (int64_t)PARAMETERS.CONTROLLER_NOMINAL_FREQUENCY;
+            return 0;
+        }
+        case 40601:
+        {
+            *registerValue = (int64_t)PARAMETERS.CONTROLLER_OVERDRIVE_FREQUENCY;
+            return 0;
+        }
+        case 40602:
+        {
+            *registerValue = (int64_t)PARAMETERS.CONTROLLER_PROPORTIONAL_FACTOR;
+            return 0;
+        }
+        case 40603:
+        {
+            *registerValue = (int64_t)PARAMETERS.CONTROLLER_INTEGRAL_FACTOR;
+            return 0;
+        }
+        case 40604:
+        {
+            *registerValue = (int64_t)PARAMETERS.CONTROLLER_SAMPLETIME;
+            return 0;
+        }
+        case 40612:
+        {
+            *registerValue = (int64_t)PARAMETERS.CONTROLLER_ENABLE_TIMEOUT;
+            return 0;
+        }
+        case 40620:
+        {
+            *registerValue = (int64_t)PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT;
+            return 0;
+        }
+        case 40628:
+        {
+            *registerValue = (int64_t)PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN;
             return 0;
         }
         default:
         {
+            if((registerAddress >= 41000) && (registerAddress <= 43047))
+            {
+                *registerValue = (int64_t)PARAMETERS.CONTROLLER_UF_VALUE[registerAddress - 41000];
+                return 0;
+            }
+
             return 1;
         }
     }
