@@ -1,6 +1,6 @@
 #include "REGISTRY.h"
 
-void REGISTRY_REGWRITE(uint16_t registerAddress, int64_t registerValue)
+void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 {
     switch(registerAddress)
     {
@@ -191,18 +191,60 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, int64_t registerValue)
 
             return;
         }
+        case 40150:
+        {
+            if((SETPOINTS.ENABLE_PROGMODE == 1) && (registerValue == 1))
+            {
+                SETPOINTS.TRIGGER_RESET = 1;
+                while(1);
+            }
+
+            else
+            {
+                SETPOINTS.TRIGGER_RESET = 0;
+            }
+
+            return;
+        }
         case 40300:
         {
-            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            if((SETPOINTS.ENABLE_PROGMODE == 1) && (registerValue > 0) && (registerValue < 248))
             {
                 PARAMETERS.MODBUS_ADDRESS = (uint16_t)registerValue;
             }
 
             return;
         }
-        case 40400:
+        case 40301:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.MODBUS_BAUDRATE = (PARAMETERS.MODBUS_BAUDRATE & 0x0000FFFF) | (((uint32_t)registerValue) << 16);
+            }
+
+            return;
+        }
+        case 40302:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.MODBUS_BAUDRATE = (PARAMETERS.MODBUS_BAUDRATE & 0xFFFF0000) | (((uint32_t)registerValue) <<  0);
+            }
+
+            return;
+        }
+        case 40303:
+        {
+            if((SETPOINTS.ENABLE_PROGMODE == 1) && (registerValue < 3))
+            {
+                PARAMETERS.MODBUS_PARITY = (uint16_t)registerValue;
+            }
+
+            return;
+        }
+        case 40400:
+        {
+            if((SETPOINTS.ENABLE_PROGMODE == 1) && (registerValue < 5))
             {
                 PARAMETERS.PWM_FREQUENCY = (uint16_t)registerValue;
             }
@@ -220,7 +262,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, int64_t registerValue)
         }
         case 40402:
         {
-            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            if((SETPOINTS.ENABLE_PROGMODE == 1) && ((uint16_t)registerValue < 4))
             {
                 PARAMETERS.PWM_DEADTIME_PRESCALING = (uint16_t)registerValue;
             }
@@ -240,7 +282,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, int64_t registerValue)
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
-                PARAMETERS.MOTOR_NOMINAL_VOLTAGE = (uint16_t)registerValue;
+                PARAMETERS.DCBUS_MINIMAL_VOLTAGE = (uint16_t)registerValue;
             }
 
             return;
@@ -249,7 +291,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, int64_t registerValue)
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
-                PARAMETERS.MOTOR_MINIMAL_VOLTAGE = (uint16_t)registerValue;
+                PARAMETERS.DCBUS_MAXIMAL_VOLTAGE = (uint16_t)registerValue;
             }
 
             return;
@@ -258,7 +300,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, int64_t registerValue)
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
-                PARAMETERS.MOTOR_NOMINAL_FREQUENCY = (uint16_t)registerValue;
+                PARAMETERS.MOTOR_NOMINAL_VOLTAGE = (uint16_t)registerValue;
             }
 
             return;
@@ -267,7 +309,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, int64_t registerValue)
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
-                PARAMETERS.MOTOR_VOLTBOOST_FREQUENCY = (uint16_t)registerValue;
+                PARAMETERS.MOTOR_MINIMAL_VOLTAGE = (uint16_t)registerValue;
             }
 
             return;
@@ -276,7 +318,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, int64_t registerValue)
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
-                PARAMETERS.MOTOR_NOMINAL_FWD_CURRENT = (int16_t)registerValue;;
+                PARAMETERS.MOTOR_NOMINAL_FREQUENCY = (uint16_t)registerValue;
             }
 
             return;
@@ -285,7 +327,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, int64_t registerValue)
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
-                PARAMETERS.MOTOR_NOMINAL_REV_CURRENT = (int16_t)registerValue;
+                PARAMETERS.MOTOR_VOLTBOOST_FREQUENCY = (uint16_t)registerValue;
             }
 
             return;
@@ -294,7 +336,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, int64_t registerValue)
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
-                PARAMETERS.MOTOR_OVERDRIVE_FWD_CURRENT = (int16_t)registerValue;
+                PARAMETERS.MOTOR_NOMINAL_FWD_CURRENT = (uint16_t)registerValue;;
             }
 
             return;
@@ -303,7 +345,25 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, int64_t registerValue)
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
-                PARAMETERS.MOTOR_OVERDRIVE_REV_CURRENT = (int16_t)registerValue;
+                PARAMETERS.MOTOR_NOMINAL_REV_CURRENT = (uint16_t)registerValue;
+            }
+
+            return;
+        }
+        case 40509:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.MOTOR_OVERDRIVE_FWD_CURRENT = (uint16_t)registerValue;
+            }
+
+            return;
+        }
+        case 40510:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.MOTOR_OVERDRIVE_REV_CURRENT = (uint16_t)registerValue;
             }
 
             return;
@@ -348,7 +408,70 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, int64_t registerValue)
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
-                PARAMETERS.CONTROLLER_SAMPLETIME = (uint64_t)registerValue;
+                PARAMETERS.CONTROLLER_SAMPLETIME = (PARAMETERS.CONTROLLER_SAMPLETIME & 0x0000FFFFFFFFFFFF) | (((uint64_t)registerValue) << 48);
+            }
+
+            return;
+        }
+        case 40605:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_SAMPLETIME = (PARAMETERS.CONTROLLER_SAMPLETIME & 0xFFFF0000FFFFFFFF) | (((uint64_t)registerValue) << 32);
+            }
+
+            return;
+        }
+        case 40606:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_SAMPLETIME = (PARAMETERS.CONTROLLER_SAMPLETIME & 0xFFFFFFFF0000FFFF) | (((uint64_t)registerValue) << 16);
+            }
+
+            return;
+        }
+        case 40607:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_SAMPLETIME = (PARAMETERS.CONTROLLER_SAMPLETIME & 0xFFFFFFFFFFFF0000) | (((uint64_t)registerValue) <<  0);
+            }
+
+            return;
+        }
+        case 40608:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_ENABLE_TIMEOUT = (PARAMETERS.CONTROLLER_ENABLE_TIMEOUT & 0x0000FFFFFFFFFFFF) | (((uint64_t)registerValue) << 48);
+            }
+
+            return;
+        }
+        case 40609:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_ENABLE_TIMEOUT = (PARAMETERS.CONTROLLER_ENABLE_TIMEOUT & 0xFFFF0000FFFFFFFF) | (((uint64_t)registerValue) << 32);
+            }
+
+            return;
+        }
+        case 40610:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_ENABLE_TIMEOUT = (PARAMETERS.CONTROLLER_ENABLE_TIMEOUT & 0xFFFFFFFF0000FFFF) | (((uint64_t)registerValue) << 16);
+            }
+
+            return;
+        }
+        case 40611:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_ENABLE_TIMEOUT = (PARAMETERS.CONTROLLER_ENABLE_TIMEOUT & 0xFFFFFFFFFFFF0000) | (((uint64_t)registerValue) <<  0);
             }
 
             return;
@@ -357,7 +480,70 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, int64_t registerValue)
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
-                PARAMETERS.CONTROLLER_ENABLE_TIMEOUT = (uint64_t)registerValue;
+                PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT = (PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT & 0x0000FFFFFFFFFFFF) | (((uint64_t)registerValue) << 48);
+            }
+
+            return;
+        }
+        case 40613:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT = (PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT & 0xFFFF0000FFFFFFFF) | (((uint64_t)registerValue) << 32);
+            }
+
+            return;
+        }
+        case 40614:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT = (PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT & 0xFFFFFFFF0000FFFF) | (((uint64_t)registerValue) << 16);
+            }
+
+            return;
+        }
+        case 40615:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT = (PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT & 0xFFFFFFFFFFFF0000) | (((uint64_t)registerValue) <<  0);
+            }
+
+            return;
+        }
+        case 40616:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN = (PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN & 0x0000FFFFFFFFFFFF) | (((uint64_t)registerValue) << 48);
+            }
+
+            return;
+        }
+        case 40617:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN = (PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN & 0xFFFF0000FFFFFFFF) | (((uint64_t)registerValue) << 32);
+            }
+
+            return;
+        }
+        case 40618:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN = (PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN & 0xFFFFFFFF0000FFFF) | (((uint64_t)registerValue) << 16);
+            }
+
+            return;
+        }
+        case 40619:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN = (PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN & 0xFFFFFFFFFFFF0000) | (((uint64_t)registerValue) <<  0);
             }
 
             return;
@@ -366,7 +552,70 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, int64_t registerValue)
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
-                PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT = (uint64_t)registerValue;
+                PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT & 0x0000FFFFFFFFFFFF) | (((uint64_t)registerValue) << 48);
+            }
+
+            return;
+        }
+        case 40621:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT & 0xFFFF0000FFFFFFFF) | (((uint64_t)registerValue) << 32);
+            }
+
+            return;
+        }
+        case 40622:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT & 0xFFFFFFFF0000FFFF) | (((uint64_t)registerValue) << 16);
+            }
+
+            return;
+        }
+        case 40623:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT & 0xFFFFFFFFFFFF0000) | (((uint64_t)registerValue) <<  0);
+            }
+
+            return;
+        }
+        case 40624:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT & 0x0000FFFFFFFFFFFF) | (((uint64_t)registerValue) << 48);
+            }
+
+            return;
+        }
+        case 40625:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT & 0xFFFF0000FFFFFFFF) | (((uint64_t)registerValue) << 32);
+            }
+
+            return;
+        }
+        case 40626:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT & 0xFFFFFFFF0000FFFF) | (((uint64_t)registerValue) << 16);
+            }
+
+            return;
+        }
+        case 40627:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT & 0xFFFFFFFFFFFF0000) | (((uint64_t)registerValue) <<  0);
             }
 
             return;
@@ -375,7 +624,70 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, int64_t registerValue)
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
-                PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN = (uint64_t)registerValue;
+                PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT & 0x0000FFFFFFFFFFFF) | (((uint64_t)registerValue) << 48);
+            }
+
+            return;
+        }
+        case 40629:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT & 0xFFFF0000FFFFFFFF) | (((uint64_t)registerValue) << 32);
+            }
+
+            return;
+        }
+        case 40630:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT & 0xFFFFFFFF0000FFFF) | (((uint64_t)registerValue) << 16);
+            }
+
+            return;
+        }
+        case 40631:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT & 0xFFFFFFFFFFFF0000) | (((uint64_t)registerValue) <<  0);
+            }
+
+            return;
+        }
+        case 40632:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET = (PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET & 0x0000FFFF) | (((uint32_t)registerValue) << 16);
+            }
+
+            return;
+        }
+        case 40633:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET = (PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET & 0xFFFF0000) | (((uint32_t)registerValue) <<  0);
+            }
+
+            return;
+        }
+        case 40634:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET = (PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET & 0x0000FFFF) | (((uint32_t)registerValue) << 16);
+            }
+
+            return;
+        }
+        case 40635:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET = (PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET & 0xFFFF0000) | (((uint32_t)registerValue) <<  0);
             }
 
             return;

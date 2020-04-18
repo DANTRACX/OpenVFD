@@ -3,8 +3,7 @@
 
 #include <stdint.h>
 
-extern void MODBUS_INIT(void);
-
-/* SETPOINT CAPPING SHOULD BE DONE HERE */
+extern  void        MODBUS_INIT(void);
+extern  void        MODBUS_PROCESS(void);
 
 #endif

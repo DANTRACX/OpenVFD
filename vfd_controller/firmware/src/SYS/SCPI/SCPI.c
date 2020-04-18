@@ -22,6 +22,7 @@ void SCPI_PROCESS(void)
     uint8_t  frameComplete = 0;
     uint16_t registerAddress = 0;
     int64_t registerValue = 0;
+    uint16_t registerTemp = 0;
     uint64_t convert = 0;
 
 
@@ -83,8 +84,10 @@ void SCPI_PROCESS(void)
         /* check if last symbol before frame end was ? - msg is a query */
         if(SCPISTATES.frame[--SCPISTATES.framePtr] == '?')
         {
+            registerValue = 0;
+
             /* read value from registry */
-            if(REGISTRY_REGREAD(registerAddress, &registerValue))
+            if(REGISTRY_REGREAD(registerAddress, &registerTemp))
             {
                 /* registry address does not exist - check if user wants help text */
                 if(registerAddress == 00000)
@@ -108,15 +111,33 @@ void SCPI_PROCESS(void)
                     }
                 }
 
-                /* or the system status variable */
-                else if(registerAddress == 30210)
-                {
-                    RS232_SEND(PROCESSVALUES.SYSTEM_STATUS + 1, PROCESSVALUES.SYSTEM_STATUS[0]);
-                }
-
                 /* frame does not exist or is protocol specific - drop it */
                 SCPISTATES.framePtr = 0;
                 return;
+            }
+
+            /* read multi byte register */
+            if((registerAddress == 30201) || (registerAddress == 30208) || (registerAddress == 40301) || (registerAddress == 40632) || (registerAddress == 40634))
+            {
+                registerValue = (((int64_t)((int16_t)registerTemp)) << 16);
+                REGISTRY_REGREAD(registerAddress + 1, &registerTemp);
+                registerValue |= (((int64_t)((int16_t)registerTemp)) <<  0);
+            }
+
+            else if((registerAddress == 40604) || (registerAddress == 40608) || (registerAddress == 40612) || (registerAddress == 40616) || (registerAddress == 40620) || (registerAddress == 40624) || (registerAddress == 40628))
+            {
+                registerValue = (((int64_t)registerTemp) << 48);
+                REGISTRY_REGREAD(registerAddress + 1, &registerTemp);
+                registerValue |= (((int64_t)registerTemp) << 32);
+                REGISTRY_REGREAD(registerAddress + 2, &registerTemp);
+                registerValue |= (((int64_t)registerTemp) << 16);
+                REGISTRY_REGREAD(registerAddress + 3, &registerTemp);
+                registerValue |= (((int64_t)registerTemp) <<  0);
+            }
+
+            else
+            {
+                registerValue = (((int64_t)registerTemp) << 0);
             }
 
             /* convert value to ascii and send it */
@@ -161,7 +182,24 @@ void SCPI_PROCESS(void)
                 SCPISTATES.framePtr--;
             }
 
-            REGISTRY_REGWRITE(registerAddress, registerValue);
+            if((registerAddress == 40301) || (registerAddress == 40632) || (registerAddress == 40634))
+            {
+                REGISTRY_REGWRITE(registerAddress + 0, (uint16_t)(registerValue >> 16));
+                REGISTRY_REGWRITE(registerAddress + 1, (uint16_t)(registerValue >>  0));
+            }
+
+            else if((registerAddress == 40604) || (registerAddress == 40608) || (registerAddress == 40612) || (registerAddress == 40616) || (registerAddress == 40620) || (registerAddress == 40624) || (registerAddress == 40628))
+            {
+                REGISTRY_REGWRITE(registerAddress + 0, (uint16_t)(registerValue >> 48));
+                REGISTRY_REGWRITE(registerAddress + 1, (uint16_t)(registerValue >> 32));
+                REGISTRY_REGWRITE(registerAddress + 2, (uint16_t)(registerValue >> 16));
+                REGISTRY_REGWRITE(registerAddress + 3, (uint16_t)(registerValue >>  0));
+            }
+
+            else
+            {
+                REGISTRY_REGWRITE(registerAddress + 0, (uint16_t)(registerValue >>  0));
+            }
         }
 
         SCPISTATES.framePtr = 0;

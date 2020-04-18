@@ -59,8 +59,6 @@ void RS232_SEND(char *data, uint8_t size)
     /* trigger new transmission start */
     if(!(UCSR1B & (1 << UDRIE1)))
     {
-        /* start new transmission */
-
         /* clear flag and enable interrupt */
         UCSR1A |= ((1 << TXC1));
         UCSR1B |= ((1 << UDRIE1));
@@ -91,11 +89,15 @@ void RS232_FETCH(char *data, uint8_t size)
 void RS232_TX_CLEAR(void)
 {
     SENDBUFFER.size = 0;
+    SENDBUFFER.readIdx = 0;
+    SENDBUFFER.writeIdx = 0;
 }
 
 void RS232_RX_CLEAR(void)
 {
     RECVBUFFER.size = 0;
+    RECVBUFFER.readIdx = 0;
+    RECVBUFFER.writeIdx = 0;
 }
 
 ISR(USART1_RX_vect)

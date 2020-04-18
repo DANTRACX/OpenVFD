@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-extern void CONTROLLER_INIT(void);
-extern void CONTROLLER_STEP_CYCLE(void);
-extern uint8_t CONTROLLER_WAIT_CYCLE(void);
+extern  void        CONTROLLER_INIT(void);
+extern  void        CONTROLLER_STEP_CYCLE(void);
+extern  uint8_t     CONTROLLER_WAIT_CYCLE(void);
 
 #endif

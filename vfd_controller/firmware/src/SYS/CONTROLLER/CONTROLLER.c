@@ -7,32 +7,18 @@
 
 static struct CONTROLLERSTATES_s
 {
-    uint8_t enable;
-    int64_t error;
+    int64_t cerror;
     int64_t ierror;
-    uint8_t currentOverdrive;
     TIME_s stepCycleTimer;
     TIME_s overdriveTimer;
     TIME_s enableTimer;
+    TIME_s motorUMZTimer;
+    TIME_s dcbusUMZTimer;
     MAVG_s filtered_buscurrent;
     MAVG_s filtered_busvoltage;
 }
 CONTROLLERSTATES;
 
-
-__attribute__((always_inline))
-static inline uint8_t _controller_check_error(void)
-{
-    if(PROCESSVALUES.SYSTEM_ERROR != 0)
-    {
-        CONTROLLERSTATES.enable = 0;
-        PROCESSVALUES.MOTOR_FREQUENCY = 0;
-        SVPWM_STOP();
-        return 1;
-    }
-
-    return 0;
-}
 
 __attribute__((always_inline))
 static inline void _controller_check_enable(void)
@@ -45,10 +31,11 @@ static inline void _controller_check_enable(void)
         /* check timeout - disable controller if expired */
         if(expired)
         {
-            CONTROLLERSTATES.enable = 0;
+            PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_ENABLE);
+            PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_RUN);
+            PROCESSVALUES.SYSTEM_STATUS |=  (SYSTEM_STATUS_STOP);
             PROCESSVALUES.MOTOR_FREQUENCY = 0;
             SVPWM_STOP();
-            REGISTRY_SETSTATUS("[ INFO ] SYSTEM STOP", 20);
             return;
         }
     }
@@ -61,10 +48,12 @@ static inline void _controller_check_enable(void)
         TIME_SET(&(CONTROLLERSTATES.enableTimer), PARAMETERS.CONTROLLER_ENABLE_TIMEOUT);
 
         /* check if controller was previously disabled - reactivate it */
-        if(CONTROLLERSTATES.enable == 0)
+        if((PROCESSVALUES.SYSTEM_STATUS & (SYSTEM_STATUS_ENABLE)) == 0)
         {
-            CONTROLLERSTATES.enable = 1;
-            CONTROLLERSTATES.error = 0;
+            PROCESSVALUES.SYSTEM_STATUS |=  (SYSTEM_STATUS_ENABLE);
+            PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_STOP);
+            PROCESSVALUES.SYSTEM_STATUS |=  (SYSTEM_STATUS_RUN);
+            CONTROLLERSTATES.cerror = 0;
             CONTROLLERSTATES.ierror = 0;
 
             if(SETPOINTS.REVERSAL == 1)
@@ -82,7 +71,6 @@ static inline void _controller_check_enable(void)
             SVPWM_QUEUE_SEND();
             __builtin_avr_delay_cycles(20000);
             SVPWM_START();
-            REGISTRY_SETSTATUS("[ INFO ] SYSTEM RUN", 19);
         }
     }
 
@@ -90,10 +78,11 @@ static inline void _controller_check_enable(void)
     else
     {
         SETPOINTS.ENABLE = -1;
-        CONTROLLERSTATES.enable = 0;
+        PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_ENABLE);
+        PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_RUN);
+        PROCESSVALUES.SYSTEM_STATUS |=  (SYSTEM_STATUS_STOP);
         PROCESSVALUES.MOTOR_FREQUENCY = 0;
         SVPWM_STOP();
-        REGISTRY_SETSTATUS("[ INFO ] SYSTEM STOP", 20);
         return;
     }
 }
@@ -104,21 +93,21 @@ static inline void _controller_check_overdrive(void)
     uint8_t expired = TIME_CHECKEXP(&(CONTROLLERSTATES.overdriveTimer));
 
     /* reset overdrive, switch to cooldown */
-    if((expired) && (CONTROLLERSTATES.currentOverdrive == 1))
+    if((expired) && ((PROCESSVALUES.SYSTEM_STATUS & SYSTEM_STATUS_CURRENT_OVERDRIVE) == 1))
     {
         /* disable overdrive, start cooldown */
-        CONTROLLERSTATES.currentOverdrive = 0;
+        PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_CURRENT_OVERDRIVE);
         SETPOINTS.ENABLE_CURRENT_OVERDRIVE = 0;
         TIME_SET(&(CONTROLLERSTATES.overdriveTimer), PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN);
     }
 
     /* reset cooldown after timeout */
-    else if((expired) && (CONTROLLERSTATES.currentOverdrive == 0))
+    else if((expired) && ((PROCESSVALUES.SYSTEM_STATUS & SYSTEM_STATUS_CURRENT_OVERDRIVE) == 0))
     {
         /* enable overdrive, start timeout */
         if(SETPOINTS.ENABLE_CURRENT_OVERDRIVE == 1)
         {
-            CONTROLLERSTATES.currentOverdrive = 1;
+            PROCESSVALUES.SYSTEM_STATUS |= (SYSTEM_STATUS_CURRENT_OVERDRIVE);
             TIME_SET(&(CONTROLLERSTATES.overdriveTimer), PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT);
         }
     }
@@ -127,17 +116,67 @@ static inline void _controller_check_overdrive(void)
 __attribute__((always_inline))
 static inline void _controller_check_overload(void)
 {
+    PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_WARNING);
+    PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_DCBUS_UMZ_WARNING);
+    PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_MOTOR_UMZ_WARNING);
 
+    if((PROCESSVALUES.DCBUS_VOLTAGE < PARAMETERS.DCBUS_MAXIMAL_VOLTAGE) && (PROCESSVALUES.DCBUS_VOLTAGE > PARAMETERS.DCBUS_MINIMAL_VOLTAGE))
+    {
+        TIME_SET(&(CONTROLLERSTATES.dcbusUMZTimer), PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT);
+    }
+
+    else
+    {
+        if(!(TIME_CHECKEXP(&(CONTROLLERSTATES.dcbusUMZTimer))))
+        {
+            PROCESSVALUES.SYSTEM_STATUS |= (SYSTEM_STATUS_WARNING);
+            PROCESSVALUES.SYSTEM_STATUS |= (SYSTEM_STATUS_DCBUS_UMZ_WARNING);
+        }
+
+        else
+        {
+            PROCESSVALUES.SYSTEM_STATUS |=  (SYSTEM_STATUS_ERROR);
+            PROCESSVALUES.SYSTEM_STATUS |=  (SYSTEM_STATUS_DCBUS_UMZ_ERROR);
+            PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_ENABLE);
+        }
+    }
+
+
+    if(((PROCESSVALUES.SYSTEM_STATUS & SYSTEM_STATUS_CURRENT_OVERDRIVE) == 0) && (PROCESSVALUES.MOTOR_CURRENT < PARAMETERS.MOTOR_NOMINAL_FWD_CURRENT) && (PROCESSVALUES.MOTOR_CURRENT > -((int32_t)PARAMETERS.MOTOR_NOMINAL_REV_CURRENT)))
+    {
+        TIME_SET(&(CONTROLLERSTATES.motorUMZTimer), PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT);
+    }
+
+    else if(((PROCESSVALUES.SYSTEM_STATUS & SYSTEM_STATUS_CURRENT_OVERDRIVE) == 1) && (PROCESSVALUES.MOTOR_CURRENT < PARAMETERS.MOTOR_OVERDRIVE_FWD_CURRENT) && (PROCESSVALUES.MOTOR_CURRENT > -((int32_t)PARAMETERS.MOTOR_OVERDRIVE_REV_CURRENT)))
+    {
+        TIME_SET(&(CONTROLLERSTATES.motorUMZTimer), PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT);
+    }
+
+    else
+    {
+        if(!(TIME_CHECKEXP(&(CONTROLLERSTATES.motorUMZTimer))))
+        {
+            PROCESSVALUES.SYSTEM_STATUS |= (SYSTEM_STATUS_WARNING);
+            PROCESSVALUES.SYSTEM_STATUS |= (SYSTEM_STATUS_MOTOR_UMZ_WARNING);
+        }
+
+        else
+        {
+            PROCESSVALUES.SYSTEM_STATUS |=  (SYSTEM_STATUS_ERROR);
+            PROCESSVALUES.SYSTEM_STATUS |=  (SYSTEM_STATUS_MOTOR_UMZ_ERROR);
+            PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_ENABLE);
+        }
+    }
 }
 
 
 void CONTROLLER_INIT(void)
 {
     /* initialize controller states */
-    CONTROLLERSTATES.enable = 0;
-    CONTROLLERSTATES.error = 0;
+    CONTROLLERSTATES.cerror = 0;
     CONTROLLERSTATES.ierror = 0;
-    CONTROLLERSTATES.currentOverdrive = 0;
+    PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_ENABLE);
+    PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_CURRENT_OVERDRIVE);
 
     /* initialize filter */
     MAVG_INIT(&(CONTROLLERSTATES.filtered_busvoltage));
@@ -147,6 +186,8 @@ void CONTROLLER_INIT(void)
     TIME_INIT();
     TIME_SET(&(CONTROLLERSTATES.stepCycleTimer), PARAMETERS.CONTROLLER_SAMPLETIME);
     TIME_SET(&(CONTROLLERSTATES.overdriveTimer), PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT);
+    TIME_SET(&(CONTROLLERSTATES.motorUMZTimer), PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT);
+    TIME_SET(&(CONTROLLERSTATES.dcbusUMZTimer), PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT);
     TIME_SET(&(CONTROLLERSTATES.enableTimer), 1);
 
     /* initialize measuring */
@@ -183,36 +224,39 @@ void CONTROLLER_STEP_CYCLE(void)
     PROCESSVALUES.MOTOR_VOLTAGE = (uint16_t)feedback_voltage;
     PROCESSVALUES.MOTOR_CURRENT = (int16_t)feedback_current;
 
-    /* check for system error */
-    if(_controller_check_error())
-    {
-        TIME_SET(&(CONTROLLERSTATES.stepCycleTimer), PARAMETERS.CONTROLLER_SAMPLETIME);
-        return;
-    }
-
     /* check for enable and overdrive */
     _controller_check_enable();
     _controller_check_overload();
     _controller_check_overdrive();
 
+    /* check for system error */
+    if((PROCESSVALUES.SYSTEM_STATUS & SYSTEM_STATUS_ERROR) == 1)
+    {
+        PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_ENABLE);
+        PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_RUN);
+        PROCESSVALUES.SYSTEM_STATUS |=  (SYSTEM_STATUS_STOP);
+        PROCESSVALUES.MOTOR_FREQUENCY = 0;
+        SVPWM_STOP();
+        TIME_SET(&(CONTROLLERSTATES.stepCycleTimer), PARAMETERS.CONTROLLER_SAMPLETIME);
+        return;
+    }
 
     /* check if controller calculation is necessary */
-    if((CONTROLLERSTATES.enable == 0) || (PROCESSVALUES.SYSTEM_ERROR == 1))
+    if((PROCESSVALUES.SYSTEM_STATUS & SYSTEM_STATUS_ENABLE) == 0)
     {
         TIME_SET(&(CONTROLLERSTATES.stepCycleTimer), PARAMETERS.CONTROLLER_SAMPLETIME);
         return;
     }
 
-
     /* read input currents */
-    if((PROCESSVALUES.MOTOR_FREQUENCY > SETPOINTS.TARGET_FREQUENCY) || (SETPOINTS.TARGET_TORQUE == 0))
+    if(((PROCESSVALUES.MOTOR_FREQUENCY > SETPOINTS.TARGET_FREQUENCY) && (SETPOINTS.TARGET_TORQUE > 0)) || (SETPOINTS.TARGET_TORQUE == 0))
     {
         reference_current = 0;
     }
 
     else
     {
-        if(CONTROLLERSTATES.currentOverdrive == 1)
+        if((PROCESSVALUES.SYSTEM_STATUS & SYSTEM_STATUS_CURRENT_OVERDRIVE) == 1)
         {
             if(SETPOINTS.TARGET_TORQUE > 0)
             {
@@ -241,12 +285,12 @@ void CONTROLLER_STEP_CYCLE(void)
 
 
     /* calculate the control error */
-    CONTROLLERSTATES.error = reference_current - feedback_current;
-    CONTROLLERSTATES.ierror = CONTROLLERSTATES.ierror + CONTROLLERSTATES.error;
+    CONTROLLERSTATES.cerror = reference_current - feedback_current;
+    CONTROLLERSTATES.ierror = CONTROLLERSTATES.ierror + CONTROLLERSTATES.cerror;
 
 
     /* calculate the controller parts */
-    proportional = (int64_t)(PARAMETERS.CONTROLLER_PROPORTIONAL_FACTOR) * CONTROLLERSTATES.error;
+    proportional = (int64_t)(PARAMETERS.CONTROLLER_PROPORTIONAL_FACTOR) * CONTROLLERSTATES.cerror;
     integral = (int64_t)(PARAMETERS.CONTROLLER_INTEGRAL_FACTOR) * CONTROLLERSTATES.ierror;
 
 
@@ -259,7 +303,7 @@ void CONTROLLER_STEP_CYCLE(void)
     {
         output = 0;
 
-        if(CONTROLLERSTATES.error < 0)
+        if(CONTROLLERSTATES.cerror < 0)
         {
             CONTROLLERSTATES.ierror = antiwindup_ierror;
         }
@@ -273,7 +317,7 @@ void CONTROLLER_STEP_CYCLE(void)
         {
             output = (int64_t)(SETPOINTS.TARGET_FREQUENCY);
 
-            if(CONTROLLERSTATES.error > 0)
+            if(CONTROLLERSTATES.cerror > 0)
             {
                 CONTROLLERSTATES.ierror = antiwindup_ierror;
             }
@@ -306,8 +350,8 @@ uint8_t CONTROLLER_WAIT_CYCLE(void)
 
 
     /* remove sensor data offset and convert to correct scale */
-    busvoltage   = (((busvoltage - 0x0867) *   5) / (4 * 1));
-    buscurrent   = (((buscurrent - 0x0867) * 500) / (4 * 4));
+    busvoltage   = (((busvoltage - 0x0867) *   5) / (4 * 1)) + PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET;
+    buscurrent   = (((buscurrent - 0x0867) * 500) / (4 * 4)) + PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET;
     //lineAcurrent = (((lineAcurrent - 0x0870) * 500) / (4 * 4));
     //lineCcurrent = (((lineCcurrent - 0x084D) * 500) / (4 * 4));
 
@@ -318,8 +362,8 @@ uint8_t CONTROLLER_WAIT_CYCLE(void)
 
 
     /* apply moving average filter for smoothing */
-    PROCESSVALUES.DCBUS_VOLTAGE = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_busvoltage), (int16_t)(busvoltage));
-    PROCESSVALUES.DCBUS_CURRENT = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_buscurrent), (int16_t)(buscurrent));
+    PROCESSVALUES.DCBUS_VOLTAGE = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_busvoltage), (int32_t)(busvoltage));
+    PROCESSVALUES.DCBUS_CURRENT = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_buscurrent), (int32_t)(buscurrent));
     //MEASUREMENTS.DCBUS_CURRENT = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_linecurrent), (int16_t)(lineAcurrent));
     //MEASUREMENTS.DCBUS_CURRENT = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_linecurrent), (int16_t)(lineCcurrent));
 

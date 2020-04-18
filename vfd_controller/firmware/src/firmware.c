@@ -29,6 +29,7 @@ int main(void)
                 wdt_reset();
         }
 
+        MODBUS_PROCESS();
         SCPI_PROCESS();
         CONTROLLER_STEP_CYCLE();
     }
