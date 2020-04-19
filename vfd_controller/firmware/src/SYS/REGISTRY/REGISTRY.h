@@ -105,6 +105,6 @@ extern  void            REGISTRY_INIT(void);
 extern  int8_t          REGISTRY_POPEEMEM(void);
 extern  void            REGISTRY_PUSHEEMEM(void);
 extern  uint8_t         REGISTRY_REGREAD(uint16_t registerAddress, uint16_t *registerValue);
-extern  void            REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue);
+extern  uint8_t         REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue);
 
 #endif

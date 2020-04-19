@@ -1,6 +1,6 @@
 #include "REGISTRY.h"
 
-void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
+uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 {
     switch(registerAddress)
     {
@@ -16,7 +16,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 SETPOINTS.ENABLE = -1;
             }
 
-            return;
+            return 0;
         }
         case 40101:
         {
@@ -35,7 +35,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 SETPOINTS.TARGET_TORQUE = (int16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40102:
         {
@@ -57,7 +57,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 }
             }
 
-            return;
+            return 0;
         }
         case 40103:
         {
@@ -71,7 +71,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 SETPOINTS.REVERSAL = 0;
             }
 
-            return;
+            return 0;
         }
         case 40104:
         {
@@ -85,7 +85,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 SETPOINTS.ENABLE_CURRENT_OVERDRIVE = 0;
             }
 
-            return;
+            return 0;
         }
         case 40105:
         {
@@ -99,7 +99,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 SETPOINTS.ENABLE_FREQUENCY_OVERDRIVE = 0;
             }
 
-            return;
+            return 0;
         }
         case 40110:
         {
@@ -119,7 +119,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 SETPOINTS.ENABLE_PROGMODE = 0;
             }
 
-            return;
+            return 0;
         }
         case 40111:
         {
@@ -136,7 +136,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 }
             }
 
-            return;
+            return 0;
         }
         case 40120:
         {
@@ -189,7 +189,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 }
             }
 
-            return;
+            return 0;
         }
         case 40150:
         {
@@ -204,7 +204,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 SETPOINTS.TRIGGER_RESET = 0;
             }
 
-            return;
+            return 0;
         }
         case 40300:
         {
@@ -213,7 +213,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.MODBUS_ADDRESS = (uint16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40301:
         {
@@ -222,7 +222,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.MODBUS_BAUDRATE = (PARAMETERS.MODBUS_BAUDRATE & 0x0000FFFF) | (((uint32_t)registerValue) << 16);
             }
 
-            return;
+            return 0;
         }
         case 40302:
         {
@@ -231,7 +231,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.MODBUS_BAUDRATE = (PARAMETERS.MODBUS_BAUDRATE & 0xFFFF0000) | (((uint32_t)registerValue) <<  0);
             }
 
-            return;
+            return 0;
         }
         case 40303:
         {
@@ -240,7 +240,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.MODBUS_PARITY = (uint16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40400:
         {
@@ -249,7 +249,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.PWM_FREQUENCY = (uint16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40401:
         {
@@ -258,7 +258,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.PWM_DEADTIME = (uint16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40402:
         {
@@ -267,7 +267,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.PWM_DEADTIME_PRESCALING = (uint16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40500:
         {
@@ -276,7 +276,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.DCBUS_NOMINAL_VOLTAGE = (uint16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40501:
         {
@@ -285,7 +285,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.DCBUS_MINIMAL_VOLTAGE = (uint16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40502:
         {
@@ -294,7 +294,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.DCBUS_MAXIMAL_VOLTAGE = (uint16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40503:
         {
@@ -303,7 +303,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.MOTOR_NOMINAL_VOLTAGE = (uint16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40504:
         {
@@ -312,7 +312,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.MOTOR_MINIMAL_VOLTAGE = (uint16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40505:
         {
@@ -321,7 +321,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.MOTOR_NOMINAL_FREQUENCY = (uint16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40506:
         {
@@ -330,7 +330,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.MOTOR_VOLTBOOST_FREQUENCY = (uint16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40507:
         {
@@ -339,7 +339,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.MOTOR_NOMINAL_FWD_CURRENT = (uint16_t)registerValue;;
             }
 
-            return;
+            return 0;
         }
         case 40508:
         {
@@ -348,7 +348,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.MOTOR_NOMINAL_REV_CURRENT = (uint16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40509:
         {
@@ -357,7 +357,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.MOTOR_OVERDRIVE_FWD_CURRENT = (uint16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40510:
         {
@@ -366,7 +366,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.MOTOR_OVERDRIVE_REV_CURRENT = (uint16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40600:
         {
@@ -375,7 +375,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_NOMINAL_FREQUENCY = (uint16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40601:
         {
@@ -384,7 +384,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_OVERDRIVE_FREQUENCY = (uint16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40602:
         {
@@ -393,7 +393,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_PROPORTIONAL_FACTOR = (int16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40603:
         {
@@ -402,7 +402,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_INTEGRAL_FACTOR = (int16_t)registerValue;
             }
 
-            return;
+            return 0;
         }
         case 40604:
         {
@@ -411,7 +411,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_SAMPLETIME = (PARAMETERS.CONTROLLER_SAMPLETIME & 0x0000FFFFFFFFFFFF) | (((uint64_t)registerValue) << 48);
             }
 
-            return;
+            return 0;
         }
         case 40605:
         {
@@ -420,7 +420,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_SAMPLETIME = (PARAMETERS.CONTROLLER_SAMPLETIME & 0xFFFF0000FFFFFFFF) | (((uint64_t)registerValue) << 32);
             }
 
-            return;
+            return 0;
         }
         case 40606:
         {
@@ -429,7 +429,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_SAMPLETIME = (PARAMETERS.CONTROLLER_SAMPLETIME & 0xFFFFFFFF0000FFFF) | (((uint64_t)registerValue) << 16);
             }
 
-            return;
+            return 0;
         }
         case 40607:
         {
@@ -438,7 +438,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_SAMPLETIME = (PARAMETERS.CONTROLLER_SAMPLETIME & 0xFFFFFFFFFFFF0000) | (((uint64_t)registerValue) <<  0);
             }
 
-            return;
+            return 0;
         }
         case 40608:
         {
@@ -447,7 +447,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_ENABLE_TIMEOUT = (PARAMETERS.CONTROLLER_ENABLE_TIMEOUT & 0x0000FFFFFFFFFFFF) | (((uint64_t)registerValue) << 48);
             }
 
-            return;
+            return 0;
         }
         case 40609:
         {
@@ -456,7 +456,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_ENABLE_TIMEOUT = (PARAMETERS.CONTROLLER_ENABLE_TIMEOUT & 0xFFFF0000FFFFFFFF) | (((uint64_t)registerValue) << 32);
             }
 
-            return;
+            return 0;
         }
         case 40610:
         {
@@ -465,7 +465,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_ENABLE_TIMEOUT = (PARAMETERS.CONTROLLER_ENABLE_TIMEOUT & 0xFFFFFFFF0000FFFF) | (((uint64_t)registerValue) << 16);
             }
 
-            return;
+            return 0;
         }
         case 40611:
         {
@@ -474,7 +474,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_ENABLE_TIMEOUT = (PARAMETERS.CONTROLLER_ENABLE_TIMEOUT & 0xFFFFFFFFFFFF0000) | (((uint64_t)registerValue) <<  0);
             }
 
-            return;
+            return 0;
         }
         case 40612:
         {
@@ -483,7 +483,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT = (PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT & 0x0000FFFFFFFFFFFF) | (((uint64_t)registerValue) << 48);
             }
 
-            return;
+            return 0;
         }
         case 40613:
         {
@@ -492,7 +492,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT = (PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT & 0xFFFF0000FFFFFFFF) | (((uint64_t)registerValue) << 32);
             }
 
-            return;
+            return 0;
         }
         case 40614:
         {
@@ -501,7 +501,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT = (PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT & 0xFFFFFFFF0000FFFF) | (((uint64_t)registerValue) << 16);
             }
 
-            return;
+            return 0;
         }
         case 40615:
         {
@@ -510,7 +510,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT = (PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT & 0xFFFFFFFFFFFF0000) | (((uint64_t)registerValue) <<  0);
             }
 
-            return;
+            return 0;
         }
         case 40616:
         {
@@ -519,7 +519,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN = (PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN & 0x0000FFFFFFFFFFFF) | (((uint64_t)registerValue) << 48);
             }
 
-            return;
+            return 0;
         }
         case 40617:
         {
@@ -528,7 +528,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN = (PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN & 0xFFFF0000FFFFFFFF) | (((uint64_t)registerValue) << 32);
             }
 
-            return;
+            return 0;
         }
         case 40618:
         {
@@ -537,7 +537,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN = (PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN & 0xFFFFFFFF0000FFFF) | (((uint64_t)registerValue) << 16);
             }
 
-            return;
+            return 0;
         }
         case 40619:
         {
@@ -546,7 +546,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN = (PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN & 0xFFFFFFFFFFFF0000) | (((uint64_t)registerValue) <<  0);
             }
 
-            return;
+            return 0;
         }
         case 40620:
         {
@@ -555,7 +555,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT & 0x0000FFFFFFFFFFFF) | (((uint64_t)registerValue) << 48);
             }
 
-            return;
+            return 0;
         }
         case 40621:
         {
@@ -564,7 +564,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT & 0xFFFF0000FFFFFFFF) | (((uint64_t)registerValue) << 32);
             }
 
-            return;
+            return 0;
         }
         case 40622:
         {
@@ -573,7 +573,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT & 0xFFFFFFFF0000FFFF) | (((uint64_t)registerValue) << 16);
             }
 
-            return;
+            return 0;
         }
         case 40623:
         {
@@ -582,7 +582,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT & 0xFFFFFFFFFFFF0000) | (((uint64_t)registerValue) <<  0);
             }
 
-            return;
+            return 0;
         }
         case 40624:
         {
@@ -591,7 +591,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT & 0x0000FFFFFFFFFFFF) | (((uint64_t)registerValue) << 48);
             }
 
-            return;
+            return 0;
         }
         case 40625:
         {
@@ -600,7 +600,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT & 0xFFFF0000FFFFFFFF) | (((uint64_t)registerValue) << 32);
             }
 
-            return;
+            return 0;
         }
         case 40626:
         {
@@ -609,7 +609,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT & 0xFFFFFFFF0000FFFF) | (((uint64_t)registerValue) << 16);
             }
 
-            return;
+            return 0;
         }
         case 40627:
         {
@@ -618,7 +618,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT & 0xFFFFFFFFFFFF0000) | (((uint64_t)registerValue) <<  0);
             }
 
-            return;
+            return 0;
         }
         case 40628:
         {
@@ -627,7 +627,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT & 0x0000FFFFFFFFFFFF) | (((uint64_t)registerValue) << 48);
             }
 
-            return;
+            return 0;
         }
         case 40629:
         {
@@ -636,7 +636,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT & 0xFFFF0000FFFFFFFF) | (((uint64_t)registerValue) << 32);
             }
 
-            return;
+            return 0;
         }
         case 40630:
         {
@@ -645,7 +645,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT & 0xFFFFFFFF0000FFFF) | (((uint64_t)registerValue) << 16);
             }
 
-            return;
+            return 0;
         }
         case 40631:
         {
@@ -654,7 +654,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT = (PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT & 0xFFFFFFFFFFFF0000) | (((uint64_t)registerValue) <<  0);
             }
 
-            return;
+            return 0;
         }
         case 40632:
         {
@@ -663,7 +663,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET = (PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET & 0x0000FFFF) | (((uint32_t)registerValue) << 16);
             }
 
-            return;
+            return 0;
         }
         case 40633:
         {
@@ -672,7 +672,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET = (PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET & 0xFFFF0000) | (((uint32_t)registerValue) <<  0);
             }
 
-            return;
+            return 0;
         }
         case 40634:
         {
@@ -681,7 +681,7 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET = (PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET & 0x0000FFFF) | (((uint32_t)registerValue) << 16);
             }
 
-            return;
+            return 0;
         }
         case 40635:
         {
@@ -690,16 +690,19 @@ void REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                 PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET = (PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET & 0xFFFF0000) | (((uint32_t)registerValue) <<  0);
             }
 
-            return;
+            return 0;
         }
         default:
         {
             if((registerAddress >= 41000) && (registerAddress <= 43047))
             {
                 PARAMETERS.CONTROLLER_UF_VALUE[registerAddress - 41000] = (uint16_t)registerValue;
+                return 0;
             }
 
-            return;
+            return 1;
         }
     }
+
+    return 1;
 }

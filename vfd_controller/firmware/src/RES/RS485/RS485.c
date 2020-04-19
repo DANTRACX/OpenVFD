@@ -39,13 +39,13 @@ RS485STATES;
 __attribute__((always_inline))
 static inline void _rs485_timer_start(void)
 {
-    TCCR3B |= (1 << CS30);
+    TCCR3B |= (1 << CS31);
 }
 
 __attribute__((always_inline))
 static inline void _rs485_timer_stop(void)
 {
-    TCCR3B &=  ~(1 << CS30);
+    TCCR3B &=  ~(1 << CS31);
 }
 
 __attribute__((always_inline))
@@ -58,12 +58,6 @@ __attribute__((always_inline))
 static inline void _rs485_reset_wrong_byte_distance(void)
 {
     TIFR3 |= (1 << OCF3A);
-}
-
-__attribute__((always_inline))
-static inline uint8_t _rs485_check_wrong_byte_distance(void)
-{
-    return (TIFR3 & (1 << OCF3A));
 }
 
 
@@ -84,9 +78,9 @@ void RS485_INIT(uint8_t addr, uint32_t baud, uint8_t parity)
     RS485STATES.state = WAIT_ROUNDTRIP;
 
     /* setup baudrate - F_CPU, U2X, */
-    uint32_t baudrate = (((RS232_F_CPU / baud) / 8) - 1);
-    uint32_t bitdist  = (((RS232_F_CPU / baud) - 1) * 5) / 2;
-    uint32_t bytedist = (((RS232_F_CPU / baud) - 1) * 9) / 2;
+    uint32_t baudrate  = (((RS232_F_CPU           ) / 8) / baud);
+    uint64_t bytedist  = (((RS232_F_CPU * 11 * 2.5) / 8) / baud);
+    uint64_t framedist = (((RS232_F_CPU * 11 * 4.5) / 8) / baud);
 
     /* initialize RS485 rx/tx switch */
     DDRB  |= (1 <<   DDB0);
@@ -124,8 +118,8 @@ void RS485_INIT(uint8_t addr, uint32_t baud, uint8_t parity)
     UCSR0B  = ((1 << RXCIE0) | (0 << TXCIE0) | (0 << UDRIE0) | (1 <<  RXEN0) | (1 <<  TXEN0) | (0 << UCSZ02) | (0 << RXB80) | (0 << TXB80));
 
     /* initialize timer */
-    OCR3A   = (uint16_t)(bitdist);
-    OCR3B   = (uint16_t)(bytedist);
+    OCR3A   = (uint16_t)(bytedist);
+    OCR3B   = (uint16_t)(framedist);
     TCCR3A  = ((0 << COM3A1) | (0 << COM3A0) | (0 << COM3B1) | (0 << COM3B0) | (0 <<  WGM31) | (0 <<  WGM30));
     TCCR3B  = ((0 <<  ICNC3) | (0 <<  ICES3) | (0 <<  WGM33) | (0 <<  WGM32) | (0 <<   CS32) | (0 <<   CS31) | (0 <<  CS30));
     TIMSK3 |= ((1 << OCIE3B));
@@ -227,8 +221,9 @@ ISR(USART0_RX_vect)
     }
 
     /* >1.5 between bytes, buffer full, parity error or frame error - delete pending frame */
-    if((_rs485_check_wrong_byte_distance()) || (UCSR0A & (1 << FE0)) || (UCSR0A & (1 << UPE0)) || ((RECVBUFFER.size + RECVBUFFER.pendingSize) > 512))
+    if((TIFR3 & (1 << OCF3A)) || (UCSR0A & (1 << FE0)) || (UCSR0A & (1 << UPE0)) || ((RECVBUFFER.size + RECVBUFFER.pendingSize) > 512))
     {
+        RECVBUFFER.buffer[RECVBUFFER.writeIdx] = UDR0;
         RECVBUFFER.writeIdx = (RECVBUFFER.writeIdx - RECVBUFFER.pendingSize) & 0x01FF;
         RECVBUFFER.pendingSize = 0;
         RS485STATES.state = WAIT_ROUNDTRIP;
@@ -241,8 +236,8 @@ ISR(USART0_RX_vect)
     /* modbus slave waits for beeing adressed by master */
     if(RS485STATES.state == WAIT_FRAMESTART)
     {
-        /* check if slave is beeing adressed as general call (0) or individually (addr) */
-        if((RECVBUFFER.buffer[RECVBUFFER.writeIdx] == 0x00) || (RECVBUFFER.buffer[RECVBUFFER.writeIdx] == RS485STATES.address))
+        /* check if slave is beeing adressed - broadcast msg 0 omitted at this point */
+        if((RECVBUFFER.buffer[RECVBUFFER.writeIdx] == RS485STATES.address))
         {
             RECVBUFFER.writeIdx = (RECVBUFFER.writeIdx + 1) & 0x01FF;
             RECVBUFFER.pendingSize++;

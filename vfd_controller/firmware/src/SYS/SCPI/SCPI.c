@@ -17,6 +17,12 @@ void SCPI_INIT(void)
 
 void SCPI_PROCESS(void)
 {
+    /* check for data in receiver buffer */
+    if(!(RS232_RXSIZE()))
+    {
+        return;
+    }
+
     char     temp;
     uint64_t counter = 0;
     uint8_t  frameComplete = 0;
@@ -24,13 +30,6 @@ void SCPI_PROCESS(void)
     int64_t registerValue = 0;
     uint16_t registerTemp = 0;
     uint64_t convert = 0;
-
-
-    /* check for data in receiver buffer */
-    if(!(RS232_RXSIZE()))
-    {
-        return;
-    }
 
     /* fetch byte per byte and store as frame */
     while(RS232_RXSIZE())
