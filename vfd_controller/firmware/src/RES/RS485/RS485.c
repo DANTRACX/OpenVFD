@@ -172,7 +172,7 @@ void RS485_FETCH(char *data, uint8_t size)
     for(counter = 0; counter < size; counter++)
     {
         data[counter] = RECVBUFFER.buffer[RECVBUFFER.readIdx];
-        RECVBUFFER.readIdx++;
+        RECVBUFFER.readIdx = (RECVBUFFER.readIdx + 1) & 0x01FF;
     }
 
     RECVBUFFER.size = RECVBUFFER.size - size;

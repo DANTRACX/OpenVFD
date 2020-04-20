@@ -5,5 +5,6 @@
 
 extern  int8_t      MEM_READ(uint16_t eememOffset, void *eememData, uint16_t size);
 extern  void        MEM_WRITE(uint16_t eememOffset, void *eememData, uint16_t size);
+extern  void        MEM_CRC16(char *data, uint8_t size, char *crcLow, char *crcHigh);
 
 #endif

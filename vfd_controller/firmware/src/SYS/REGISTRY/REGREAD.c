@@ -69,29 +69,39 @@ uint8_t REGISTRY_REGREAD(uint16_t registerAddress, uint16_t *registerValue)
             *registerValue = (uint16_t)(PROCESSVALUES.DCBUS_CURRENT >>  0);
             return 0;
         }
-        case 30205:
+        case 30203:
+        {
+            *registerValue = (uint16_t)PROCESSVALUES.DCBUS_TEMPERATURE;
+            return 0;
+        }
+        case 30204:
         {
             *registerValue = (uint16_t)PROCESSVALUES.MOTOR_FREQUENCY;
             return 0;
         }
-        case 30206:
+        case 30205:
         {
             *registerValue = (uint16_t)PROCESSVALUES.MOTOR_POWER;
             return 0;
         }
-        case 30207:
+        case 30206:
         {
             *registerValue = (uint16_t)PROCESSVALUES.MOTOR_VOLTAGE;
             return 0;
         }
-        case 30208:
+        case 30207:
         {
             *registerValue = (uint16_t)(PROCESSVALUES.MOTOR_CURRENT >> 16);
             return 0;
         }
-        case 30209:
+        case 30208:
         {
             *registerValue = (uint16_t)(PROCESSVALUES.MOTOR_CURRENT >>  0);
+            return 0;
+        }
+        case 30209:
+        {
+            *registerValue = (uint16_t)PROCESSVALUES.MOTOR_TEMPERATURE;
             return 0;
         }
         case 30250:
@@ -119,255 +129,269 @@ uint8_t REGISTRY_REGREAD(uint16_t registerAddress, uint16_t *registerValue)
             *registerValue = (uint16_t)PARAMETERS.MODBUS_PARITY;
             return 0;
         }
+        case 40304:
+        {
+            *registerValue = (uint16_t)PARAMETERS.MODBUS_OFFSET;
+            return 0;
+        }
         case 40400:
-        {
-            *registerValue = (uint16_t)PARAMETERS.PWM_FREQUENCY;
-            return 0;
-        }
-        case 40401:
-        {
-            *registerValue = (uint16_t)PARAMETERS.PWM_DEADTIME;
-            return 0;
-        }
-        case 40402:
-        {
-            *registerValue = (uint16_t)PARAMETERS.PWM_DEADTIME_PRESCALING;
-            return 0;
-        }
-        case 40500:
-        {
-            *registerValue = (uint16_t)PARAMETERS.DCBUS_NOMINAL_VOLTAGE;
-            return 0;
-        }
-        case 40501:
-        {
-            *registerValue = (uint16_t)PARAMETERS.DCBUS_MINIMAL_VOLTAGE;
-            return 0;
-        }
-        case 40502:
-        {
-            *registerValue = (uint16_t)PARAMETERS.DCBUS_MAXIMAL_VOLTAGE;
-            return 0;
-        }
-        case 40503:
         {
             *registerValue = (uint16_t)PARAMETERS.MOTOR_NOMINAL_VOLTAGE;
             return 0;
         }
-        case 40504:
+        case 40401:
         {
             *registerValue = (uint16_t)PARAMETERS.MOTOR_MINIMAL_VOLTAGE;
             return 0;
         }
-        case 40505:
+        case 40402:
         {
             *registerValue = (uint16_t)PARAMETERS.MOTOR_NOMINAL_FREQUENCY;
             return 0;
         }
-        case 40506:
+        case 40403:
         {
             *registerValue = (uint16_t)PARAMETERS.MOTOR_VOLTBOOST_FREQUENCY;
             return 0;
         }
-        case 40507:
+        case 40404:
         {
             *registerValue = (uint16_t)PARAMETERS.MOTOR_NOMINAL_FWD_CURRENT;
             return 0;
         }
-        case 40508:
+        case 40405:
         {
             *registerValue = (uint16_t)PARAMETERS.MOTOR_NOMINAL_REV_CURRENT;
             return 0;
         }
-        case 40509:
+        case 40406:
         {
             *registerValue = (uint16_t)PARAMETERS.MOTOR_OVERDRIVE_FWD_CURRENT;
             return 0;
         }
-        case 40510:
+        case 40407:
         {
             *registerValue = (uint16_t)PARAMETERS.MOTOR_OVERDRIVE_REV_CURRENT;
             return 0;
         }
-
-        case 40600:
+        case 40500:
         {
             *registerValue = (uint16_t)PARAMETERS.CONTROLLER_NOMINAL_FREQUENCY;
             return 0;
         }
-        case 40601:
+        case 40501:
         {
             *registerValue = (uint16_t)PARAMETERS.CONTROLLER_OVERDRIVE_FREQUENCY;
             return 0;
         }
-        case 40602:
+        case 40502:
         {
             *registerValue = (uint16_t)PARAMETERS.CONTROLLER_PROPORTIONAL_FACTOR;
             return 0;
         }
-        case 40603:
+        case 40503:
         {
             *registerValue = (uint16_t)PARAMETERS.CONTROLLER_INTEGRAL_FACTOR;
             return 0;
         }
-        case 40604:
+        case 40504:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_SAMPLETIME >> 48);
             return 0;
         }
-        case 40605:
+        case 40505:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_SAMPLETIME >> 32);
             return 0;
         }
-        case 40606:
+        case 40506:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_SAMPLETIME >> 16);
             return 0;
         }
-        case 40607:
+        case 40507:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_SAMPLETIME >>  0);
             return 0;
         }
-        case 40608:
+        case 40508:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_ENABLE_TIMEOUT >> 48);
             return 0;
         }
-        case 40609:
+        case 40509:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_ENABLE_TIMEOUT >> 32);
             return 0;
         }
-        case 40610:
+        case 40510:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_ENABLE_TIMEOUT >> 16);
             return 0;
         }
-        case 40611:
+        case 40511:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_ENABLE_TIMEOUT >>  0);
             return 0;
         }
-        case 40612:
+        case 40512:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT >> 48);
             return 0;
         }
-        case 40613:
+        case 40513:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT >> 32);
             return 0;
         }
-        case 40614:
+        case 40514:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT >> 16);
             return 0;
         }
-        case 40615:
+        case 40515:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_OVERDRIVE_TIMEOUT >>  0);
             return 0;
         }
-        case 40616:
+        case 40516:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN >> 48);
             return 0;
         }
-        case 40617:
+        case 40517:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN >> 32);
             return 0;
         }
-        case 40618:
+        case 40518:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN >> 16);
             return 0;
         }
-        case 40619:
+        case 40519:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_OVERDRIVE_COOLDOWN >>  0);
             return 0;
         }
-        case 40620:
+        case 40520:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT >> 48);
             return 0;
         }
-        case 40621:
+        case 40521:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT >> 32);
             return 0;
         }
-        case 40622:
+        case 40522:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT >> 16);
             return 0;
         }
-        case 40623:
+        case 40523:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_NOMINAL_UMZ_TIMEOUT >>  0);
             return 0;
         }
-        case 40624:
+        case 40524:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT >> 48);
             return 0;
         }
-        case 40625:
+        case 40525:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT >> 32);
             return 0;
         }
-        case 40626:
+        case 40526:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT >> 16);
             return 0;
         }
-        case 40627:
+        case 40527:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_OVERDRIVE_UMZ_TIMEOUT >>  0);
             return 0;
         }
-        case 40628:
+        case 40528:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT >> 48);
             return 0;
         }
-        case 40629:
+        case 40529:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT >> 32);
             return 0;
         }
-        case 40630:
+        case 40530:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT >> 16);
             return 0;
         }
-        case 40631:
+        case 40531:
         {
             *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT >>  0);
             return 0;
         }
-        case 40632:
+        case 40532:
         {
-            *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET >>  16);
+            *registerValue = (uint16_t)PARAMETERS.CONTROLLER_DCBUS_NOMINAL_VOLTAGE;
             return 0;
         }
-        case 40633:
+        case 40533:
         {
-            *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET >>  0);
+            *registerValue = (uint16_t)PARAMETERS.CONTROLLER_DCBUS_MINIMAL_VOLTAGE;
             return 0;
         }
-        case 40634:
+        case 40534:
         {
-            *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET >>  16);
+            *registerValue = (uint16_t)PARAMETERS.CONTROLLER_DCBUS_MAXIMAL_VOLTAGE;
             return 0;
         }
-        case 40635:
+        case 40535:
         {
-            *registerValue = (uint16_t)(PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET >>  0);
+            *registerValue = (uint16_t)PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET;
+            return 0;
+        }
+        case 40536:
+        {
+            *registerValue = (uint16_t)PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET;
+            return 0;
+        }
+        case 40537:
+        {
+            *registerValue = (uint16_t)PARAMETERS.CONTROLLER_DCBUS_FAN_THRESHOLD;
+            return 0;
+        }
+        case 40538:
+        {
+            *registerValue = (uint16_t)PARAMETERS.CONTROLLER_DCBUS_MAXIMAL_TEMP;
+            return 0;
+        }
+        case 40539:
+        {
+            *registerValue = (uint16_t)PARAMETERS.CONTROLLER_MOTOR_FAN_THRESHOLD;
+            return 0;
+        }
+        case 40540:
+        {
+            *registerValue = (uint16_t)PARAMETERS.CONTROLLER_MOTOR_MAXIMAL_TEMP;
+            return 0;
+        }
+        case 40541:
+        {
+            *registerValue = (uint16_t)PARAMETERS.CONTROLLER_PWM_FREQUENCY;
+            return 0;
+        }
+        case 40542:
+        {
+            *registerValue = (uint16_t)PARAMETERS.CONTROLLER_PWM_DEADTIME;
+            return 0;
+        }
+        case 40543:
+        {
+            *registerValue = (uint16_t)PARAMETERS.CONTROLLER_PWM_DEADTIME_PRESCALING;
             return 0;
         }
         default:

@@ -152,7 +152,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
                     uint64_t uboost_finalvoltage = 0;
 
                     /* calculate u/f lookup-table base values */
-                    scaled_dcbusvoltage = ((PARAMETERS.DCBUS_NOMINAL_VOLTAGE * (1.10 * 1774)) / 2048);
+                    scaled_dcbusvoltage = ((PARAMETERS.CONTROLLER_DCBUS_NOMINAL_VOLTAGE * (1.10 * 1774)) / 2048);
                     scaled_motorvoltage = ((PARAMETERS.MOTOR_NOMINAL_VOLTAGE * (1.00 * 1448)) / 1024);
                     scaled_motorvoltage = ((scaled_motorvoltage * 255) / scaled_dcbusvoltage);
 
@@ -242,61 +242,16 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
+        case 40304:
+        {
+            if((SETPOINTS.ENABLE_PROGMODE == 1) && ((int16_t)registerValue > -2) && ((int16_t)registerValue < 2))
+            {
+                PARAMETERS.MODBUS_OFFSET = (int16_t)registerValue;
+            }
+
+            return 0;
+        }
         case 40400:
-        {
-            if((SETPOINTS.ENABLE_PROGMODE == 1) && (registerValue < 5))
-            {
-                PARAMETERS.PWM_FREQUENCY = (uint16_t)registerValue;
-            }
-
-            return 0;
-        }
-        case 40401:
-        {
-            if(SETPOINTS.ENABLE_PROGMODE == 1)
-            {
-                PARAMETERS.PWM_DEADTIME = (uint16_t)registerValue;
-            }
-
-            return 0;
-        }
-        case 40402:
-        {
-            if((SETPOINTS.ENABLE_PROGMODE == 1) && ((uint16_t)registerValue < 4))
-            {
-                PARAMETERS.PWM_DEADTIME_PRESCALING = (uint16_t)registerValue;
-            }
-
-            return 0;
-        }
-        case 40500:
-        {
-            if(SETPOINTS.ENABLE_PROGMODE == 1)
-            {
-                PARAMETERS.DCBUS_NOMINAL_VOLTAGE = (uint16_t)registerValue;
-            }
-
-            return 0;
-        }
-        case 40501:
-        {
-            if(SETPOINTS.ENABLE_PROGMODE == 1)
-            {
-                PARAMETERS.DCBUS_MINIMAL_VOLTAGE = (uint16_t)registerValue;
-            }
-
-            return 0;
-        }
-        case 40502:
-        {
-            if(SETPOINTS.ENABLE_PROGMODE == 1)
-            {
-                PARAMETERS.DCBUS_MAXIMAL_VOLTAGE = (uint16_t)registerValue;
-            }
-
-            return 0;
-        }
-        case 40503:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -305,7 +260,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40504:
+        case 40401:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -314,7 +269,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40505:
+        case 40402:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -323,7 +278,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40506:
+        case 40403:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -332,7 +287,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40507:
+        case 40404:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -341,7 +296,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40508:
+        case 40405:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -350,7 +305,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40509:
+        case 40406:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -359,7 +314,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40510:
+        case 40407:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -368,7 +323,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40600:
+        case 40500:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -377,7 +332,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40601:
+        case 40501:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -386,7 +341,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40602:
+        case 40502:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -395,7 +350,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40603:
+        case 40503:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -404,7 +359,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40604:
+        case 40504:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -413,7 +368,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40605:
+        case 40505:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -422,7 +377,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40606:
+        case 40506:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -431,7 +386,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40607:
+        case 40507:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -440,7 +395,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40608:
+        case 40508:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -449,7 +404,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40609:
+        case 40509:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -458,7 +413,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40610:
+        case 40510:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -467,7 +422,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40611:
+        case 40511:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -476,7 +431,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40612:
+        case 40512:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -485,7 +440,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40613:
+        case 40513:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -494,7 +449,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40614:
+        case 40514:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -503,7 +458,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40615:
+        case 40515:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -512,7 +467,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40616:
+        case 40516:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -521,7 +476,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40617:
+        case 40517:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -530,7 +485,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40618:
+        case 40518:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -539,7 +494,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40619:
+        case 40519:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -548,7 +503,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40620:
+        case 40520:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -557,7 +512,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40621:
+        case 40521:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -566,7 +521,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40622:
+        case 40522:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -575,7 +530,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40623:
+        case 40523:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -584,7 +539,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40624:
+        case 40524:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -593,7 +548,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40625:
+        case 40525:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -602,7 +557,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40626:
+        case 40526:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -611,7 +566,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40627:
+        case 40527:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -620,7 +575,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40628:
+        case 40528:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -629,7 +584,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40629:
+        case 40529:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -638,7 +593,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40630:
+        case 40530:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -647,7 +602,7 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40631:
+        case 40531:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
@@ -656,38 +611,110 @@ uint8_t REGISTRY_REGWRITE(uint16_t registerAddress, uint16_t registerValue)
 
             return 0;
         }
-        case 40632:
+        case 40532:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
-                PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET = (PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET & 0x0000FFFF) | (((uint32_t)registerValue) << 16);
+                PARAMETERS.CONTROLLER_DCBUS_NOMINAL_VOLTAGE = (uint16_t)registerValue;
             }
 
             return 0;
         }
-        case 40633:
+        case 40533:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
-                PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET = (PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET & 0xFFFF0000) | (((uint32_t)registerValue) <<  0);
+                PARAMETERS.CONTROLLER_DCBUS_MINIMAL_VOLTAGE = (uint16_t)registerValue;
             }
 
             return 0;
         }
-        case 40634:
+        case 40534:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
-                PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET = (PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET & 0x0000FFFF) | (((uint32_t)registerValue) << 16);
+                PARAMETERS.CONTROLLER_DCBUS_MAXIMAL_VOLTAGE = (uint16_t)registerValue;
             }
 
             return 0;
         }
-        case 40635:
+        case 40535:
         {
             if(SETPOINTS.ENABLE_PROGMODE == 1)
             {
-                PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET = (PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET & 0xFFFF0000) | (((uint32_t)registerValue) <<  0);
+                PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET = (int16_t)registerValue;
+            }
+
+            return 0;
+        }
+        case 40536:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET = (int16_t)registerValue;
+            }
+
+            return 0;
+        }
+        case 40537:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_DCBUS_FAN_THRESHOLD = (int16_t)registerValue;
+            }
+
+            return 0;
+        }
+        case 40538:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_DCBUS_MAXIMAL_TEMP = (int16_t)registerValue;
+            }
+
+            return 0;
+        }
+        case 40539:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_MOTOR_FAN_THRESHOLD = (int16_t)registerValue;
+            }
+
+            return 0;
+        }
+        case 40540:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_MOTOR_MAXIMAL_TEMP = (int16_t)registerValue;
+            }
+
+            return 0;
+        }
+        case 40541:
+        {
+            if((SETPOINTS.ENABLE_PROGMODE == 1) && (registerValue < 5))
+            {
+                PARAMETERS.CONTROLLER_PWM_FREQUENCY = (uint16_t)registerValue;
+            }
+
+            return 0;
+        }
+        case 40542:
+        {
+            if(SETPOINTS.ENABLE_PROGMODE == 1)
+            {
+                PARAMETERS.CONTROLLER_PWM_DEADTIME = (uint16_t)registerValue;
+            }
+
+            return 0;
+        }
+        case 40543:
+        {
+            if((SETPOINTS.ENABLE_PROGMODE == 1) && ((uint16_t)registerValue < 4))
+            {
+                PARAMETERS.CONTROLLER_PWM_DEADTIME_PRESCALING = (uint16_t)registerValue;
             }
 
             return 0;

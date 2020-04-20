@@ -24,14 +24,15 @@ int main(void)
 
     while(1)
     {
-        while(CONTROLLER_WAIT_CYCLE())
-        {
-                wdt_reset();
-        }
-
         MODBUS_PROCESS();
         SCPI_PROCESS();
         CONTROLLER_STEP_CYCLE();
+
+        do
+        {
+                wdt_reset();
+        }
+        while(CONTROLLER_WAIT_CYCLE());
     }
 
     return 0;

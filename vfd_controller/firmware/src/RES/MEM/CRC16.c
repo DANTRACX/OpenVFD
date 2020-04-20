@@ -1,6 +1,6 @@
-#include "CRC.h"
+#include "MEM.h"
 
-static const uint8_t lookup_crcHigh[] =
+static const uint8_t lookup_crc16High[] =
 {
     0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
     0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
@@ -23,7 +23,7 @@ static const uint8_t lookup_crcHigh[] =
 } ;
 
 /* Table of CRC values for low–order byte */
-static const uint8_t lookup_crcLow[] =
+static const uint8_t lookup_crc16Low[] =
 {
     0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4,
     0x04, 0xCC, 0x0C, 0x0D, 0xCD, 0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09,
@@ -45,7 +45,7 @@ static const uint8_t lookup_crcLow[] =
     0x40
 };
 
-void CRC16(char *data, uint8_t size, char *crcLow, char *crcHigh)
+void MEM_CRC16(char *data, uint8_t size, char *crcLow, char *crcHigh)
 {
     uint8_t uIndex;
 
@@ -55,7 +55,7 @@ void CRC16(char *data, uint8_t size, char *crcLow, char *crcHigh)
     while(size--)
     {
         uIndex   = *crcLow  ^ *data++;
-        *crcLow  = *crcHigh ^ lookup_crcHigh[uIndex] ;
-        *crcHigh = lookup_crcLow[uIndex] ;
+        *crcLow  = *crcHigh ^ lookup_crc16High[uIndex] ;
+        *crcHigh = lookup_crc16Low[uIndex] ;
     }
 }

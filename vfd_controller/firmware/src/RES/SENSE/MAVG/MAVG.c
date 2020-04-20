@@ -19,12 +19,12 @@ int16_t MAVG_GET(MAVG_s *ptr)
     return (int16_t)(ptr->avg);
 }
 
-int16_t MAVG_UPDATE(MAVG_s *ptr, int32_t value)
+uint16_t MAVG_UPDATE(MAVG_s *ptr, uint16_t value)
 {
     ptr->sum = ptr->sum - ptr->buffer[ptr->bufferpos] + value;
     ptr->avg = ptr->sum / MAVG_BUFFERSIZE;
     ptr->buffer[ptr->bufferpos] = value;
     ptr->bufferpos = (ptr->bufferpos + 1) & (MAVG_BUFFERSIZE - 1);
 
-    return (int16_t)(ptr->avg);
+    return (uint16_t)(ptr->avg);
 }

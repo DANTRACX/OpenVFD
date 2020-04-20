@@ -116,14 +116,14 @@ void SCPI_PROCESS(void)
             }
 
             /* read multi byte register */
-            if((registerAddress == 30201) || (registerAddress == 30208) || (registerAddress == 40301) || (registerAddress == 40632) || (registerAddress == 40634))
+            if((registerAddress == 30201) || (registerAddress == 30207) || (registerAddress == 40301))
             {
                 registerValue = (((int64_t)((int16_t)registerTemp)) << 16);
                 REGISTRY_REGREAD(registerAddress + 1, &registerTemp);
                 registerValue |= (((int64_t)((int16_t)registerTemp)) <<  0);
             }
 
-            else if((registerAddress == 40604) || (registerAddress == 40608) || (registerAddress == 40612) || (registerAddress == 40616) || (registerAddress == 40620) || (registerAddress == 40624) || (registerAddress == 40628))
+            else if((registerAddress == 40504) || (registerAddress == 40508) || (registerAddress == 40512) || (registerAddress == 40516) || (registerAddress == 40520) || (registerAddress == 40524) || (registerAddress == 40528))
             {
                 registerValue = (((int64_t)registerTemp) << 48);
                 REGISTRY_REGREAD(registerAddress + 1, &registerTemp);
@@ -181,13 +181,13 @@ void SCPI_PROCESS(void)
                 SCPISTATES.framePtr--;
             }
 
-            if((registerAddress == 40301) || (registerAddress == 40632) || (registerAddress == 40634))
+            if(registerAddress == 40301)
             {
                 REGISTRY_REGWRITE(registerAddress + 0, (uint16_t)(registerValue >> 16));
                 REGISTRY_REGWRITE(registerAddress + 1, (uint16_t)(registerValue >>  0));
             }
 
-            else if((registerAddress == 40604) || (registerAddress == 40608) || (registerAddress == 40612) || (registerAddress == 40616) || (registerAddress == 40620) || (registerAddress == 40624) || (registerAddress == 40628))
+            else if((registerAddress == 40504) || (registerAddress == 40508) || (registerAddress == 40512) || (registerAddress == 40516) || (registerAddress == 40520) || (registerAddress == 40524) || (registerAddress == 40528))
             {
                 REGISTRY_REGWRITE(registerAddress + 0, (uint16_t)(registerValue >> 48));
                 REGISTRY_REGWRITE(registerAddress + 1, (uint16_t)(registerValue >> 32));

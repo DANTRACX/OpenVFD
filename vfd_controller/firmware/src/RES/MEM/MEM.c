@@ -2,7 +2,6 @@
 #include <avr/io.h>
 #include <avr/wdt.h>
 #include <avr/interrupt.h>
-#include <util/crc16.h>
 
 __attribute__((always_inline))
 static inline uint8_t _eemem_read(uint16_t eememAddr)
@@ -53,21 +52,22 @@ int8_t MEM_READ(uint16_t eememOffset, void *eememData, uint16_t size)
 {
     uint8_t *ptr = (uint8_t *)eememData;
     uint16_t counter = 0;
-    uint16_t crc_new = 0;
-    uint16_t crc_old = 0;
+    char crcH_old = 0;
+    char crcL_old = 0;
+    char crcH_new = 0;
+    char crcL_new = 0;
 
     for(counter = 0; counter < size; counter++)
     {
         *ptr = (uint8_t)_eemem_read(eememOffset + counter);
-        crc_new = _crc16_update(crc_new, (uint8_t)*ptr);
         ptr++;
     }
 
-    crc_old = (uint8_t)_eemem_read(eememOffset + counter + 0);
-    crc_old = crc_old << 8;
-    crc_old = crc_old | ((uint8_t)_eemem_read(eememOffset + counter + 1));
+    crcH_old = (char)_eemem_read(eememOffset + counter + 0);
+    crcL_old = (char)_eemem_read(eememOffset + counter + 1);
+    MEM_CRC16((char *)eememData, size, &crcL_new, &crcH_new);
 
-    if(crc_old != crc_new)
+    if((crcL_old != crcL_new) || (crcH_old != crcH_new))
     {
         return -1;
     }
@@ -79,15 +79,16 @@ void MEM_WRITE(uint16_t eememOffset, void *eememData, uint16_t size)
 {
     uint16_t counter = 0;
     uint8_t *ptr = (uint8_t *)eememData;
-    uint16_t crc = 0;
+    char crcH = 0;
+    char crcL = 0;
 
     for(counter = 0; counter < size; counter++)
     {
         _eemem_write(eememOffset + counter, (uint8_t)*ptr);
-        crc = _crc16_update(crc, (uint8_t)*ptr);
         ptr++;
     }
 
-    _eemem_write(eememOffset + counter + 0, (uint8_t)(crc >> 8));
-    _eemem_write(eememOffset + counter + 1, (uint8_t)(crc >> 0));
+    MEM_CRC16((char *)eememData, size, &crcL, &crcH);
+    _eemem_write(eememOffset + counter + 0, (uint8_t)crcH);
+    _eemem_write(eememOffset + counter + 1, (uint8_t)crcL);
 }

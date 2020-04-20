@@ -1,7 +1,7 @@
 #include "MODBUS.h"
 #include "../REGISTRY/REGISTRY.h"
 #include "../../RES/RS485/RS485.h"
-#include "./CRC/CRC.h"
+#include "../../RES/MEM/MEM.h"
 
 static union convert_u
 {
@@ -31,7 +31,7 @@ static inline void _modbus_exception(uint8_t id, uint8_t fc, uint8_t ex, char *b
     buffer[0] = id;
     buffer[1] = (fc | 0x80);
     buffer[2] = ex;
-    CRC16(&buffer[0], 3, &buffer[3], &buffer[4]);
+    MEM_CRC16(&buffer[0], 3, &buffer[3], &buffer[4]);
     RS485_SEND(buffer, 5);
 }
 
@@ -69,7 +69,7 @@ void MODBUS_PROCESS(void)
             }
 
             RS485_FETCH(&temp[2], 6);
-            CRC16(&temp[0], 6, &temp[8], &temp[9]);
+            MEM_CRC16(&temp[0], 6, &temp[8], &temp[9]);
 
             if((temp[6] != temp[8]) || (temp[7] != temp[9]))
             {
@@ -77,7 +77,7 @@ void MODBUS_PROCESS(void)
                 return;
             }
 
-            registerAddress = _bytes2word(&temp[2], &temp[3]);
+            registerAddress = 40000 + _bytes2word(&temp[2], &temp[3]) + PARAMETERS.MODBUS_OFFSET;
             registerCount = _bytes2word(&temp[4], &temp[5]);
             bufferPtr = 2;
             temp[bufferPtr++] = (uint8_t)registerCount*2;
@@ -94,7 +94,7 @@ void MODBUS_PROCESS(void)
                 temp[bufferPtr++] = convert.cbyte[0];
             }
 
-            CRC16(&temp[0], (3 + 2*registerCount), &temp[bufferPtr + 0], &temp[bufferPtr + 1]);
+            MEM_CRC16(&temp[0], (3 + 2*registerCount), &temp[bufferPtr + 0], &temp[bufferPtr + 1]);
             RS485_SEND(temp, (5 + 2*registerCount));
             return;
         }
@@ -107,7 +107,7 @@ void MODBUS_PROCESS(void)
             }
 
             RS485_FETCH(&temp[2], 6);
-            CRC16(&temp[0], 6, &temp[8], &temp[9]);
+            MEM_CRC16(&temp[0], 6, &temp[8], &temp[9]);
 
             if((temp[6] != temp[8]) || (temp[7] != temp[9]))
             {
@@ -115,7 +115,7 @@ void MODBUS_PROCESS(void)
                 return;
             }
 
-            registerAddress = _bytes2word(&temp[2], &temp[3]);
+            registerAddress = 30000 + _bytes2word(&temp[2], &temp[3]) + PARAMETERS.MODBUS_OFFSET;
             registerCount = _bytes2word(&temp[4], &temp[5]);
             bufferPtr = 2;
             temp[bufferPtr++] = (uint8_t)registerCount*2;
@@ -132,7 +132,7 @@ void MODBUS_PROCESS(void)
                 temp[bufferPtr++] = convert.cbyte[0];
             }
 
-            CRC16(&temp[0], (3 + 2*registerCount), &temp[bufferPtr + 0], &temp[bufferPtr + 1]);
+            MEM_CRC16(&temp[0], (3 + 2*registerCount), &temp[bufferPtr + 0], &temp[bufferPtr + 1]);
             RS485_SEND(temp, (5 + 2*registerCount));
             return;
         }
@@ -145,7 +145,7 @@ void MODBUS_PROCESS(void)
             }
 
             RS485_FETCH(&temp[2], 6);
-            CRC16(&temp[0], 6, &temp[8], &temp[9]);
+            MEM_CRC16(&temp[0], 6, &temp[8], &temp[9]);
 
             if((temp[6] != temp[8]) || (temp[7] != temp[9]))
             {
@@ -153,7 +153,7 @@ void MODBUS_PROCESS(void)
                 return;
             }
 
-            registerAddress = _bytes2word(&temp[2], &temp[3]);
+            registerAddress = 40000 + _bytes2word(&temp[2], &temp[3]) + PARAMETERS.MODBUS_OFFSET;
             registerValue = _bytes2word(&temp[4], &temp[5]);
 
             if(REGISTRY_REGWRITE(registerAddress, registerValue) == 1)
@@ -182,7 +182,7 @@ void MODBUS_PROCESS(void)
             }
 
             RS485_FETCH(&temp[7], (temp[6] + 2));
-            CRC16(&temp[0], 7 + temp[6], &temp[254], &temp[255]);
+            MEM_CRC16(&temp[0], 7 + temp[6], &temp[254], &temp[255]);
 
             if((temp[7 + temp[6] + 0] != temp[254]) || (temp[7 + temp[6] + 1] != temp[255]))
             {
@@ -190,7 +190,7 @@ void MODBUS_PROCESS(void)
                 return;
             }
 
-            registerAddress = _bytes2word(&temp[2], &temp[3]);
+            registerAddress = 40000 + _bytes2word(&temp[2], &temp[3]) + PARAMETERS.MODBUS_OFFSET;
             registerCount = _bytes2word(&temp[4], &temp[5]);
             bufferPtr = 7;
 
@@ -205,7 +205,7 @@ void MODBUS_PROCESS(void)
                 bufferPtr = bufferPtr + 2;
             }
 
-            CRC16(&temp[0], 6, &temp[6], &temp[7]);
+            MEM_CRC16(&temp[0], 6, &temp[6], &temp[7]);
             RS485_SEND(temp, 8);
             return;
         }
@@ -215,10 +215,4 @@ void MODBUS_PROCESS(void)
             break;
         }
     }
-
-    while(RS485_RXSIZE())
-    {
-    }
-
-    // interpret frame and send response
 }

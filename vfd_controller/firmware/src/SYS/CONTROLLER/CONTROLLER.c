@@ -1,5 +1,4 @@
 #include "CONTROLLER.h"
-#include "./MAVG/MAVG.h"
 #include "../REGISTRY/REGISTRY.h"
 #include "../../RES/SVPWM/SVPWM.h"
 #include "../../RES/SENSE/SENSE.h"
@@ -14,8 +13,6 @@ static struct CONTROLLERSTATES_s
     TIME_s enableTimer;
     TIME_s motorUMZTimer;
     TIME_s dcbusUMZTimer;
-    MAVG_s filtered_buscurrent;
-    MAVG_s filtered_busvoltage;
 }
 CONTROLLERSTATES;
 
@@ -116,11 +113,10 @@ static inline void _controller_check_overdrive(void)
 __attribute__((always_inline))
 static inline void _controller_check_overload(void)
 {
-    PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_WARNING);
     PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_DCBUS_UMZ_WARNING);
     PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_MOTOR_UMZ_WARNING);
 
-    if((PROCESSVALUES.DCBUS_VOLTAGE < PARAMETERS.DCBUS_MAXIMAL_VOLTAGE) && (PROCESSVALUES.DCBUS_VOLTAGE > PARAMETERS.DCBUS_MINIMAL_VOLTAGE))
+    if((PROCESSVALUES.DCBUS_VOLTAGE < PARAMETERS.CONTROLLER_DCBUS_MAXIMAL_VOLTAGE) && (PROCESSVALUES.DCBUS_VOLTAGE > PARAMETERS.CONTROLLER_DCBUS_MINIMAL_VOLTAGE))
     {
         TIME_SET(&(CONTROLLERSTATES.dcbusUMZTimer), PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT);
     }
@@ -129,7 +125,6 @@ static inline void _controller_check_overload(void)
     {
         if(!(TIME_CHECKEXP(&(CONTROLLERSTATES.dcbusUMZTimer))))
         {
-            PROCESSVALUES.SYSTEM_STATUS |= (SYSTEM_STATUS_WARNING);
             PROCESSVALUES.SYSTEM_STATUS |= (SYSTEM_STATUS_DCBUS_UMZ_WARNING);
         }
 
@@ -137,7 +132,6 @@ static inline void _controller_check_overload(void)
         {
             PROCESSVALUES.SYSTEM_STATUS |=  (SYSTEM_STATUS_ERROR);
             PROCESSVALUES.SYSTEM_STATUS |=  (SYSTEM_STATUS_DCBUS_UMZ_ERROR);
-            PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_ENABLE);
         }
     }
 
@@ -156,7 +150,6 @@ static inline void _controller_check_overload(void)
     {
         if(!(TIME_CHECKEXP(&(CONTROLLERSTATES.motorUMZTimer))))
         {
-            PROCESSVALUES.SYSTEM_STATUS |= (SYSTEM_STATUS_WARNING);
             PROCESSVALUES.SYSTEM_STATUS |= (SYSTEM_STATUS_MOTOR_UMZ_WARNING);
         }
 
@@ -164,7 +157,6 @@ static inline void _controller_check_overload(void)
         {
             PROCESSVALUES.SYSTEM_STATUS |=  (SYSTEM_STATUS_ERROR);
             PROCESSVALUES.SYSTEM_STATUS |=  (SYSTEM_STATUS_MOTOR_UMZ_ERROR);
-            PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_ENABLE);
         }
     }
 }
@@ -177,10 +169,6 @@ void CONTROLLER_INIT(void)
     CONTROLLERSTATES.ierror = 0;
     PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_ENABLE);
     PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_CURRENT_OVERDRIVE);
-
-    /* initialize filter */
-    MAVG_INIT(&(CONTROLLERSTATES.filtered_busvoltage));
-    MAVG_INIT(&(CONTROLLERSTATES.filtered_buscurrent));
 
     /* initialize timing intervals */
     TIME_INIT();
@@ -196,9 +184,9 @@ void CONTROLLER_INIT(void)
     /* initialize svpwm subsystem */
     SVPWM_INIT();
     SVPWM_STOP();
-    SVPWM_QUEUE_SET_PWM_FREQUENCY(PARAMETERS.PWM_FREQUENCY);
-    SVPWM_QUEUE_SET_DEADTIME_PRESCALER(PARAMETERS.PWM_DEADTIME_PRESCALING);
-    SVPWM_QUEUE_SET_DEADTIME_TIMINGS(((PARAMETERS.PWM_FREQUENCY >> 8) & 0x0F), ((PARAMETERS.PWM_FREQUENCY >> 0) & 0x0F));
+    SVPWM_QUEUE_SET_PWM_FREQUENCY(PARAMETERS.CONTROLLER_PWM_FREQUENCY);
+    SVPWM_QUEUE_SET_DEADTIME_PRESCALER(PARAMETERS.CONTROLLER_PWM_DEADTIME_PRESCALING);
+    SVPWM_QUEUE_SET_DEADTIME_TIMINGS(((PARAMETERS.CONTROLLER_PWM_FREQUENCY >> 8) & 0x0F), ((PARAMETERS.CONTROLLER_PWM_FREQUENCY >> 0) & 0x0F));
     SVPWM_QUEUE_SET_MAGNITUDE(0);
     SVPWM_QUEUE_SET_FREQUENCY(0);
     SVPWM_QUEUE_SEND();
@@ -234,7 +222,7 @@ void CONTROLLER_STEP_CYCLE(void)
     {
         PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_ENABLE);
         PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_RUN);
-        PROCESSVALUES.SYSTEM_STATUS |=  (SYSTEM_STATUS_STOP);
+        PROCESSVALUES.SYSTEM_STATUS &= ~(SYSTEM_STATUS_STOP);
         PROCESSVALUES.MOTOR_FREQUENCY = 0;
         SVPWM_STOP();
         TIME_SET(&(CONTROLLERSTATES.stepCycleTimer), PARAMETERS.CONTROLLER_SAMPLETIME);
@@ -341,31 +329,23 @@ uint8_t CONTROLLER_WAIT_CYCLE(void)
 {
     int64_t busvoltage = 0;
     int64_t buscurrent = 0;
-    int64_t lineAcurrent = 0;
-    int64_t lineCcurrent = 0;
-
+    int64_t dump = 0;
 
     /* read sensor data */
-    SENSE_FETCH((uint16_t *)(&busvoltage), (uint16_t *)(&buscurrent), (uint16_t *)(&lineAcurrent), (uint16_t *)(&lineCcurrent));
-
+    SENSE_FETCH((uint16_t *)(&busvoltage), (uint16_t *)(&dump), (uint16_t *)(&dump), (uint16_t *)(&buscurrent));
 
     /* remove sensor data offset and convert to correct scale */
     busvoltage   = (((busvoltage - 0x0867) *   5) / (4 * 1)) + PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET;
     buscurrent   = (((buscurrent - 0x0867) * 500) / (4 * 4)) + PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET;
-    //lineAcurrent = (((lineAcurrent - 0x0870) * 500) / (4 * 4));
-    //lineCcurrent = (((lineCcurrent - 0x084D) * 500) / (4 * 4));
 
     if(busvoltage < 0)
     {
         busvoltage = 0;
     }
 
-
-    /* apply moving average filter for smoothing */
-    PROCESSVALUES.DCBUS_VOLTAGE = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_busvoltage), (int32_t)(busvoltage));
-    PROCESSVALUES.DCBUS_CURRENT = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_buscurrent), (int32_t)(buscurrent));
-    //MEASUREMENTS.DCBUS_CURRENT = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_linecurrent), (int16_t)(lineAcurrent));
-    //MEASUREMENTS.DCBUS_CURRENT = MAVG_UPDATE(&(CONTROLLERSTATES.filtered_linecurrent), (int16_t)(lineCcurrent));
+    /* move data to process register  */
+    PROCESSVALUES.DCBUS_VOLTAGE = (uint16_t)busvoltage;
+    PROCESSVALUES.DCBUS_CURRENT = (int32_t)buscurrent;
 
 
     /* check controller sample time */
