@@ -1,8 +1,10 @@
 #include "TIME.h"
 
-static volatile struct TIMEBASE_s
+static volatile union TIMEBASE_u
 {
     volatile uint64_t time;
+    volatile uint16_t clock[4];
+    #define  clockreg clock[0]
 }
 TIMEBASE;
 
@@ -22,14 +24,15 @@ void TIME_INIT(void)
 
 void TIME_SET(TIME_s *ptr, uint64_t time_us)
 {
-    ptr->time = (((TIMEBASE.time) & 0xFFFFFFFFFFFF0000) | ((uint64_t)TCNT1)) + (time_us * 20);
+    TIMEBASE.clockreg = TCNT1;
+    ptr->time = TIMEBASE.time + (time_us * 20);
 }
 
 uint8_t TIME_CHECKEXP(TIME_s *ptr)
 {
-    uint64_t timeRemain = ptr->time - (((TIMEBASE.time) & 0xFFFFFFFFFFFF0000) | ((uint64_t)TCNT1));
+    TIMEBASE.clockreg = TCNT1;
 
-    if(timeRemain >= ptr->time)
+    if((ptr->time - TIMEBASE.time) >= ptr->time)
     {
         return 1;
     }
@@ -39,7 +42,8 @@ uint8_t TIME_CHECKEXP(TIME_s *ptr)
 
 uint64_t TIME_GETREMAINS(TIME_s *ptr)
 {
-    uint64_t timeRemain = ptr->time - (((TIMEBASE.time) & 0xFFFFFFFFFFFF0000) | ((uint64_t)TCNT1));
+    TIMEBASE.clockreg = TCNT1;
+    uint64_t timeRemain = ptr->time - TIMEBASE.time;
 
     if(timeRemain >= ptr->time)
     {
