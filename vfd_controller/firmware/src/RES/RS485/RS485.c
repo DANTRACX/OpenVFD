@@ -181,16 +181,14 @@ void RS485_FETCH(char *data, uint8_t size)
 void RS485_TX_CLEAR(void)
 {
     SENDBUFFER.size = 0;
-    SENDBUFFER.readIdx = 0;
-    SENDBUFFER.writeIdx = 0;
+    SENDBUFFER.readIdx = SENDBUFFER.writeIdx;
 }
 
 void RS485_RX_CLEAR(void)
 {
     RECVBUFFER.size = 0;
     RECVBUFFER.pendingSize = 0;
-    RECVBUFFER.readIdx = 0;
-    RECVBUFFER.writeIdx = 0;
+    RECVBUFFER.readIdx = RECVBUFFER.writeIdx;
 }
 
 
@@ -264,10 +262,10 @@ ISR(USART0_RX_vect)
 ISR(USART0_UDRE_vect)
 {
     /* until empty buffer send byte */
-    if(SENDBUFFER.size != 0x0000)
+    if(SENDBUFFER.size != 0x00)
     {
         UDR0 = SENDBUFFER.buffer[SENDBUFFER.readIdx];
-        SENDBUFFER.readIdx = (SENDBUFFER.readIdx + 1) & 0x01FF;
+        SENDBUFFER.readIdx = SENDBUFFER.readIdx + 1;
         SENDBUFFER.size--;
         return;
     }

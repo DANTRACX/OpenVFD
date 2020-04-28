@@ -50,21 +50,23 @@ void SENSE_FETCH(uint16_t *sense1, uint16_t *sense2, uint16_t *sense3, uint16_t 
     *sense4 = 0x0000;
 
     /* enable sensor chips and start conversion */
-    PORTD &= ~((1 << PD5) | (1 << PD7));
-    __builtin_avr_delay_cycles(10);
-    PORTD |=  ((1 << PD5));
-    __builtin_avr_delay_cycles(10);
+    PORTD &= ~((1 << PD7));
+    __builtin_avr_delay_cycles(SENSE_TCLK);
     PORTD &= ~((1 << PD5));
-    __builtin_avr_delay_cycles(10);
+    __builtin_avr_delay_cycles(SENSE_TCLK);
     PORTD |=  ((1 << PD5));
-    __builtin_avr_delay_cycles(10);
+    __builtin_avr_delay_cycles(SENSE_TCLK);
+    PORTD &= ~((1 << PD5));
+    __builtin_avr_delay_cycles(SENSE_TCLK);
+    PORTD |=  ((1 << PD5));
+    __builtin_avr_delay_cycles(SENSE_TCLK);
 
     /* read bit per bit into sensor data buffer */
     for(counter = 0; counter < 13; counter++)
     {
         /* shift a new bit to input */
         PORTD &= ~((1 << PD5));
-        __builtin_avr_delay_cycles(10);
+        __builtin_avr_delay_cycles(SENSE_TCLK);
         PORTD |=  ((1 << PD5));
 
         /* shift data buffer by 1 position to the left */

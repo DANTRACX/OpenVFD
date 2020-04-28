@@ -68,12 +68,11 @@ void MODBUS_PROCESS(void)
                 return;
             }
 
-            RS485_FETCH(&temp[2], 6);
+            RS485_FETCH(&temp[2], RS485_RXSIZE());
             MEM_CRC16(&temp[0], 6, &temp[8], &temp[9]);
 
             if((temp[6] != temp[8]) || (temp[7] != temp[9]))
             {
-                RS485_FETCH(temp, RS485_RXSIZE());
                 return;
             }
 
@@ -102,16 +101,14 @@ void MODBUS_PROCESS(void)
         {
             if(RS485_RXSIZE() < 6)
             {
-                RS485_FETCH(temp, RS485_RXSIZE());
                 return;
             }
 
-            RS485_FETCH(&temp[2], 6);
+            RS485_FETCH(&temp[2], RS485_RXSIZE());
             MEM_CRC16(&temp[0], 6, &temp[8], &temp[9]);
 
             if((temp[6] != temp[8]) || (temp[7] != temp[9]))
             {
-                RS485_FETCH(temp, RS485_RXSIZE());
                 return;
             }
 
@@ -140,16 +137,14 @@ void MODBUS_PROCESS(void)
         {
             if(RS485_RXSIZE() < 6)
             {
-                RS485_FETCH(temp, RS485_RXSIZE());
                 return;
             }
 
-            RS485_FETCH(&temp[2], 6);
+            RS485_FETCH(&temp[2], RS485_RXSIZE());
             MEM_CRC16(&temp[0], 6, &temp[8], &temp[9]);
 
             if((temp[6] != temp[8]) || (temp[7] != temp[9]))
             {
-                RS485_FETCH(temp, RS485_RXSIZE());
                 return;
             }
 
@@ -181,12 +176,11 @@ void MODBUS_PROCESS(void)
                 return;
             }
 
-            RS485_FETCH(&temp[7], (temp[6] + 2));
+            RS485_FETCH(&temp[7], RS485_RXSIZE());
             MEM_CRC16(&temp[0], 7 + temp[6], &temp[254], &temp[255]);
 
             if((temp[7 + temp[6] + 0] != temp[254]) || (temp[7 + temp[6] + 1] != temp[255]))
             {
-                RS485_FETCH(temp, RS485_RXSIZE());
                 return;
             }
 
@@ -211,7 +205,9 @@ void MODBUS_PROCESS(void)
         }
         default:
         {
-            _modbus_exception(PARAMETERS.MODBUS_ADDRESS, temp[1], 0x01, temp);
+            bufferPtr = (uint8_t)temp[1];
+            RS485_FETCH(temp, RS485_RXSIZE());
+            _modbus_exception(PARAMETERS.MODBUS_ADDRESS, (char)bufferPtr, 0x01, temp);
             break;
         }
     }
