@@ -1,2 +1,3 @@
 # OpenVFD
-https://github.com/DANTRACX/OpenVFD/blob/master/vfd_images/OpenVFD.png?raw=true
+![OpenVFD structure](/vfd_images/OpenVFD.png)
+Format: ![Alt Text](url)
