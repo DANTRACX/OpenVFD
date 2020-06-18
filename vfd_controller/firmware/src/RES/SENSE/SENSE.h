@@ -6,8 +6,8 @@
 #include <avr/wdt.h>
 
 #define SENSE_USE_CHANNEL_1
-//#define SENSE_USE_CHANNEL_2
-//#define SENSE_USE_CHANNEL_3
+#define SENSE_USE_CHANNEL_2
+#define SENSE_USE_CHANNEL_3
 #define SENSE_USE_CHANNEL_4
 
 #define SENSE_TCLK  10

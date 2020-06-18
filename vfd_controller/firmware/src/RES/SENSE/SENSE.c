@@ -1,18 +1,4 @@
 #include "SENSE.h"
-#include "./MAVG/MAVG.h"
-
-#ifdef SENSE_USE_CHANNEL_1
-    static MAVG_s filtered_sense1;
-#endif
-#ifdef SENSE_USE_CHANNEL_2
-    static MAVG_s filtered_sense2;
-#endif
-#ifdef SENSE_USE_CHANNEL_3
-    static MAVG_s filtered_sense3;
-#endif
-#ifdef SENSE_USE_CHANNEL_4
-    static MAVG_s filtered_sense4;
-#endif
 
 void SENSE_INIT(void)
 {
@@ -24,20 +10,6 @@ void SENSE_INIT(void)
     DDRD  |=  ((1 << PD5) | (1 << PD7));
     PORTD &= ~((1 << PD5));
     PORTD |=  ((1 << PD7));
-
-    /* initialize filter */
-    #ifdef SENSE_USE_CHANNEL_1
-        MAVG_INIT(&filtered_sense1);
-    #endif
-    #ifdef SENSE_USE_CHANNEL_2
-        MAVG_INIT(&filtered_sense2);
-    #endif
-    #ifdef SENSE_USE_CHANNEL_3
-        MAVG_INIT(&filtered_sense3);
-    #endif
-    #ifdef SENSE_USE_CHANNEL_4
-        MAVG_INIT(&filtered_sense4);
-    #endif
 }
 
 void SENSE_FETCH(uint16_t *sense1, uint16_t *sense2, uint16_t *sense3, uint16_t *sense4)
@@ -109,15 +81,15 @@ void SENSE_FETCH(uint16_t *sense1, uint16_t *sense2, uint16_t *sense3, uint16_t 
 
     /* filter data */
     #ifdef SENSE_USE_CHANNEL_1
-        *sense1 = MAVG_UPDATE(&filtered_sense1, (*sense1 & 0x0FFF));
+        *sense1 = *sense1 & 0x0FFF;
     #endif
     #ifdef SENSE_USE_CHANNEL_2
-        *sense2 = MAVG_UPDATE(&filtered_sense2, (*sense2 & 0x0FFF));
+        *sense2 = *sense2 & 0x0FFF;
     #endif
     #ifdef SENSE_USE_CHANNEL_3
-        *sense3 = MAVG_UPDATE(&filtered_sense3, (*sense3 & 0x0FFF));
+        *sense3 = *sense3 & 0x0FFF;
     #endif
     #ifdef SENSE_USE_CHANNEL_4
-        *sense4 = MAVG_UPDATE(&filtered_sense4, (*sense4 & 0x0FFF));
+        *sense4 = *sense4 & 0x0FFF;
     #endif
 }

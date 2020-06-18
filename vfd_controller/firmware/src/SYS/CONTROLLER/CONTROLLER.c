@@ -1,8 +1,10 @@
 #include "CONTROLLER.h"
+#include "./MAVG/MAVG.h"
 #include "../REGISTRY/REGISTRY.h"
 #include "../../RES/SVPWM/SVPWM.h"
 #include "../../RES/SENSE/SENSE.h"
 #include "../../RES/TIME/TIME.h"
+
 
 static struct CONTROLLERSTATES_s
 {
@@ -13,6 +15,10 @@ static struct CONTROLLERSTATES_s
     TIME_s enableTimer;
     TIME_s motorUMZTimer;
     TIME_s dcbusUMZTimer;
+    MAVG256_s voltageFilterStage1;
+    MAVG32_s voltageFilterStage2;
+    MAVG256_s currentFilterStage1;
+    MAVG32_s currentFilterStage2;
 }
 CONTROLLERSTATES;
 
@@ -178,6 +184,12 @@ void CONTROLLER_INIT(void)
     TIME_SET(&(CONTROLLERSTATES.dcbusUMZTimer), PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT);
     TIME_SET(&(CONTROLLERSTATES.enableTimer), 1);
 
+    /* initialize filter */
+    MAVG256_INIT(&(CONTROLLERSTATES.voltageFilterStage1));
+    MAVG32_INIT(&(CONTROLLERSTATES.voltageFilterStage2));
+    MAVG256_INIT(&(CONTROLLERSTATES.currentFilterStage1));
+    MAVG32_INIT(&(CONTROLLERSTATES.currentFilterStage2));
+
     /* initialize measuring */
     SENSE_INIT();
 
@@ -196,13 +208,18 @@ void CONTROLLER_STEP_CYCLE(void)
 {
     /* declare some working variables */
     int64_t reference_current = 0;
-    int64_t feedback_current = (int64_t)(PROCESSVALUES.DCBUS_CURRENT);
-    int64_t feedback_voltage = (int64_t)(PROCESSVALUES.DCBUS_VOLTAGE);
+    int64_t feedback_current = 0;
+    int64_t feedback_voltage = 0;
     int64_t antiwindup_ierror = CONTROLLERSTATES.ierror;
     int64_t proportional = 0;
     int64_t integral = 0;
     int64_t output = 0;
 
+    /* move data to process register  */
+    PROCESSVALUES.DCBUS_VOLTAGE = MAVG32_UPDATE(&(CONTROLLERSTATES.voltageFilterStage2), MAVG256_GET(&(CONTROLLERSTATES.voltageFilterStage1)));// + PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET;
+    PROCESSVALUES.DCBUS_CURRENT = MAVG32_UPDATE(&(CONTROLLERSTATES.currentFilterStage2), MAVG256_GET(&(CONTROLLERSTATES.currentFilterStage1)));// + PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET;
+    feedback_current = (int64_t)(PROCESSVALUES.DCBUS_CURRENT);
+    feedback_voltage = (int64_t)(PROCESSVALUES.DCBUS_VOLTAGE);
 
     /* calculate depending measurement values */
     /* approximation of sqrt(2) by (1448/1024) and 1/sqrt(2) by (1448/2048) */
@@ -329,24 +346,23 @@ uint8_t CONTROLLER_WAIT_CYCLE(void)
 {
     int64_t busvoltage = 0;
     int64_t buscurrent = 0;
-    int64_t dump = 0;
+    int64_t noise1 = 0;
+    int64_t noise2 = 0;
 
     /* read sensor data */
-    SENSE_FETCH((uint16_t *)(&busvoltage), (uint16_t *)(&dump), (uint16_t *)(&dump), (uint16_t *)(&buscurrent));
+    SENSE_FETCH((uint16_t *)(&busvoltage), (uint16_t *)(&noise1), (uint16_t *)(&noise2), (uint16_t *)(&buscurrent));
 
     /* remove sensor data offset and convert to correct scale */
-    busvoltage   = (((busvoltage - 0x0867) *   5) / (4 * 1)) + PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET;
-    buscurrent   = (((buscurrent - 0x0867) * 500) / (4 * 4)) + PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET;
+    noise1 = (noise1 + noise2) / 2;
+    busvoltage = (((busvoltage - noise1) *   5) / (4 * 1));
+    buscurrent = (((buscurrent - noise1) * 500) / (4 * 4));
+    //busvoltage = ((busvoltage - 2315) * 41) / 32;
+    //buscurrent = (((buscurrent - noise1) * 500) / (4 * 4));
 
-    if(busvoltage < 0)
-    {
-        busvoltage = 0;
-    }
 
-    /* move data to process register  */
-    PROCESSVALUES.DCBUS_VOLTAGE = (uint16_t)busvoltage;
-    PROCESSVALUES.DCBUS_CURRENT = (int32_t)buscurrent;
-
+    /* put data in stage 1 buffer */
+    MAVG256_UPDATE(&(CONTROLLERSTATES.voltageFilterStage1), (int16_t)(busvoltage));
+    MAVG256_UPDATE(&(CONTROLLERSTATES.currentFilterStage1), (int16_t)(buscurrent));
 
     /* check controller sample time */
     if(TIME_CHECKEXP(&(CONTROLLERSTATES.stepCycleTimer)))
