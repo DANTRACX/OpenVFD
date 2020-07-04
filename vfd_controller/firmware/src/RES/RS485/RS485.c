@@ -275,6 +275,8 @@ ISR(USART0_UDRE_vect)
     PORTB  |=   (1 << PORTB0);
 
     /* restart timer for roundtrip */
+    RS485_TX_CLEAR();
+    RS485_RX_CLEAR();
     _rs485_reset_wrong_byte_distance();
     _rs485_timer_reset();
     _rs485_timer_start();

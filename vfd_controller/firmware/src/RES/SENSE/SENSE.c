@@ -22,21 +22,24 @@ void SENSE_FETCH(uint16_t *sense1, uint16_t *sense2, uint16_t *sense3, uint16_t 
     *sense4 = 0x0000;
 
     /* enable sensor chips and start conversion */
+    PORTD &= ~((1 << PD5));
     PORTD &= ~((1 << PD7));
     __builtin_avr_delay_cycles(SENSE_TCLK);
-    PORTD &= ~((1 << PD5));
-    __builtin_avr_delay_cycles(SENSE_TCLK);
     PORTD |=  ((1 << PD5));
     __builtin_avr_delay_cycles(SENSE_TCLK);
     PORTD &= ~((1 << PD5));
     __builtin_avr_delay_cycles(SENSE_TCLK);
     PORTD |=  ((1 << PD5));
     __builtin_avr_delay_cycles(SENSE_TCLK);
+    PORTD &= ~((1 << PD5));
+    __builtin_avr_delay_cycles(SENSE_TCLK);
+    PORTD |=  ((1 << PD5));
 
     /* read bit per bit into sensor data buffer */
-    for(counter = 0; counter < 13; counter++)
+    for(counter = 0; counter < 12; counter++)
     {
         /* shift a new bit to input */
+        __builtin_avr_delay_cycles(SENSE_TCLK);
         PORTD &= ~((1 << PD5));
         __builtin_avr_delay_cycles(SENSE_TCLK);
         PORTD |=  ((1 << PD5));
@@ -76,8 +79,12 @@ void SENSE_FETCH(uint16_t *sense1, uint16_t *sense2, uint16_t *sense3, uint16_t 
         #endif
     }
 
+    __builtin_avr_delay_cycles(SENSE_TCLK);
+    PORTD &= ~((1 << PD5));
+
     /* shutdown sensor chips */
     PORTD |= ((1 << PD7));
+    __builtin_avr_delay_cycles(4 * SENSE_TCLK);
 
     /* filter data */
     #ifdef SENSE_USE_CHANNEL_1

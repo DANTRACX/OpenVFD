@@ -1,5 +1,40 @@
+/*
+ * Copyright 2020
+ *
+ * Christoph Klie
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+/* Header files - Includes local used header files */
 #include "CONTROLLER.h"
-#include "./MAVG/MAVG.h"
+#include "./SENSEOSF/SENSEOSF.h"
 #include "../REGISTRY/REGISTRY.h"
 #include "../../RES/SVPWM/SVPWM.h"
 #include "../../RES/SENSE/SENSE.h"
@@ -15,10 +50,8 @@ static struct CONTROLLERSTATES_s
     TIME_s enableTimer;
     TIME_s motorUMZTimer;
     TIME_s dcbusUMZTimer;
-    MAVG256_s voltageFilterStage1;
-    MAVG32_s voltageFilterStage2;
-    MAVG256_s currentFilterStage1;
-    MAVG32_s currentFilterStage2;
+    SENSEOSF_s voltageFilter;
+    SENSEOSF_s currentFilter;
 }
 CONTROLLERSTATES;
 
@@ -184,14 +217,12 @@ void CONTROLLER_INIT(void)
     TIME_SET(&(CONTROLLERSTATES.dcbusUMZTimer), PARAMETERS.CONTROLLER_DCBUS_UMZ_TIMEOUT);
     TIME_SET(&(CONTROLLERSTATES.enableTimer), 1);
 
-    /* initialize filter */
-    MAVG256_INIT(&(CONTROLLERSTATES.voltageFilterStage1));
-    MAVG32_INIT(&(CONTROLLERSTATES.voltageFilterStage2));
-    MAVG256_INIT(&(CONTROLLERSTATES.currentFilterStage1));
-    MAVG32_INIT(&(CONTROLLERSTATES.currentFilterStage2));
-
     /* initialize measuring */
     SENSE_INIT();
+
+    /* initialize filter */
+    SENSEOSF_INIT(&(CONTROLLERSTATES.voltageFilter));
+    SENSEOSF_INIT(&(CONTROLLERSTATES.currentFilter));
 
     /* initialize svpwm subsystem */
     SVPWM_INIT();
@@ -216,8 +247,21 @@ void CONTROLLER_STEP_CYCLE(void)
     int64_t output = 0;
 
     /* move data to process register  */
-    PROCESSVALUES.DCBUS_VOLTAGE = MAVG32_UPDATE(&(CONTROLLERSTATES.voltageFilterStage2), MAVG256_GET(&(CONTROLLERSTATES.voltageFilterStage1)));// + PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET;
-    PROCESSVALUES.DCBUS_CURRENT = MAVG32_UPDATE(&(CONTROLLERSTATES.currentFilterStage2), MAVG256_GET(&(CONTROLLERSTATES.currentFilterStage1)));// + PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET;
+    int64_t test = (SENSEOSF_U_GET(&(CONTROLLERSTATES.voltageFilter)));
+    test = (((test * 5000000) / 32768) / 512); //- 5580;
+
+    if(test < 0)
+        test = 0;
+
+    PROCESSVALUES.DCBUS_VOLTAGE = (uint16_t)test;
+    //uint64_t temp = (((MAVG256_GET(&(CONTROLLERSTATES.voltageFilterStage1)) - 36750) * 5100) / 65536);
+    //temp =  MAVG32_UPDATE(&(CONTROLLERSTATES.voltageFilterStage2), (int16_t)temp);
+    //PROCESSVALUES.DCBUS_VOLTAGE = (uint16_t)(MAVG256_GET(&(CONTROLLERSTATES.voltageFilterStage1)));
+
+    //PROCESSVALUES.DCBUS_VOLTAGE = MAVG32_UPDATE(&(CONTROLLERSTATES.voltageFilterStage2), MAVG256_GET(&(CONTROLLERSTATES.voltageFilterStage1)));// + PARAMETERS.CONTROLLER_DCBUS_VOLTAGE_OFFSET;
+    //PROCESSVALUES.DCBUS_CURRENT = MAVG32_UPDATE(&(CONTROLLERSTATES.currentFilterStage2), MAVG256_GET(&(CONTROLLERSTATES.currentFilterStage1)));// + PARAMETERS.CONTROLLER_DCBUS_CURRENT_OFFSET;
+
+
     feedback_current = (int64_t)(PROCESSVALUES.DCBUS_CURRENT);
     feedback_voltage = (int64_t)(PROCESSVALUES.DCBUS_VOLTAGE);
 
@@ -344,25 +388,17 @@ void CONTROLLER_STEP_CYCLE(void)
 
 uint8_t CONTROLLER_WAIT_CYCLE(void)
 {
-    int64_t busvoltage = 0;
-    int64_t buscurrent = 0;
-    int64_t noise1 = 0;
-    int64_t noise2 = 0;
+    uint16_t busvoltage = 0;
+    uint16_t buscurrent = 0;
+    uint16_t noise1 = 0;
+    uint16_t noise2 = 0;
 
     /* read sensor data */
     SENSE_FETCH((uint16_t *)(&busvoltage), (uint16_t *)(&noise1), (uint16_t *)(&noise2), (uint16_t *)(&buscurrent));
 
-    /* remove sensor data offset and convert to correct scale */
-    noise1 = (noise1 + noise2) / 2;
-    busvoltage = (((busvoltage - noise1) *   5) / (4 * 1));
-    buscurrent = (((buscurrent - noise1) * 500) / (4 * 4));
-    //busvoltage = ((busvoltage - 2315) * 41) / 32;
-    //buscurrent = (((buscurrent - noise1) * 500) / (4 * 4));
-
-
-    /* put data in stage 1 buffer */
-    MAVG256_UPDATE(&(CONTROLLERSTATES.voltageFilterStage1), (int16_t)(busvoltage));
-    MAVG256_UPDATE(&(CONTROLLERSTATES.currentFilterStage1), (int16_t)(buscurrent));
+    /* put data in filter */
+    SENSEOSF_U_UPDATE(&(CONTROLLERSTATES.voltageFilter), busvoltage);
+    //SENSEOSF_I_UPDATE(&(CONTROLLERSTATES.currentFilter), buscurrent);
 
     /* check controller sample time */
     if(TIME_CHECKEXP(&(CONTROLLERSTATES.stepCycleTimer)))
