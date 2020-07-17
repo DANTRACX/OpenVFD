@@ -90,24 +90,28 @@ uint16_t SENSEOSF_U_UPDATE(SENSEOSF_s *ptr, uint16_t value)
         ptr->oversampleCounter = 0;
         ptr->sampleSum = 0;
 
-        ptr->medianBuffer[ptr->medianSampleCounter] = ptr->oversampledResult;
-        ptr->medianSampleCounter = ptr->medianSampleCounter + 1;
-
-        if(ptr->medianSampleCounter == 5)
+        /* only add to filter if in expected range */
+        if((ptr->oversampledResult >= 16384) && (ptr->oversampledResult <= 26200))
         {
-            /* sorting network */
-            networkSort(&(ptr->medianBuffer[0]), &(ptr->medianBuffer[4]));
-            networkSort(&(ptr->medianBuffer[1]), &(ptr->medianBuffer[4]));
-            networkSort(&(ptr->medianBuffer[2]), &(ptr->medianBuffer[4]));
-            networkSort(&(ptr->medianBuffer[3]), &(ptr->medianBuffer[4]));
-            networkSort(&(ptr->medianBuffer[0]), &(ptr->medianBuffer[2]));
-            networkSort(&(ptr->medianBuffer[1]), &(ptr->medianBuffer[3]));
-            networkSort(&(ptr->medianBuffer[0]), &(ptr->medianBuffer[1]));
-            networkSort(&(ptr->medianBuffer[2]), &(ptr->medianBuffer[3]));
-            networkSort(&(ptr->medianBuffer[1]), &(ptr->medianBuffer[2]));
+            ptr->medianBuffer[ptr->medianSampleCounter] = ptr->oversampledResult;
+            ptr->medianSampleCounter = ptr->medianSampleCounter + 1;
 
-            ptr->medianSampleCounter = 0;
-            ptr->median = ptr->medianBuffer[2];
+            if(ptr->medianSampleCounter == 5)
+            {
+                /* sorting network */
+                networkSort(&(ptr->medianBuffer[0]), &(ptr->medianBuffer[4]));
+                networkSort(&(ptr->medianBuffer[1]), &(ptr->medianBuffer[4]));
+                networkSort(&(ptr->medianBuffer[2]), &(ptr->medianBuffer[4]));
+                networkSort(&(ptr->medianBuffer[3]), &(ptr->medianBuffer[4]));
+                networkSort(&(ptr->medianBuffer[0]), &(ptr->medianBuffer[2]));
+                networkSort(&(ptr->medianBuffer[1]), &(ptr->medianBuffer[3]));
+                networkSort(&(ptr->medianBuffer[0]), &(ptr->medianBuffer[1]));
+                networkSort(&(ptr->medianBuffer[2]), &(ptr->medianBuffer[3]));
+                networkSort(&(ptr->medianBuffer[1]), &(ptr->medianBuffer[2]));
+
+                ptr->medianSampleCounter = 0;
+                ptr->median = ptr->medianBuffer[2];
+            }
         }
     }
 

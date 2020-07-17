@@ -1,0 +1,10 @@
+Qty,Value,Parts,Description,R
+2,,"X1, X2",JST XH Connector 2 Pin,JST XH2P ST
+2,100n,"C4, C6","CAPACITOR, European symbol",MKS02-63 100N
+6,100n,"C1, C2, C3, C5, C7, C8","CAPACITOR, European symbol",MKS2-63 100N
+2,"12V in, 5V out","DC1, DC2",DC-DC CONVERTER,MEV1S1205SC
+2,HCPL-7840,"IC1, IC2",Isolation Amplifer,
+2,JST-XH-02-PIN-LONG-PAD,"X6, X7",JST XH Connector 2 Pin,JST XH2P ST
+2,JST-XH-03-PIN-LONG-PAD,"X3, X4",JST XH Connector 2 Pin,JST XH3P ST
+1,JST-XH-10-PIN-LONG-PAD,X5,JST XH Connector 2 Pin,JST XH10P ST
+4,MPC3201,"IC3, IC4, IC5, IC6",Dual In Line / Socket,MPC 3201-CI/P

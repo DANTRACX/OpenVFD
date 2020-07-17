@@ -248,7 +248,7 @@ void CONTROLLER_STEP_CYCLE(void)
 
     /* move data to process register  */
     int64_t test = (SENSEOSF_U_GET(&(CONTROLLERSTATES.voltageFilter)));
-    test = (((test * 5000000) / 32768) / 512); //- 5580;
+    test = (((test * 5000000) / 32768) / 1024) - 2695;
 
     if(test < 0)
         test = 0;
