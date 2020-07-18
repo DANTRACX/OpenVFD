@@ -1,10 +1,10 @@
 Qty,Value,Parts,Description,R
 2,,"J5, J6","Flachstecker Typ Tyco/Electronics/AMP TAB, FASTON","FS-P 6,35"
-4,,"J1, J2, J3, J4","Flachstecker Typ Tyco/Electronics/AMP TAB, FASTON","FS-PW 2,8"
 3,"0,47µ","C1, C3, C4","CAPACITOR, European symbol",MKS2-63 470N
 1,100n,C2,"CAPACITOR, European symbol",MKS2-63 100N
 1,"12V in, +12V -5V out",DC1,DC-DC CONVERTER,MGJ2D121505SC
 1,140R,R1,"RESISTOR, European symbol",METALL 140
 1,15R,R2,"RESISTOR, European symbol",2W METALL 15
 1,FOD3120V,IC1,Dual In Line / Socket,
+1,JST-XH-04-PIN-LONG-PAD,X3,JST XH Connector 2 Pin,JST XH2P ST90
 2,ZD18,"D1, D2",Z DIODE,ZD18 3W

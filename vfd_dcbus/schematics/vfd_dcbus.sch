@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.2.2">
+<eagle version="9.6.1">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -16424,6 +16424,9 @@ Number of pins: &lt;b&gt;2&lt;/b&gt;&lt;b&gt;&lt;P&gt;
 <sheets>
 <sheet>
 <plain>
+<text x="163.83" y="31.75" size="2.54" layer="94">OpenVFD</text>
+<text x="163.83" y="27.94" size="2.54" layer="94">VFD DC-BUS</text>
+<text x="163.83" y="24.13" size="2.54" layer="94">(C) 2020 Christoph Klie</text>
 </plain>
 <instances>
 <instance part="FRAME1" gate="G$1" x="0" y="0" smashed="yes"/>

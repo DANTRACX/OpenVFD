@@ -5309,9 +5309,9 @@ Number of pins: &lt;b&gt;10&lt;/b&gt;&lt;b&gt;&lt;P&gt;
 <text x="7.62" y="119.38" size="1.27" layer="91" rot="R270">CURRENT SHUNT</text>
 <text x="7.62" y="73.66" size="1.27" layer="91" rot="R270">TEMPERATURE 1</text>
 <text x="7.62" y="45.72" size="1.27" layer="91" rot="R270">TEMPERATURE 2</text>
-<text x="163.83" y="31.75" size="2.54" layer="91">OpenVFD</text>
-<text x="163.83" y="27.94" size="2.54" layer="91">VFD-Controller I/O Board</text>
-<text x="163.83" y="24.13" size="2.54" layer="91">(C) 2020 Christoph Klie</text>
+<text x="163.83" y="31.75" size="2.54" layer="94">OpenVFD</text>
+<text x="163.83" y="27.94" size="2.54" layer="94">VFD-Controller I/O Board</text>
+<text x="163.83" y="24.13" size="2.54" layer="94">(C) 2020 Christoph Klie</text>
 </plain>
 <instances>
 <instance part="FRAME1" gate="G$1" x="0" y="0" smashed="yes"/>

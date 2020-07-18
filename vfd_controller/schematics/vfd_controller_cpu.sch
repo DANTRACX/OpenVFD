@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
+<grid distance="0.05" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
 <layer number="2" name="Route2" color="16" fill="1" visible="no" active="no"/>
@@ -10308,9 +10308,9 @@ Number of pins: &lt;b&gt;7&lt;/b&gt;&lt;b&gt;&lt;P&gt;
 <text x="71.12" y="175.26" size="1.27" layer="91" rot="R180">SCPI/MODBUS</text>
 <text x="60.96" y="172.72" size="1.27" layer="91">OVER 485</text>
 <text x="96.52" y="88.9" size="1.27" layer="91" rot="R180">DEBUG</text>
-<text x="163.83" y="31.75" size="2.54" layer="91">OpenVFD</text>
-<text x="163.83" y="27.94" size="2.54" layer="91">(C) 2020 Christoph Klie</text>
-<text x="163.83" y="24.13" size="2.54" layer="91">VFD-Controller CPU Board</text>
+<text x="163.83" y="31.75" size="2.54" layer="94">OpenVFD</text>
+<text x="163.83" y="24.13" size="2.54" layer="94">(C) 2020 Christoph Klie</text>
+<text x="163.83" y="27.94" size="2.54" layer="94">VFD-Controller CPU Board</text>
 </plain>
 <instances>
 <instance part="FRAME1" gate="G$1" x="0" y="0" smashed="yes"/>

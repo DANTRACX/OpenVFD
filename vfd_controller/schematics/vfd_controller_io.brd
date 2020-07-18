@@ -157,9 +157,9 @@
 <hole x="147.7645" y="143.430625" drill="3.2"/>
 <hole x="110.617" y="56.34355" drill="3.2"/>
 <hole x="147.7645" y="56.34355" drill="3.2"/>
-<text x="168.11625" y="18.415" size="2.54" layer="48">Variable Frequency Drive</text>
-<text x="168.61306875" y="13.335" size="2.54" layer="48">VFD-Conroller I/O Board</text>
-<text x="169.59794375" y="8.255" size="2.54" layer="48">(C) 2020 Christoph Klie</text>
+<text x="180.18125" y="17.78" size="2.54" layer="48">OpenVFD</text>
+<text x="168.61306875" y="13.0175" size="2.54" layer="48">VFD-Conroller I/O Board</text>
+<text x="169.59794375" y="7.9375" size="2.54" layer="48">(C) 2020 Christoph Klie</text>
 <circle x="110.5916" y="143.4211" radius="0.762" width="0.508" layer="16"/>
 <circle x="147.7772" y="143.4211" radius="0.762" width="0.508" layer="16"/>
 <circle x="147.7772" y="56.3499" radius="0.762" width="0.508" layer="16"/>

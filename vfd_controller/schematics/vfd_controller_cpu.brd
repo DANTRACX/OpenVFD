@@ -161,9 +161,9 @@
 <hole x="124.09805" y="137.715625" drill="3.2" locked="yes"/>
 <hole x="86.95055" y="50.62855" drill="3.2" locked="yes"/>
 <hole x="124.09805" y="50.62855" drill="3.2" locked="yes"/>
-<text x="168.75125" y="18.415" size="2.54" layer="48">Variable Frequency Drive</text>
-<text x="167.66056875" y="13.335" size="2.54" layer="48">VFD-Conroller CPU Board</text>
-<text x="170.23294375" y="8.255" size="2.54" layer="48">(C) 2020 Christoph Klie</text>
+<text x="180.49875" y="17.78" size="2.54" layer="48">OpenVFD</text>
+<text x="167.66056875" y="13.0175" size="2.54" layer="48">VFD-Conroller CPU Board</text>
+<text x="170.23294375" y="7.9375" size="2.54" layer="48">(C) 2020 Christoph Klie</text>
 <circle x="86.9696" y="137.7061" radius="0.762" width="0.508" layer="16"/>
 <circle x="124.1044" y="137.7061" radius="0.762" width="0.508" layer="16"/>
 <circle x="141.6812" y="137.7061" radius="0.762" width="0.508" layer="16"/>
